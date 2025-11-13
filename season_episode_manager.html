@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المواسم والحلقات</title>
+    <style>
+        /* 🔥🔥 الـ CSS الأساسي */
+        :root {
+            --bg-color: #0d0d0d; 
+            --card-color: #1a1a1a; 
+            --text-color: #f5f5f5; 
+            --accent-color: #e50914; 
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--card-color);
+            padding: 30px; border-radius: 8px; max-width: 900px; margin: 20px auto;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+        h1 { color: #007bff; margin-bottom: 5px; }
+        h2 { color: var(--accent-color); font-size: 1.5em; margin-top: 20px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        h3 { font-size: 1.2em; color: #ccc; margin: 15px 0 10px; }
+        
+        /* 🔥 زر العودة */
+        .back-btn { display: block; margin-bottom: 20px; text-align: right; color: #007bff; text-decoration: none; }
+        
+        /* 🔥 تصميم الأزرار الرئيسية */
+        .action-group { margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; }
+        .action-group button { 
+            padding: 10px 15px; font-weight: bold; border-radius: 5px; border: none; cursor: pointer;
+            background-color: #4CAF50; color: white; transition: 0.3s;
+        }
+        .action-group button:hover { background-color: #45a049; }
+        .delete-btn { background-color: var(--accent-color) !important; }
+        .delete-btn:hover { background-color: #b00710 !important; }
+
+        /* 🔥 قائمة المواسم */
+        #seasons-list { list-style: none; padding: 0; }
+        #seasons-list > li {
+            background-color: #222; padding: 15px; margin-bottom: 15px; border-radius: 8px;
+        }
+        .season-header { display: flex; justify-content: space-between; align-items: center; font-size: 1.3em; margin-bottom: 10px; }
+
+        /* 🔥 قائمة الحلقات */
+        .episodes-list { list-style: decimal; padding-right: 20px; margin-top: 10px; }
+        .episodes-list > li { 
+            background-color: #333; margin-bottom: 8px; padding: 10px; border-radius: 5px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .episode-actions button { 
+            padding: 5px 10px; font-size: 0.9em; margin-left: 5px; cursor: pointer;
+            border-radius: 4px; color: white; border: none;
+        }
+        .episode-actions .edit-btn { background-color: #007bff; }
+        .episode-actions .delete-btn { background-color: var(--accent-color); }
+    </style>
+</head>
+<body>
+    
+    <a href="series_list.html" class="back-btn">&larr; العودة لقائمة المسلسلات</a>
+
+    <div class="container">
+        <h1 id="series-name">... جاري تحميل المسلسل</h1>
+        <p id="series-id-display" style="font-size: 0.8em; color: #888; text-align: center;"></p>
+        
+        <hr style="border-color: #333; margin: 25px 0;">
+
+        <h2>إدارة المواسم والحلقات</h2>
+        
+        <div class="action-group">
+            <button id="add-season-btn" onclick="promptAddSeason()">+ إضافة موسم جديد</button>
+        </div>
+
+        <ul id="seasons-list">
+            <li id="loading-indicator">جاري جلب المواسم...</li>
+        </ul>
+        
+        <div id="error-message" style="color: var(--accent-color); text-align: center; margin-top: 20px;"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // ================ (1) إعدادات Firebase ================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
+            authDomain: "qmove1.firebaseapp.com",
+            projectId: "qmove1",
+            storageBucket: "qmove1.appspot.com",
+            messagingSenderId: "166464805371",
+            appId: "1:166464805371:web:d65b0cb8b141e4b894935e"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const seriesId = urlParams.get('seriesId');
+        
+        const seriesNameElement = document.getElementById('series-name');
+        const seasonsListElement = document.getElementById('seasons-list');
+        const errorMessageElement = document.getElementById('error-message');
+
+
+        // ===============================================
+        //  دوآل الإضافة والتعديل والحذف
+        // ===============================================
+        
+        // 🔥🔥 يفتح فورم لجمع بيانات الحلقة الجديدة أو المعدلة
+        function promptEditEpisode(seriesId, seasonNumber, episodeDoc) {
+            const isNew = !episodeDoc;
+            const data = episodeDoc ? episodeDoc.data() : {};
+            
+            // قراءة السيرفرات الحالية
+            const servers = data.servers || {};
+
+            const episodeNumber = isNew ? (prompt(`أدخل رقم الحلقة الجديدة (مثال: 10):`) || '').trim() : data.episodeNumber;
+            if (!episodeNumber) return;
+
+            const episodeTitle = prompt(`أدخل عنوان الحلقة ${episodeNumber}:`, data.title || `الحلقة ${episodeNumber}`);
+            if (!episodeTitle) return;
+
+            // جمع روابط السيرفرات
+            const wistia1Url = prompt("Wistia 1 Link (iframe):", servers.wistia1 || '');
+            const doodUrl = prompt("Doodstream Link (iframe):", servers.dood || '');
+
+            const episodeData = {
+                episodeNumber: episodeNumber,
+                title: episodeTitle,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                servers: {
+                    wistia1: wistia1Url,
+                    dood: doodUrl
+                }
+            };
+
+            const collectionPath = `series/${seriesId}/seasons/${seasonNumber}/episodes`;
+            let savePromise;
+
+            if (isNew) {
+                // إضافة حلقة جديدة (باستخدام رقم الحلقة كـ ID)
+                savePromise = db.collection(collectionPath).doc(episodeNumber).set(episodeData);
+            } else {
+                // تعديل حلقة موجودة
+                savePromise = db.collection(collectionPath).doc(episodeDoc.id).update(episodeData);
+            }
+
+            savePromise.then(() => {
+                alert(`تم حفظ الحلقة ${episodeNumber} بنجاح!`);
+                fetchSeasons(seriesId);
+            }).catch(error => {
+                alert(`فشل الحفظ: تأكد من أنك لم تكرر رقم الحلقة ${episodeNumber} في هذا الموسم.`);
+                errorMessageElement.textContent = `خطأ في الحفظ: ${error.message}`;
+            });
+        }
+        
+        // 🔥🔥 حذف حلقة
+        function deleteEpisode(seriesId, seasonNumber, episodeId, episodeTitle) {
+            if (confirm(`تأكيد حذف الحلقة ${episodeTitle}؟`)) {
+                db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).doc(episodeId).delete()
+                    .then(() => {
+                        alert(`تم حذف الحلقة ${episodeTitle}.`);
+                        fetchSeasons(seriesId);
+                    })
+                    .catch(error => {
+                        errorMessageElement.textContent = `فشل الحذف: ${error.message}`;
+                    });
+            }
+        }
+
+        // 🔥🔥 إضافة موسم جديد
+        function promptAddSeason() {
+            const seasonNumber = (prompt("أدخل رقم الموسم الجديد (مثال: 1, 2):") || '').trim();
+            if (!seasonNumber) return;
+            
+            db.collection(`series/${seriesId}/seasons`).doc(seasonNumber).set({
+                seasonNumber: seasonNumber,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert(`تم إنشاء الموسم ${seasonNumber}. يمكنك الآن إضافة حلقات.`);
+                fetchSeasons(seriesId);
+            }).catch(error => {
+                alert("فشل إنشاء الموسم. تأكد أنك لم تكرر رقم الموسم.");
+            });
+        }
+
+        // ===============================================
+        //  دوآل العرض (Rendering)
+        // ===============================================
+
+        // 🔥 يعرض الحلقات داخل الموسم
+        function renderEpisodes(seriesId, seasonNumber) {
+            const episodesListElement = document.getElementById(`episodes-list-${seasonNumber}`);
+            episodesListElement.innerHTML = 'جاري التحميل...';
+
+            db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).orderBy('episodeNumber', 'asc').get()
+                .then(snapshot => {
+                    episodesListElement.innerHTML = '';
+                    if (snapshot.empty) {
+                         episodesListElement.innerHTML = '<li>لا توجد حلقات.</li>';
+                         return;
+                    }
+                    snapshot.forEach(doc => {
+                        const episode = doc.data();
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <span>الحلقة ${episode.episodeNumber}: ${episode.title}</span>
+                            <div class="episode-actions">
+                                <button class="edit-btn" onclick="promptEditEpisode('${seriesId}', '${seasonNumber}', ${JSON.stringify(doc.data()).replace(/"/g, "'")}, '${doc.id}')">تعديل</button>
+                                <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${doc.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
+                            </div>
+                        `;
+                        episodesListElement.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                     episodesListElement.textContent = `خطأ في جلب الحلقات: ${error.message}`;
+                });
+        }
+        
+        // 🔥 يعرض قائمة المواسم
+        function renderSeasons(seriesId, seasons) {
+            seasonsListElement.innerHTML = '';
+            if (seasons.length === 0) {
+                 seasonsListElement.innerHTML = '<li>لم يتم إضافة مواسم بعد.</li>';
+                 return;
+            }
+
+            seasons.forEach(season => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="season-header">
+                        <span>الموسم ${season.seasonNumber}</span>
+                        <div class="episode-actions">
+                            <button onclick="promptEditEpisode('${seriesId}', '${season.seasonNumber}')">+ إضافة حلقة</button>
+                        </div>
+                    </div>
+                    <ul id="episodes-list-${season.seasonNumber}" class="episodes-list">
+                        جاري جلب الحلقات...
+                    </ul>
+                `;
+                seasonsListElement.appendChild(li);
+                
+                // تحميل حلقات هذا الموسم
+                renderEpisodes(seriesId, season.seasonNumber);
+            });
+        }
+
+        // 🔥 جلب كل المواسم لسلسلة معينة
+        function fetchSeasons(seriesId) {
+            db.collection(`series/${seriesId}/seasons`).orderBy('seasonNumber', 'asc').get()
+                .then(snapshot => {
+                    const seasons = snapshot.docs.map(doc => doc.data());
+                    renderSeasons(seriesId, seasons);
+                })
+                .catch(error => {
+                    errorMessageElement.textContent = `خطأ في جلب المواسم: ${error.message}`;
+                });
+        }
+
+        // ===============================================
+        //  نقطة البداية
+        // ===============================================
+        if (seriesId) {
+            db.collection('series').doc(seriesId).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        seriesNameElement.textContent = `إدارة: ${data.title}`;
+                        document.getElementById('series-id-display').textContent = `ID: ${seriesId}`;
+                        fetchSeasons(seriesId);
+                    } else {
+                        seriesNameElement.textContent = 'المسلسل غير موجود.';
+                    }
+                });
+        } else {
+            seriesNameElement.textContent = 'خطأ: لم يتم تحديد المسلسل.';
+        }
+
+        // 🔥 حارس الأمان (مهم جداً)
+        auth.onAuthStateChanged(user => {
+            if (!user || user.uid !== ADMIN_UID) {
+                alert('غير مصرح لك بدخول هذه الصفحة.');
+                window.location.href = './login.html';
+            }
+        });
+
+    </script>
+</body>
+</html>
