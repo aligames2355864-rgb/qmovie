@@ -5,50 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة المواسم والحلقات</title>
     <style>
-        /* 🔥🔥 الـ CSS الأساسي */
+        /* 🔥🔥 الـ CSS الأساسي (نفسه لتوحيد المظهر) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
-            --text-color: #f5f5f5; 
+            --text-color: #e0e0e0; 
             --accent-color: #e50914; 
+            --primary-color: #007bff;
         }
         body {
             font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
+            background: radial-gradient(circle at top, #141414, #000);
             color: var(--text-color);
             padding: 20px;
+            margin: 0;
         }
         .container {
             background-color: var(--card-color);
-            padding: 30px; border-radius: 8px; max-width: 900px; margin: 20px auto;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            padding: 30px; border-radius: 12px; max-width: 900px; margin: 20px auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
-        h1 { color: #007bff; margin-bottom: 5px; }
-        h2 { color: var(--accent-color); font-size: 1.5em; margin-top: 20px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-        h3 { font-size: 1.2em; color: #ccc; margin: 15px 0 10px; }
+        h1 { color: var(--accent-color); margin-bottom: 5px; text-align: center; }
+        h2 { color: var(--text-color); font-size: 1.5em; margin-top: 20px; border-bottom: 1px solid #333; padding-bottom: 5px; text-align: right; }
+        h3 { font-size: 1.2em; color: #ccc; margin: 15px 0 10px; text-align: right; }
         
-        /* 🔥 زر العودة */
-        .back-btn { display: block; margin-bottom: 20px; text-align: right; color: #007bff; text-decoration: none; }
+        /* زر العودة */
+        .back-btn { display: block; margin-bottom: 20px; text-align: right; color: var(--primary-color); text-decoration: none; }
         
-        /* 🔥 تصميم الأزرار الرئيسية */
+        /* تصميم الأزرار الرئيسية */
         .action-group { margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; }
         .action-group button { 
             padding: 10px 15px; font-weight: bold; border-radius: 5px; border: none; cursor: pointer;
-            background-color: #4CAF50; color: white; transition: 0.3s;
+            background-color: var(--primary-color); color: white; transition: 0.3s;
         }
-        .action-group button:hover { background-color: #45a049; }
+        .action-group button:hover { background-color: #0056b3; }
         .delete-btn { background-color: var(--accent-color) !important; }
         .delete-btn:hover { background-color: #b00710 !important; }
 
-        /* 🔥 قائمة المواسم */
+        /* قائمة المواسم */
         #seasons-list { list-style: none; padding: 0; }
         #seasons-list > li {
             background-color: #222; padding: 15px; margin-bottom: 15px; border-radius: 8px;
         }
         .season-header { display: flex; justify-content: space-between; align-items: center; font-size: 1.3em; margin-bottom: 10px; }
 
-        /* 🔥 قائمة الحلقات */
-        .episodes-list { list-style: decimal; padding-right: 20px; margin-top: 10px; }
+        /* قائمة الحلقات */
+        .episodes-list { list-style: none; padding-right: 0; margin-top: 10px; }
         .episodes-list > li { 
             background-color: #333; margin-bottom: 8px; padding: 10px; border-radius: 5px;
             display: flex; justify-content: space-between; align-items: center;
@@ -57,8 +59,10 @@
             padding: 5px 10px; font-size: 0.9em; margin-left: 5px; cursor: pointer;
             border-radius: 4px; color: white; border: none;
         }
-        .episode-actions .edit-btn { background-color: #007bff; }
+        .episode-actions .edit-btn { background-color: #4CAF50; }
         .episode-actions .delete-btn { background-color: var(--accent-color); }
+        .episode-actions .edit-btn:hover { background-color: #45a049; }
+        .episode-actions .delete-btn:hover { background-color: #b00710; }
     </style>
 </head>
 <body>
@@ -124,7 +128,7 @@
             // قراءة السيرفرات الحالية
             const servers = data.servers || {};
 
-            const episodeNumber = isNew ? (prompt(`أدخل رقم الحلقة الجديدة (مثال: 10):`) || '').trim() : data.episodeNumber;
+            const episodeNumber = (prompt(`أدخل رقم الحلقة الجديدة (مثال: 10):`, data.episodeNumber || '') || '').trim();
             if (!episodeNumber) return;
 
             const episodeTitle = prompt(`أدخل عنوان الحلقة ${episodeNumber}:`, data.title || `الحلقة ${episodeNumber}`);
