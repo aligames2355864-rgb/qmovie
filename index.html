@@ -6,12 +6,12 @@
     <title>q movie - الرئيسية</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 🔥🔥 التصميم النظيف والمستقر (الأخير) 🔥🔥 */
+        /* 🔥🔥 الـ CSS العام والمستقر 🔥🔥 */
         :root {
             --bg-color: #0d0d0d;
             --card-color: #1a1a1a;
             --text-color: #e0e0e0;
-            --accent-color: #e50914;
+            --accent-color: #e50914; 
             --sidebar-width: 280px;
         }
 
@@ -28,7 +28,7 @@
             transition: margin-right 0.3s ease;
         }
 
-        /* 🔥🔥 الهيدر (هيكلة مستقرة لحل مشكلة التداخل) 🔥🔥 */
+        /* 🎬 الهيدر (شكل قياسي) */
         header {
             display: flex;
             flex-direction: column; 
@@ -47,17 +47,19 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px;
-            width: 100%;
+            width: 100%; 
         }
+
         .logo {
             font-size: 2em;
             color: var(--accent-color);
             font-weight: 700;
             text-shadow: 0 0 10px rgba(229, 9, 20, 0.6);
-            margin-right: 15px; 
             flex-grow: 1; 
             text-align: right;
+            margin-right: 15px; 
         }
+
         #menu-toggle-btn {
             background: none;
             border: none;
@@ -66,9 +68,10 @@
             cursor: pointer;
             transition: 0.3s;
         }
+
         /* 🔥 شريط البحث */
         #search-input {
-            width: 95%; 
+            width: 95%;
             margin: 10px auto 15px; 
             padding: 12px;
             border-radius: 30px;
@@ -84,6 +87,7 @@
             gap: 10px;
             align-items: center;
         }
+
         .header-action-btn {
             padding: 8px 14px;
             border-radius: 25px;
@@ -102,10 +106,10 @@
             height: 100%;
             width: 0; 
             position: fixed;
-            z-index: 100; 
             top: 0;
             right: 0;
             background: #111;
+            z-index: 100;
             transition: width 0.3s ease;
             padding-top: 20px;
             overflow-y: auto;
@@ -115,72 +119,84 @@
             width: var(--sidebar-width);
             padding-right: 10px;
         }
+        .sidebar-category-link:hover, .sidebar-category-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
         body.sidebar-open main {
             margin-right: var(--sidebar-width);
         }
 
-        /* 🎬 شبكة الأفلام (Grid) - الحجم الأصلي القوي */
+        /* 🎬 شبكة الأفلام */
         #movie-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 22px;
             padding-top: 10px;
-            animation: fadeIn 0.6s ease-in;
         }
+
         .movie-item {
             background-color: var(--card-color);
             border-radius: 10px;
+            overflow: hidden;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
-            overflow: hidden;
             text-decoration: none;
-        }
-        .movie-item:hover {
-            transform: scale(1.06);
-            box-shadow: 0 10px 25px rgba(229, 9, 20, 0.3);
         }
         .movie-item img {
             width: 100%;
-            height: 270px; /* 🔥 الارتفاع الذي يعجبك */
+            height: 270px;
             object-fit: cover;
             border-bottom: 2px solid rgba(255, 255, 255, 0.05);
         }
-        .movie-item h3 {
-            padding: 10px;
-            font-size: 1em;
-            text-align: center;
-            color: #eee;
-            margin: 0;
-        }
-        /* 🔥 تصميم التاجات والتقييم */
+
+        /* 🔥🔥 التاجات والتقييم */
         .movie-rating {
             top: 10px; right: 10px;
             background-color: var(--accent-color);
             color: gold; padding: 4px 8px; border-radius: 6px; font-size: 0.9em;
             position: absolute; font-weight: bold;
         }
-        .movie-category-tag {
-            bottom: 40px; left: 0; 
-            background-color: rgba(0, 123, 255, 0.85);
-            color: white; padding: 4px 10px; border-radius: 0 6px 6px 0;
-            font-size: 0.8em; position: absolute; font-weight: bold;
-        }
-        .movie-type-tag { /* 🔥 تاك المسلسل */
+        .movie-type-tag { 
             top: 10px; left: 10px;
             background-color: #4CAF50; 
             color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.8em;
             position: absolute; font-weight: bold;
         }
         
-        /* 🎬 الموبايل */
+        /* 🎬 الموبايل (إصلاح مشكلة التداخل) */
         @media (max-width: 600px) {
-             header { padding: 10px; }
-             .header-top-row { width: 100%; margin-bottom: 5px; }
-             .logo { font-size: 1.8em; margin-right: 0; text-align: left; }
-             #search-input { margin: 10px 0; }
-             .header-actions { width: 100%; justify-content: space-between; margin-top: 10px; }
-             #movie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+             header { 
+                 padding: 10px; 
+                 flex-wrap: wrap;
+             }
+             /* 🔥🔥🔥 إصلاح الـ Top Row للموبايل 🔥🔥🔥 */
+             .header-top-row {
+                 width: 100%; 
+                 display: flex;
+                 justify-content: space-between;
+                 /* اللوجو يمين والـ Menu يسار، والأزرار بالوسط */
+             }
+             .logo { 
+                 font-size: 1.8em; 
+                 margin-right: 0; 
+                 text-align: center;
+                 flex-grow: 0; /* لا يدفع العناصر */
+             }
+             .header-actions {
+                 width: 100%;
+                 margin-top: 10px;
+                 justify-content: space-between; /* الأزرار تتوزع على العرض */
+                 order: 3; /* الأزرار تنزل للسطر الثالث */
+             }
+             #search-input { 
+                 margin: 10px 0; 
+                 order: 4; /* البحث ينزل للسطر الرابع */
+             }
+             /* 🔥 تعديل الـ Grid للموبايل */
+             #movie-grid { 
+                 grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* حجم مناسب لليد */
+             }
              .movie-item img { height: 195px; }
         }
     </style>
