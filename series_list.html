@@ -1,54 +1,67 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المسلسلات</title>
     <style>
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
             --text-color: #e0e0e0; 
             --accent-color: #e50914; 
+            --primary-color: #007bff;
         }
         body {
             font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
+            background: radial-gradient(circle at top, #141414, #000);
             color: var(--text-color);
-            padding: 40px 20px;
-        }
-        .back-to-home {
-            display: block; text-align: right; margin-bottom: 25px; font-size: 1.2em; color: #007bff; text-decoration: none;
+            padding: 20px;
+            margin: 0;
         }
         .container {
             background-color: var(--card-color);
-            padding: 30px; border-radius: 8px; max-width: 800px; margin: 0 auto; min-height: 400px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            padding: 30px; border-radius: 12px; max-width: 900px; margin: 20px auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
-        h1 { color: var(--accent-color); margin-bottom: 30px; text-align: center; }
+        .back-to-home {
+            display: block; text-align: right; margin-bottom: 25px; font-size: 1.1em; color: var(--primary-color); text-decoration: none; transition: color 0.3s;
+        }
+        h1 { color: var(--accent-color); margin-bottom: 10px; text-align: center; }
+        h2 { 
+            color: var(--text-color); font-size: 1.5em; margin-top: 30px;
+            border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; text-align: right; 
+        }
         
-        /* 🔥🔥 تصميم التنقل */
+        /* 🔥 التنقل بين الأفلام والمسلسلات */
         .admin-nav { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
         .admin-nav-btn {
-            padding: 10px 20px; font-size: 1.1em; font-weight: bold; border: 2px solid transparent; border-radius: 8px; text-decoration: none;
-            background-color: #333; color: white;
+            padding: 12px 25px; font-size: 1.1em; font-weight: bold; border: none; border-radius: 8px; text-decoration: none;
+            background-color: #333; color: white; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); transition: 0.3s;
         }
         .admin-nav-btn.active {
-            background-color: var(--accent-color); /* لون أحمر للمسلسلات */
-            border-color: var(--accent-color);
-            box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+            background-color: var(--accent-color); 
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
         }
+        /* زر إضافة مسلسل جديد */
+        .add-action-btn {
+            padding: 12px 20px; font-weight: bold; border-radius: 8px;
+            background-color: #4CAF50; color: white; text-decoration: none; display: block; width: 100%; margin-bottom: 15px;
+        }
+        
         /* تصميم قائمة المسلسلات */
         .series-list-item {
-            display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; align-items: center; padding: 15px; margin-bottom: 10px;
+            background-color: #222; border-radius: 6px; transition: background-color 0.3s;
         }
+        .series-list-item:hover { background-color: #2a2a2a; }
         .series-list-item .title { font-weight: bold; }
         .series-actions button, .series-actions a {
-            background: none; border: none; color: #007bff; margin-left: 10px; cursor: pointer; text-decoration: none;
+            background: none; border: none; color: var(--primary-color); margin-left: 15px; cursor: pointer; text-decoration: none; font-weight: bold;
         }
         .series-actions .delete-btn { color: var(--accent-color); }
-        .action-btn {
-            display: block; width: 100%; padding: 15px; margin-bottom: 15px; font-size: 1.1em; font-weight: bold; border-radius: 5px;
-            background-color: #4CAF50; color: white; text-decoration: none;
-        }
-        #logout-btn { background-color: #333; margin-top: 20px; }
+        #logout-btn { background-color: #333; margin-top: 20px; padding: 10px 15px; width: auto; }
     </style>
 </head>
 <body>
@@ -62,14 +75,16 @@
             <a href="admin_control.html" class="admin-nav-btn">إدارة الأفلام</a>
             <a href="series_list.html" class="admin-nav-btn active" style="background-color: var(--accent-color);">إدارة المسلسلات</a>
         </div>
-        <a href="series_add_form.html" class="action-btn">📺 إضافة مسلسل جديد</a>
+        
+        <a href="series_add_form.html" class="add-action-btn">📺 إضافة مسلسل جديد</a>
         
         <h2>قائمة المسلسلات الحالية</h2>
         <div id="admin-series-list">
             <p id="list-loader">جاري تحميل قائمة المسلسلات...</p>
         </div>
         
-        <button id="logout-btn" class="action-btn">تسجيل خروج</button>
+        <button id="logout-btn" class="header-action-btn">تسجيل خروج</button>
+        <div id="error-message" style="color: var(--accent-color); text-align: center; margin-top: 20px;"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -78,7 +93,6 @@
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // (نفس الكونفج والـ UID مالتك)
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -95,6 +109,8 @@
 
         const listContainer = document.getElementById('admin-series-list');
         const listLoader = document.getElementById('list-loader');
+        const errorMessageElement = document.getElementById('error-message');
+
 
         // ================ (2) دالة الحذف ================
         function deleteSeries(seriesId, seriesTitle) {
@@ -102,10 +118,10 @@
                 db.collection('series').doc(seriesId).delete()
                     .then(() => {
                         alert(`تم حذف المسلسل بنجاح: ${seriesTitle}`);
-                        fetchSeries(); // حدث القائمة
+                        fetchSeries(); 
                     })
                     .catch(error => {
-                        alert("حدث خطأ في الحذف. تأكد من صلاحياتك.");
+                        errorMessageElement.textContent = `خطأ في الحذف: ${error.message}`;
                     });
             }
         }
@@ -122,7 +138,6 @@
                 const item = document.createElement('div');
                 item.className = 'series-list-item';
                 
-                // اسم المسلسل
                 item.innerHTML = `
                     <span class="title">${series.title} (${series.releaseYear || 'N/A'})</span>
                     <div class="series-actions">
@@ -152,7 +167,7 @@
         // ================ (5) الحارس الأمني ================
         auth.onAuthStateChanged(user => {
             if (user && user.uid === ADMIN_UID) {
-                fetchSeries(); // جلب المسلسلات وعرضها
+                fetchSeries(); 
             } else {
                 window.location.href = './login.html';
             }
