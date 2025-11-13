@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشاهدة الفيلم</title>
+    <title>q movie - مشاهدة الفيلم</title>
     <style>
         :root {
             --bg-color: #141414;
@@ -40,8 +40,6 @@
         }
         .back-btn:hover { background-color: #333; }
         #movie-title { font-size: 1.8em; margin: 0; }
-        
-        /* زر الخروج (جزء من السكيورتي) */
         #logout-btn {
             padding: 8px 12px;
             background-color: var(--accent-color);
@@ -53,8 +51,6 @@
             flex-shrink: 0; 
         }
         #logout-btn:hover { background-color: #f6121d; }
-
-        /* حاوية المشغّل */
         #player-container {
             position: relative;
             width: 100%;
@@ -73,7 +69,6 @@
             height: 100%;
             border: none;
         }
-        /* أزرار السيرفرات */
         #server-buttons {
             display: flex;
             flex-wrap: wrap;
@@ -137,22 +132,22 @@
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥🔥 لازم تخلي الكونفج مالتك هنا 🔥🔥🔥
+        // 🔥🔥 هذا الكونفج مالتك... جاهز! 🔥🔥
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+          apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0",
+          authDomain: "qmove1.firebaseapp.com",
+          projectId: "qmove1",
+          storageBucket: "qmove1.firebasestorage.app",
+          messagingSenderId: "166464805371",
+          appId: "1:166464805371:web:d65b0cb8b141e4b894935e",
+          measurementId: "G-3EXSHD3GN8"
         };
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        // تهيئة خدمة المصادقة (السكيورتي)
         const auth = firebase.auth();
 
-        // ================ (2) جلب بيانات الفيلم المحدد (نفس الكود) ================
+        // ================ (2) جلب بيانات الفيلم المحدد ================
         const titleElement = document.getElementById('movie-title');
         const player = document.getElementById('movie-player');
         const buttonsContainer = document.getElementById('server-buttons');
@@ -162,13 +157,13 @@
         async function loadMovie() {
             const urlParams = new URLSearchParams(window.location.search);
             const movieId = urlParams.get('id');
-            if (!movieId) { /* ... */ return; }
+            if (!movieId) { loader.textContent = 'خطأ'; return; }
             try {
                 const docRef = db.collection('movies').doc(movieId);
                 const doc = await docRef.get();
-                if (!doc.exists) { /* ... */ return; }
+                if (!doc.exists) { loader.textContent = 'الفيلم ما موجود'; return; }
                 displayMovie(doc.data());
-            } catch (error) { /* ... */ }
+            } catch (error) { loader.textContent = 'خطأ'; }
         }
 
         function displayMovie(movie) {
@@ -199,25 +194,17 @@
             loader.style.display = 'none';
         }
 
-        // ================ (3) الحارس الأمني (السكيورتي) 🔥🔥🔥 ================
-        
+        // ================ (3) الحارس الأمني (السكيورتي) ================
         auth.onAuthStateChanged(user => {
             if (user) {
-                // (أ) المستخدم مسجل دخول: اسمحله يشوف الفيلم
                 loadMovie();
-
-                // (ب) برمجة زر تسجيل الخروج
                 logoutBtn.addEventListener('click', () => {
                     auth.signOut();
                 });
-
             } else {
-                // (ب) المستخدم *ما* مسجل دخول: اطرده
                 window.location.href = './login.html';
             }
         });
-    </T>
     </script>
-
 </body>
 </html>
