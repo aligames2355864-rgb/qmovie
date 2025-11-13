@@ -41,7 +41,7 @@
             font-weight: bold;
             border: none;
             border-radius: 5px;
-            background-color: #4CAF50; /* لون اخضر للإضافة */
+            background-color: #4CAF50; 
             color: white;
             cursor: pointer;
             text-decoration: none;
@@ -106,9 +106,9 @@
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥 تأكد من وضع الكونفج النهائي لمشروع qmove1 هنا
+        // 🔥🔥 تم لصق الـ API Key الخاص بك هنا!
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", 
+            apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
             projectId: "qmove1",
             storageBucket: "qmove1.appspot.com",
@@ -120,7 +120,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         
-        // 🔥🔥 UID الخاص بك (المفتاح السري)
+        // UID الخاص بك (المفتاح السري)
         const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
         const welcomeMessage = document.getElementById('welcome-message');
@@ -133,7 +133,7 @@
                 db.collection('movies').doc(movieId).delete()
                     .then(() => {
                         alert(`تم حذف الفيلم بنجاح: ${movieTitle}`);
-                        fetchAdminMovies(); // حدث القائمة
+                        fetchAdminMovies(); 
                     })
                     .catch(error => {
                         alert("حدث خطأ في الحذف. تأكد من صلاحياتك.");
@@ -144,7 +144,7 @@
         
         // ================ (3) دالة عرض الأفلام في لوحة التحكم ================
         function renderAdminMovies(movies) {
-            listContainer.innerHTML = ''; // تنظيف القائمة
+            listContainer.innerHTML = ''; 
             if (movies.length === 0) {
                 listContainer.innerHTML = '<p>لا توجد أفلام مضافة حالياً.</p>';
                 return;
@@ -154,7 +154,6 @@
                 const item = document.createElement('div');
                 item.className = 'movie-list-item';
                 
-                // اسم الفيلم
                 item.innerHTML = `
                     <span>${movie.title}</span>
                     <div class="movie-actions">
@@ -185,15 +184,12 @@
         // ================ (5) الحارس الأمني ================
         auth.onAuthStateChanged(user => {
             if (user && user.uid === ADMIN_UID) {
-                // أنت الأدمن!
                 welcomeMessage.textContent = `مرحباً يا علاوي! (${user.email})`;
-                fetchAdminMovies(); // جلب الأفلام وعرضها
+                fetchAdminMovies(); 
             } else if (user) {
-                // مستخدم مسجل دخول لكنه ليس الأدمن
                 alert('غير مصرح لك بالدخول. سيتم إرجاعك للرئيسية.');
                 window.location.href = './index.html';
             } else {
-                // لم يسجل دخول
                 window.location.href = './login.html';
             }
         });
