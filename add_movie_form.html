@@ -5,100 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إضافة / تعديل فيلم</title>
     <style>
+        /* 🔥🔥 الـ CSS الأساسي (موحد مع باقي الموقع) 🔥🔥 */
         :root {
-            --bg-color: #141414;
-            --card-color: #1c1c1c;
-            --text-color: #f5f5f5;
+            --bg-color: #0d0d0d; 
+            --card-color: #1a1a1a; 
+            --text-color: #f5f5f5; 
             --accent-color: #e50914; 
         }
         body {
             font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
+            background: radial-gradient(circle at top, #141414, #000);
             color: var(--text-color);
             padding: 20px;
+            margin: 0;
         }
         .container {
             background-color: var(--card-color);
-            padding: 30px;
-            border-radius: 8px;
-            max-width: 700px;
-            margin: 20px auto;
+            padding: 30px; border-radius: 12px; max-width: 700px; margin: 20px auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
-        h1 {
-            color: var(--accent-color);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        /* 🔥 تصميم الحقول الجديدة */
+        h1 { color: var(--accent-color); margin-bottom: 20px; text-align: center; }
         input[type="text"], input[type="number"], textarea, select { 
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            border: 1px solid #333;
-            background-color: #333;
-            color: var(--text-color);
-            font-size: 16px;
-            box-sizing: border-box;
-            resize: vertical;
+            width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #333;
+            background-color: #333; color: var(--text-color); font-size: 16px; box-sizing: border-box; resize: vertical;
         }
-        /* تصميم حقل التصنيف */
-        select {
-            appearance: none;
-            -webkit-appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%23f5f5f5" d="M4.5 7.5L10 13l5.5-5.5z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: left 10px center;
-            padding-left: 30px; /* مسافة للآيقونة */
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #222;
-            border-radius: 5px;
-        }
-        .checkbox-group label {
-            margin-right: auto; 
-            font-weight: bold;
-        }
-        /* نهاية تصميم الحقول الجديدة */
-
+        .checkbox-group { display: flex; align-items: center; margin-bottom: 15px; padding: 10px; background-color: #222; border-radius: 5px; }
         button {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            background-color: var(--accent-color);
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            width: 100%; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 5px;
+            background-color: var(--accent-color); color: white; cursor: pointer; transition: background-color 0.2s;
         }
-        button:hover {
-            background-color: #f6121d;
-        }
-        .back-btn {
-            display: block;
-            margin-bottom: 20px;
-            text-align: right;
-            color: #007bff;
-            text-decoration: none;
-        }
-        .link-group h3 {
-            margin-top: 25px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 5px;
-        }
-        #message {
-            color: #ff9a9a;
-            text-align: center;
-            margin-top: 10px;
-            font-weight: bold;
-        }
+        button:hover { background-color: #b00710; }
+        .back-btn { display: block; margin-bottom: 20px; text-align: right; color: #007bff; text-decoration: none; }
+        #message { color: #ff9a9a; text-align: center; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -139,16 +77,11 @@
                 <label for="isFeatured">عرض كإعلان رئيسي في الصفحة الرئيسية؟</label>
             </div>
             <hr style="border-color: #555; margin: 20px 0;">
-            <div class="link-group">
-                <h3>روابط السيرفرات (Embed URLs)</h3>
-                <input type="text" id="wistia1" placeholder="سيرفر Wistia 1 (الرئيسي)">
-                <input type="text" id="wistia2" placeholder="سيرفر Wistia 2">
-                <input type="text" id="wistia3" placeholder="سيرفر Wistia 3">
-                <input type="text" id="dood" placeholder="سيرفر Doodstream">
-                <input type="text" id="tape" placeholder="سيرفر Streamtape">
-                <input type="text" id="uqload" placeholder="سيرفر Uqload">
-            </div>
 
+            <h2>روابط المشغلات</h2>
+            <input type="text" id="playerjs" placeholder="1. PlayerJS Link (الخيار الأساسي)">
+            <input type="text" id="wistia" placeholder="2. Wistia Link (الخيار الاحتياطي الأول)">
+            <input type="text" id="dood" placeholder="3. Doodstream/Uqload Link (الخيار الاحتياطي الثاني)">
             <div id="message"></div>
             
             <button type="submit" id="submit-btn">إضافة الفيلم</button>
@@ -181,7 +114,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const movieId = urlParams.get('id'); 
 
-        // ================ (2) دالة جلب بيانات التعديل (لتعبئة الحقول) ================
+        // ================ (2) دالة جلب بيانات التعديل ================
         function loadMovieData(id) {
             document.getElementById('form-title').textContent = 'تعديل فيلم موجود';
             document.getElementById('submit-btn').textContent = 'حفظ التعديلات';
@@ -196,19 +129,17 @@
                         document.getElementById('cast').value = data.cast || '';
                         document.getElementById('description').value = data.description || '';
                         
-                        // 🔥 تعبئة الحقول الجديدة
                         document.getElementById('category').value = data.category || 'Other';
                         document.getElementById('rating').value = data.rating || 5; 
                         document.getElementById('bannerUrl').value = data.bannerUrl || '';
                         document.getElementById('isFeatured').checked = data.isFeatured || false;
                         
+                        // 🔥🔥 تعبئة حقول المشغلات المتعددة
                         const servers = data.servers || {};
-                        document.getElementById('wistia1').value = servers.wistia1 || '';
-                        document.getElementById('wistia2').value = servers.wistia2 || '';
-                        document.getElementById('wistia3').value = servers.wistia3 || '';
+                        document.getElementById('playerjs').value = servers.playerjs || '';
+                        document.getElementById('wistia').value = servers.wistia || '';
                         document.getElementById('dood').value = servers.dood || '';
-                        document.getElementById('tape').value = servers.tape || '';
-                        document.getElementById('uqload').value = servers.uqload || '';
+
                     } else {
                         message.textContent = 'الفيلم غير موجود.';
                     }
@@ -227,51 +158,38 @@
             e.preventDefault();
             message.textContent = 'جاري الإرسال...';
             
+            // سحب البيانات الأساسية
             const title = document.getElementById('title').value;
             const posterUrl = document.getElementById('posterUrl').value;
-            const releaseYear = document.getElementById('releaseYear').value;
-            const cast = document.getElementById('cast').value;
             const description = document.getElementById('description').value;
 
-            // 🔥 سحب قيم الحقول الجديدة
+            // سحب بيانات التصنيف
             const category = document.getElementById('category').value;
             const rating = parseFloat(document.getElementById('rating').value);
-            const bannerUrl = document.getElementById('bannerUrl').value;
             const isFeatured = document.getElementById('isFeatured').checked;
+            
+            // 🔥🔥 سحب قيم المشغلات الثلاثة
+            const playerjsLink = document.getElementById('playerjs').value.trim();
+            const wistiaLink = document.getElementById('wistia').value.trim();
+            const doodLink = document.getElementById('dood').value.trim();
 
-            const servers = {};
-            // (سحب قيم السيرفرات...)
-            const wistia1Url = document.getElementById('wistia1').value.trim();
-            const wistia2Url = document.getElementById('wistia2').value.trim();
-            const wistia3Url = document.getElementById('wistia3').value.trim();
-            const doodUrl = document.getElementById('dood').value.trim();
-            const tapeUrl = document.getElementById('tape').value.trim();
-            const uqloadUrl = document.getElementById('uqload').value.trim();
-            
-            if (wistia1Url) servers.wistia1 = wistia1Url;
-            if (wistia2Url) servers.wistia2 = wistia2Url;
-            if (wistia3Url) servers.wistia3 = wistia3Url;
-            if (doodUrl) servers.dood = doodUrl;
-            if (tapeUrl) servers.tape = tapeUrl;
-            if (uqloadUrl) servers.uqload = uqloadUrl;
-            
             const movieData = {
                 title: title,
                 posterUrl: posterUrl,
-                releaseYear: releaseYear, 
-                cast: cast,                 
                 description: description,   
-                servers: servers,
-                // 🔥 تخزين الحقول الجديدة
                 category: category, 
                 rating: rating,
-                bannerUrl: bannerUrl,
                 isFeatured: isFeatured,
+                // 🔥🔥 تخزين الروابط في مصفوفة servers
+                servers: {
+                    playerjs: playerjsLink,
+                    wistia: wistiaLink,
+                    dood: doodLink,
+                },
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             let savePromise;
-
             if (movieId) {
                 savePromise = db.collection('movies').doc(movieId).update(movieData);
             } else {
@@ -281,9 +199,6 @@
             savePromise.then(() => {
                 message.textContent = movieId ? 'تم حفظ التعديلات بنجاح!' : 'تم إضافة الفيلم بنجاح!';
                 message.style.color = 'lightgreen';
-                if (!movieId) {
-                    form.reset();
-                }
                 setTimeout(() => {
                      window.location.href = './admin_control.html';
                 }, 1500);
