@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة / تعديل فيلم</title>
+    <style>
+        :root {
+            --bg-color: #141414;
+            --card-color: #1c1c1c;
+            --text-color: #f5f5f5;
+            --accent-color: #e50914; 
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 700px;
+            margin: 20px auto;
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #333;
+            color: var(--text-color);
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .back-btn {
+            display: block;
+            margin-bottom: 20px;
+            text-align: right;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        .link-group h3 {
+            margin-top: 25px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        #message {
+            color: #ff9a9a;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="admin_control.html" class="back-btn">&larr; العودة للوحة التحكم</a>
+    
+    <div class="container">
+        <h1 id="form-title">إضافة فيلم جديد</h1>
+
+        <form id="movie-form">
+            <h2>المعلومات الأساسية</h2>
+            <input type="text" id="title" placeholder="عنوان الفيلم (مطلوب)" required>
+            <input type="text" id="posterUrl" placeholder="رابط صورة البوستر (مطلوب)" required>
+
+            <div class="link-group">
+                <h3>روابط السيرفرات (Embed URLs)</h3>
+                <input type="text" id="dood" placeholder="سيرفر Doodstream">
+                <input type="text" id="tape" placeholder="سيرفر Streamtape">
+                <input type="text" id="uqload" placeholder="سيرفر Uqload">
+            </div>
+
+            <div id="message"></div>
+            
+            <button type="submit" id="submit-btn">إضافة الفيلم</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // ================ (1) إعدادات Firebase ================
+        // 🔥🔥 تأكد من وضع الكونفج النهائي لمشروع qmove1 هنا
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY", 
+            authDomain: "qmove1.firebaseapp.com",
+            projectId: "qmove1",
+            storageBucket: "qmove1.appspot.com",
+            messagingSenderId: "166464805371",
+            appId: "1:166464805371:web:d65b0cb8b141e4b894935e"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // 🔥🔥 UID الخاص بك (المفتاح السري)
+        const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
+
+        const form = document.getElementById('movie-form');
+        const message = document.getElementById('message');
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = urlParams.get('id'); // إذا اكو ID، معناها 'تعديل'
+
+        // ================ (2) دالة جلب بيانات التعديل ================
+        function loadMovieData(id) {
+            document.getElementById('form-title').textContent = 'تعديل فيلم موجود';
+            document.getElementById('submit-btn').textContent = 'حفظ التعديلات';
+            
+            db.collection('movies').doc(id).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('title').value = data.title || '';
+                        document.getElementById('posterUrl').value = data.posterUrl || '';
+                        
+                        // ملء روابط السيرفرات
+                        const servers = data.servers || {};
+                        document.getElementById('dood').value = servers.dood || '';
+                        document.getElementById('tape').value = servers.tape || '';
+                        document.getElementById('uqload').value = servers.uqload || '';
+                    } else {
+                        message.textContent = 'الفيلم غير موجود.';
+                    }
+                })
+                .catch(error => {
+                    message.textContent = 'خطأ في جلب بيانات الفيلم.';
+                    console.error("Error loading movie: ", error);
+                });
+        }
+
+        if (movieId) {
+            loadMovieData(movieId);
+        }
+
+        // ================ (3) دالة الإرسال ================
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            message.textContent = 'جاري الإرسال...';
+            
+            const title = document.getElementById('title').value;
+            const posterUrl = document.getElementById('posterUrl').value;
+            
+            // تجميع روابط السيرفرات
+            const servers = {};
+            const doodUrl = document.getElementById('dood').value.trim();
+            const tapeUrl = document.getElementById('tape').value.trim();
+            const uqloadUrl = document.getElementById('uqload').value.trim();
+            
+            if (doodUrl) servers.dood = doodUrl;
+            if (tapeUrl) servers.tape = tapeUrl;
+            if (uqloadUrl) servers.uqload = uqloadUrl;
+            
+            const movieData = {
+                title: title,
+                posterUrl: posterUrl,
+                servers: servers,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            let savePromise;
+
+            if (movieId) {
+                // وضع التعديل
+                savePromise = db.collection('movies').doc(movieId).update(movieData);
+            } else {
+                // وضع الإضافة
+                savePromise = db.collection('movies').add(movieData);
+            }
+
+            savePromise.then(() => {
+                message.textContent = movieId ? 'تم حفظ التعديلات بنجاح!' : 'تم إضافة الفيلم بنجاح!';
+                message.style.color = 'lightgreen';
+                // إذا إضافة جديدة، نظّف الفورم
+                if (!movieId) {
+                    form.reset();
+                }
+                // ارجع للصفحة بعد ثواني
+                setTimeout(() => {
+                     window.location.href = './admin_control.html';
+                }, 1500);
+
+            }).catch(error => {
+                message.textContent = 'فشل الإرسال. هل أنت متأكد أنك الأدمن؟';
+                message.style.color = '#ff9a9a';
+                console.error("Error writing document: ", error);
+            });
+        });
+
+        // ================ (4) الحارس الأمني (الأدمن) ================
+        auth.onAuthStateChanged(user => {
+            if (!user || user.uid !== ADMIN_UID) {
+                // ممنوع الدخول! ارجع للرئيسية أو صفحة الدخول
+                alert('غير مصرح لك بدخول هذه الصفحة.');
+                window.location.href = './login.html';
+            }
+        });
+
+    </script>
+</body>
+</html>
