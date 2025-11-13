@@ -38,7 +38,6 @@
             background-color: var(--card-color);
             color: var(--text-color);
         }
-        /* زر تسجيل الخروج (جزء من السكيورتي) */
         #logout-btn {
             padding: 8px 12px;
             background-color: var(--accent-color);
@@ -48,9 +47,7 @@
             cursor: pointer;
             font-size: 14px;
         }
-        #logout-btn:hover {
-            background-color: #f6121d;
-        }
+        #logout-btn:hover { background-color: #f6121d; }
         #movie-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -111,28 +108,26 @@
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥🔥 لازم تخلي الكونفج مالتك هنا 🔥🔥🔥
+        // 🔥🔥 هذا الكونفج مالتك... جاهز! 🔥🔥
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+          apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0",
+          authDomain: "qmove1.firebaseapp.com",
+          projectId: "qmove1",
+          storageBucket: "qmove1.firebasestorage.app",
+          messagingSenderId: "166464805371",
+          appId: "1:166464805371:web:d65b0cb8b141e4b894935e",
+          measurementId: "G-3EXSHD3GN8"
         };
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        // تهيئة خدمة المصادقة (السكيورتي)
         const auth = firebase.auth();
 
-        // ================ (2) جلب وعرض الأفلام (نفس الكود) ================
-        
+        // ================ (2) جلب وعرض الأفلام ================
         const grid = document.getElementById('movie-grid');
         const loader = document.getElementById('loader');
         const searchInput = document.getElementById('search-input');
         const logoutBtn = document.getElementById('logout-btn');
-        
         let allMovies = []; 
 
         async function fetchMovies() {
@@ -152,14 +147,14 @@
                 movieLink.href = `./movie.html?id=${movie.id}`;
                 movieLink.className = 'movie-item';
                 movieLink.innerHTML = `
-                    <img src="${movie.posterUrl}" alt="${movie.title}" onerror="this.src='https.via.placeholder.com/180x270?text=No+Image';">
+                    <img src="${movie.posterUrl}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/180x270?text=No+Image';">
                     <h3>${movie.title}</h3>
                 `;
                 grid.appendChild(movieLink);
             });
         }
 
-        // ================ (3) برمجة البحث (نفس الكود) ================
+        // ================ (3) برمجة البحث ================
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             const filteredMovies = allMovies.filter(movie => {
@@ -168,25 +163,17 @@
             displayMovies(filteredMovies);
         });
 
-        // ================ (4) الحارس الأمني (السكيورتي) 🔥🔥🔥 ================
-        
+        // ================ (4) الحارس الأمني (السكيورتي) ================
         auth.onAuthStateChanged(user => {
             if (user) {
-                // (أ) المستخدم مسجل دخول: اسمحله يشوف الأفلام
                 fetchMovies();
-
-                // (ب) برمجة زر تسجيل الخروج
                 logoutBtn.addEventListener('click', () => {
                     auth.signOut(); 
                 });
-
             } else {
-                // (ب) المستخدم *ما* مسجل دخول: اطرده لصفحة الدخول
                 window.location.href = './login.html';
             }
         });
-        
     </script>
-
 </body>
 </html>
