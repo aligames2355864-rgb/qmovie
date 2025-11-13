@@ -21,8 +21,14 @@
         header {
             display: flex;
             align-items: center;
+            justify-content: space-between; 
             gap: 20px;
             margin-bottom: 20px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
         .back-btn {
             font-size: 2em;
@@ -32,19 +38,27 @@
             border-radius: 5px;
             background-color: var(--card-color);
         }
-        .back-btn:hover {
-            background-color: #333;
-        }
-        #movie-title {
-            font-size: 1.8em;
-            margin: 0;
-        }
+        .back-btn:hover { background-color: #333; }
+        #movie-title { font-size: 1.8em; margin: 0; }
         
-        /* حاوية المشغّل (للحفاظ على نسبة 16:9) */
+        /* زر الخروج (جزء من السكيورتي) */
+        #logout-btn {
+            padding: 8px 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            flex-shrink: 0; 
+        }
+        #logout-btn:hover { background-color: #f6121d; }
+
+        /* حاوية المشغّل */
         #player-container {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* (9 / 16) * 100% */
+            padding-bottom: 56.25%; 
             height: 0;
             background-color: #000;
             border-radius: 8px;
@@ -59,7 +73,6 @@
             height: 100%;
             border: none;
         }
-
         /* أزرار السيرفرات */
         #server-buttons {
             display: flex;
@@ -79,17 +92,12 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
-        .server-btn:hover {
-            background-color: #555;
-        }
-        /* الزر الفعال (اللي دايشتغل) */
+        .server-btn:hover { background-color: #555; }
         .server-btn.active {
             background-color: var(--accent-color);
             box-shadow: 0 0 10px var(--accent-color);
         }
-
         #loader {
             text-align: center;
             font-size: 1.5em;
@@ -100,8 +108,11 @@
 <body>
 
     <header>
-        <a href="index.html" class="back-btn">&larr; رجوع</a>
-        <h1 id="movie-title">...</h1>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">&larr; رجوع</a>
+            <h1 id="movie-title">...</h1>
+        </div>
+        <button id="logout-btn">تسجيل خروج</button>
     </header>
 
     <main>
@@ -116,22 +127,97 @@
                 allowfullscreen>
             </iframe>
         </div>
-
-        <div id="server-buttons">
-            </div>
-
+        <div id="server-buttons"></div>
         <div id="loader">...جاري تحميل الفيلم</div>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥🔥 لازم تخلي نفس الكونفج مال index.html هنا 🔥🔥🔥
+        // 🔥🔥🔥 لازم تخلي الكونفج مالتك هنا 🔥🔥🔥
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_AUTH_DOMAIN",
             projectId: "YOUR_PROJECT_ID",
             storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSender
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        // تهيئة خدمة المصادقة (السكيورتي)
+        const auth = firebase.auth();
+
+        // ================ (2) جلب بيانات الفيلم المحدد (نفس الكود) ================
+        const titleElement = document.getElementById('movie-title');
+        const player = document.getElementById('movie-player');
+        const buttonsContainer = document.getElementById('server-buttons');
+        const loader = document.getElementById('loader');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        async function loadMovie() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const movieId = urlParams.get('id');
+            if (!movieId) { /* ... */ return; }
+            try {
+                const docRef = db.collection('movies').doc(movieId);
+                const doc = await docRef.get();
+                if (!doc.exists) { /* ... */ return; }
+                displayMovie(doc.data());
+            } catch (error) { /* ... */ }
+        }
+
+        function displayMovie(movie) {
+            titleElement.textContent = movie.title;
+            const servers = movie.servers;
+            if (!servers || Object.keys(servers).length === 0) {
+                loader.textContent = 'ماكو سيرفرات مشاهدة لهذا الفيلم حالياً.';
+                player.style.display = 'none'; 
+                return;
+            }
+            const serverEntries = Object.entries(servers);
+            let firstServerUrl = serverEntries[0][1];
+            player.src = firstServerUrl;
+
+            serverEntries.forEach(([serverName, serverUrl], index) => {
+                const button = document.createElement('button');
+                button.className = 'server-btn';
+                button.textContent = serverName.toUpperCase();
+                if (index === 0) button.classList.add('active');
+
+                button.onclick = () => {
+                    player.src = serverUrl;
+                    document.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                };
+                buttonsContainer.appendChild(button);
+            });
+            loader.style.display = 'none';
+        }
+
+        // ================ (3) الحارس الأمني (السكيورتي) 🔥🔥🔥 ================
+        
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // (أ) المستخدم مسجل دخول: اسمحله يشوف الفيلم
+                loadMovie();
+
+                // (ب) برمجة زر تسجيل الخروج
+                logoutBtn.addEventListener('click', () => {
+                    auth.signOut();
+                });
+
+            } else {
+                // (ب) المستخدم *ما* مسجل دخول: اطرده
+                window.location.href = './login.html';
+            }
+        });
+    </T>
+    </script>
+
+</body>
+</html>
