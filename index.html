@@ -23,7 +23,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            gap: 15px; /* مسافة بين العناصر */
+            gap: 15px; 
         }
         .logo {
             font-size: 2em;
@@ -31,7 +31,7 @@
             font-weight: bold;
         }
         #search-input {
-            flex-grow: 1; /* ياخذ مساحة أكبر */
+            flex-grow: 1; 
             padding: 10px;
             font-size: 16px;
             border-radius: 5px;
@@ -39,7 +39,6 @@
             background-color: var(--card-color);
             color: var(--text-color);
         }
-        /* زر تسجيل الخروج والأدمن */
         .header-action-btn {
             padding: 8px 12px;
             background-color: var(--accent-color);
@@ -55,7 +54,7 @@
             background-color: #f6121d;
         }
         #admin-panel-btn {
-            background-color: #007bff; /* لون أزرق لزر الأدمن */
+            background-color: #007bff; 
         }
         #admin-panel-btn:hover {
             background-color: #0056b3;
@@ -106,9 +105,7 @@
     <header>
         <div class="logo">q movie</div>
         <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
-        
         <div class="admin-controls"></div> 
-        
         <button id="logout-btn" class="header-action-btn">تسجيل خروج</button>
     </header>
 
@@ -123,9 +120,9 @@
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥 تأكد من وضع الكونفج النهائي لمشروع qmove1 هنا
+        // 🔥🔥 تم لصق الـ API Key الخاص بك هنا!
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", 
+            apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
             projectId: "qmove1",
             storageBucket: "qmove1.appspot.com",
@@ -137,7 +134,7 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
         
-        // 🔥🔥 UID الخاص بك (المفتاح السري)
+        // UID الخاص بك (المفتاح السري)
         const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
         // ================ (2) جلب وعرض الأفلام ================
@@ -152,7 +149,6 @@
         async function fetchMovies() {
             try {
                 const snapshot = await db.collection('movies').get();
-                // ... (باقي كود جلب الأفلام)
                 if (snapshot.empty) { loader.textContent = 'ماكو أفلام حالياً.'; return; }
                 allMovies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 displayMovies(allMovies); 
@@ -164,7 +160,6 @@
         }
 
         function displayMovies(moviesList) {
-            // ... (باقي كود عرض الأفلام)
             grid.innerHTML = ''; 
             moviesList.forEach(movie => {
                 const movieLink = document.createElement('a');
@@ -178,19 +173,16 @@
             });
         }
 
-        // ================ (3) الحارس الأمني (السكيورتي) 🔥🔥🔥 ================
+        // ================ (3) الحارس الأمني (السكيورتي) ================
         auth.onAuthStateChanged(user => {
             if (user) {
-                // (أ) المستخدم مسجل دخول
-                
-                // 🔥🔥 التحقق من الأدمن: إذا كان المستخدم هو الـ UID مالتك
+                // التحقق من الأدمن: إذا كان المستخدم هو الـ UID مالتك
                 if (user.uid === ADMIN_UID) {
                     adminControls.innerHTML = `<a href="./admin_control.html" id="admin-panel-btn" class="header-action-btn">لوحة التحكم</a>`;
                 }
 
                 fetchMovies();
 
-                // (ب) برمجة زر تسجيل الخروج
                 logoutBtn.addEventListener('click', () => {
                     auth.signOut().then(() => {
                         window.location.href = './login.html';
@@ -198,7 +190,6 @@
                 });
 
             } else {
-                // المستخدم *ما* مسجل دخول: اطرده لصفحة الدخول
                 window.location.href = './login.html';
             }
         });
