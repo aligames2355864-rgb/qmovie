@@ -5,188 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مشاهدة الفيلم</title>
     <style>
-        /* الأساسيات */
+        /* 🔥🔥 الـ CSS الموحد (مريح للعين وجذاب) 🔥🔥 */
         :root {
-            --bg-color: #141414;
-            --card-color: #1c1c1c;
-            --text-color: #f5f5f5;
-            --accent-color: #e50914;
+            --bg-color: #0d0d0d; 
+            --card-color: #1a1a1a; 
+            --text-color: #e0e0e0; 
+            --accent-color: #e50914; 
+            --primary-color: #007bff;
         }
         body {
             font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
+            background: radial-gradient(circle at top, #141414, #000);
             color: var(--text-color);
-            margin: 0;
             padding: 0;
+            margin: 0;
             opacity: 0;
-            transition: opacity 1s ease-in-out; 
+            transition: opacity 0.5s ease-in-out;
         }
-        body.loaded {
-            opacity: 1;
-        }
+        body.loaded { opacity: 1; }
         
-        /* الهيدر والأزرار */
         header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between; 
-            padding: 20px;
-            background-color: var(--card-color);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; 
+            background-color: var(--card-color); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
         }
-        .back-btn {
-            font-size: 1.5em;
-            color: var(--text-color);
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: color 0.3s;
-        }
+        .back-btn { font-size: 1.5em; color: #007bff; text-decoration: none; transition: color 0.3s; }
         .back-btn:hover { color: var(--accent-color); }
-        #logout-btn {
-            padding: 8px 12px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+        #logout-btn { padding: 8px 12px; background-color: var(--accent-color); color: white; border-radius: 5px; cursor: pointer; border: none; }
 
-        /* حاوية المشغّل والتفاصيل */
-        main {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-        /* المشغل (جعله بالوسط ومحاط بإطار) */
-        #player-wrapper {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
+        /* 🔥🔥 منطقة المشغل (Player) */
+        main { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        #player-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
         #player-container {
-            width: 100%;
-            max-width: 800px; 
-            position: relative;
-            padding-bottom: 450px; 
-            height: 0;
-            background-color: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
-            transform: scale(0.95);
-            animation: fadeInScale 0.8s ease-out forwards; 
+            width: 100%; max-width: 900px; position: relative; padding-bottom: 500px; height: 0;
+            background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
         }
-        #movie-player {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        #movie-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* أزرار السيرفرات */
-        #server-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
+        /* 🔥🔥 أزرار السيرفرات */
+        #server-buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 20px; }
         .server-btn {
-            padding: 10px 25px;
-            font-size: 1em;
-            font-weight: bold;
-            color: var(--text-color);
-            background-color: #333;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+            padding: 10px 25px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; transition: 0.3s;
+            background-color: #333; color: var(--text-color);
         }
-        .server-btn:hover { background-color: #555; transform: translateY(-2px); }
-        .server-btn.wistia-btn.active {
-            background-color: #007bff; 
-            box-shadow: 0 0 10px #007bff;
-        }
-        .server-btn.upload-btn.active {
-            background-color: var(--accent-color); 
-            box-shadow: 0 0 10px var(--accent-color);
-        }
-
-        /* تفاصيل الفيلم */
-        .movie-details {
-            background-color: var(--card-color);
-            padding: 30px;
-            border-radius: 12px;
-            text-align: right;
-        }
-        .meta-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 15px;
-        }
-        .meta-info div strong {
-            display: block;
-            font-size: 1.1em;
-            color: var(--accent-color);
-            margin-bottom: 5px;
-        }
-        .description-box {
-            line-height: 1.8;
-            font-size: 1.05em;
-        }
+        .server-btn.active { background-color: #007bff; box-shadow: 0 0 10px #007bff; }
+        .server-btn:hover { background-color: #555; }
         
-        /* 🔥 تصميم التقييم النجمي 🔥 */
-        .rating-box {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .rating-text {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: gold;
-            margin-left: 10px;
-        }
-        .stars {
-            font-size: 1.5em;
-            color: #555; /* لون النجوم غير الممتلئة */
-            position: relative;
-            direction: ltr; /* نجعل النجوم تُرسم من اليسار لليمين */
-        }
-        .filled-stars {
-            color: gold;
-            overflow: hidden;
-            position: absolute;
-            top: 0;
-            right: 0; /* يبدأ الرسم من اليمين (جهة القراءة العربية) */
-            height: 100%;
-        }
-
-        /* الأنميشن */
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        #loader {
-            text-align: center;
-            font-size: 1.5em;
-            padding: 50px;
-        }
+        /* 🔥🔥 تفاصيل الفيلم (الوصف والتقييم) */
+        #details-container { margin-bottom: 30px; text-align: right; }
+        .rating-box { display: flex; align-items: center; margin-bottom: 10px; }
+        .rating-text { font-size: 1.2em; font-weight: bold; color: gold; margin-left: 10px; }
+        .meta-info { display: flex; flex-wrap: wrap; gap: 30px; border-bottom: 1px solid #444; padding-bottom: 15px; margin-bottom: 15px; }
+        .stars { font-size: 1.5em; color: #555; position: relative; direction: ltr; }
+        .filled-stars { color: gold; overflow: hidden; position: absolute; top: 0; right: 0; height: 100%; }
     </style>
 </head>
 <body onload="document.body.classList.add('loaded')">
 
     <header>
         <a href="index.html" class="back-btn">&larr; الرئيسية</a>
-        <h1 id="movie-title">جاري التحميل...</h1>
+        <h1 id="movie-title">جاري تحميل الفيلم...</h1>
         <button id="logout-btn">تسجيل خروج</button>
     </header>
 
@@ -207,37 +84,20 @@
         
         <div id="server-buttons"></div>
         
-        <div id="details-container" class="movie-details" style="display: none;">
-            
+        <div id="details-container">
             <div class="rating-box">
                 <span class="rating-text"><span id="detail-rating-number">N/A</span>/10</span>
-                <div class="stars">
-                    ★★★★★
-                    <div class="filled-stars" id="filled-stars">★★★★★</div>
-                </div>
+                <div class="stars">★★★★★<div class="filled-stars" id="filled-stars">★★★★★</div></div>
             </div>
-            
             <div class="meta-info">
-                <div>
-                    <strong>سنة الإنتاج:</strong>
-                    <span id="detail-year">N/A</span>
-                </div>
-                <div>
-                    <strong>التصنيف:</strong>
-                    <span id="detail-category">N/A</span>
-                </div>
-                <div>
-                    <strong>بطولة:</strong>
-                    <span id="detail-cast">N/A</span>
-                </div>
+                <div><strong>سنة الإنتاج:</strong><span id="detail-year">N/A</span></div>
+                <div><strong>بطولة:</strong><span id="detail-cast">N/A</span></div>
+                <div><strong>التصنيف:</strong><span id="detail-category">N/A</span></div>
             </div>
-            
-            <h2>القصة والوصف</h2>
-            <p id="detail-description" class="description-box"></p>
+            <h2>الوصف</h2>
+            <p id="detail-description"></p>
         </div>
         
-        <div id="loader">...جاري تحميل الفيلم</div>
-
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -245,7 +105,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
-        // ================ (1) إعدادات Firebase ================
+        // ===============================================
+        //  إعدادات Firebase والـ UID
+        // ===============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -258,87 +120,62 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
-
-        // UID الخاص بك (المفتاح السري)
         const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
-        // عناصر التحكم
-        const titleElement = document.getElementById('movie-title');
+        const movieTitleElement = document.getElementById('movie-title');
         const player = document.getElementById('movie-player');
         const buttonsContainer = document.getElementById('server-buttons');
-        const detailsContainer = document.getElementById('details-container');
-        const loader = document.getElementById('loader');
-        const logoutBtn = document.getElementById('logout-btn');
         const detailRatingNumber = document.getElementById('detail-rating-number');
         const filledStars = document.getElementById('filled-stars');
 
-        // 🔥 دالة لحساب وعرض النجوم
+        // 🔥 دالة لعرض التقييم النجمي
         function setStarRating(rating) {
-            // تحويل التقييم من 10 إلى 5 (مثلاً 9/10 = 4.5/5)
-            const ratingOutOfFive = (rating / 10) * 5;
-            
-            // حساب العرض كنسبة مئوية (4.5 / 5 * 100 = 90%)
-            const widthPercentage = (ratingOutOfFive / 5) * 100;
-
-            detailRatingNumber.textContent = rating.toFixed(1); // عرض رقم التقييم
+            const widthPercentage = (rating / 10) * 100;
+            detailRatingNumber.textContent = rating ? rating.toFixed(1) : 'N/A';
             filledStars.style.width = `${widthPercentage}%`;
         }
-
-
+        
+        // 🔥 دالة عرض الفيلم (تم تبسيطها للمشغلات المتعددة)
         function displayMovie(movie) {
-            titleElement.textContent = movie.title || 'فيلم بدون عنوان';
+            movieTitleElement.textContent = movie.title || 'فيلم بدون عنوان';
             
-            // عرض التفاصيل
-            document.getElementById('detail-year').textContent = movie.releaseYear || 'غير محدد';
-            document.getElementById('detail-cast').textContent = movie.cast || 'غير متوفر';
-            document.getElementById('detail-description').textContent = movie.description || 'لم تتم إضافة وصف.';
-            document.getElementById('detail-category').textContent = movie.category || 'أخرى';
-            setStarRating(movie.rating || 0); // 🔥 عرض التقييم
-            detailsContainer.style.display = 'block'; 
-            
-            // باقي كود المشغّل
-            const servers = movie.servers;
-            if (!servers || Object.keys(servers).length === 0) {
-                loader.textContent = 'ماكو سيرفرات مشاهدة لهذا الفيلم حالياً.';
-                player.style.display = 'none'; 
-                return;
-            }
+            // 🔥🔥 نستخدم مصفوفة Servers
+            const servers = movie.servers || {};
 
-            // ترتيب الأزرار الجديد
-            const serverOrder = ['wistia1', 'wistia2', 'wistia3', 'dood', 'tape', 'uqload'];
+            // ترتيب المشغلات (الأولوية لـ PlayerJS)
+            const serverOrder = ['playerjs', 'wistia', 'dood']; 
             
             const availableServers = serverOrder
                 .filter(name => servers[name])
                 .map(name => ({ name, url: servers[name] }));
 
-
             if (availableServers.length === 0) {
-                 loader.textContent = 'ماكو سيرفرات مشاهدة لهذا الفيلم حالياً.';
-                 player.style.display = 'none';
+                 player.src = '';
+                 // يمكن عرض رسالة خطأ هنا
                  return;
             }
-
-            // شغل أول سيرفر موجود كافتراضي
-            let firstServerUrl = availableServers[0].url;
-            player.src = firstServerUrl;
             
-            // سوي الأزرار
+            // تشغيل المشغل الأول افتراضياً
+            player.src = availableServers[0].url;
+            
+            // عرض الأزرار
             availableServers.forEach((server, index) => {
                 const button = document.createElement('button');
                 button.className = 'server-btn';
                 
                 let buttonText = server.name.toUpperCase();
-                let buttonClass = 'upload-btn'; 
                 
-                if (server.name.startsWith('wistia')) {
-                    buttonText = server.name.toUpperCase().replace('WISTIA', 'WISTIA ');
-                    buttonClass = 'wistia-btn'; 
-                } else if (server.name === 'dood' || server.name === 'tape' || server.name === 'uqload') {
-                    buttonClass = 'upload-btn'; 
+                // تخصيص أسماء الأزرار
+                if (server.name === 'playerjs') {
+                    buttonText = 'المشغل الرئيسي';
+                    button.classList.add('active'); // تفعيل الزر الأول
+                } else if (server.name === 'wistia') {
+                    buttonText = 'WISTIA (جودة عالية)';
+                } else if (server.name === 'dood') {
+                    buttonText = 'UPSTREAM (مجاني/إعلانات)';
                 }
-                
+
                 button.textContent = buttonText;
-                button.classList.add(buttonClass);
 
                 if (index === 0) {
                     button.classList.add('active');
@@ -352,18 +189,29 @@
                 
                 buttonsContainer.appendChild(button);
             });
-            
-            loader.style.display = 'none';
+
+
+            // عرض التفاصيل
+            document.getElementById('detail-year').textContent = movie.releaseYear || 'غير محدد';
+            document.getElementById('detail-cast').textContent = movie.cast || 'غير متوفر';
+            document.getElementById('detail-description').textContent = movie.description || 'لم تتم إضافة وصف.';
+            document.getElementById('detail-category').textContent = movie.category || 'غير محدد';
+            setStarRating(movie.rating || 0);
+
+            document.getElementById('details-container').style.display = 'block';
         }
 
-        // ================ (4) الحارس الأمني ================
-        function loadMovie() {
+
+        // ===============================================
+        //  نقطة البداية والحارس الأمني
+        // ===============================================
+
+        function fetchMovieData() {
             const urlParams = new URLSearchParams(window.location.search);
             const movieId = urlParams.get('id');
 
             if (!movieId) {
-                titleElement.textContent = 'خطأ: الفيلم غير محدد';
-                loader.textContent = 'الفيلم غير محدد.';
+                movieTitleElement.textContent = 'خطأ: لم يتم تحديد الفيلم.';
                 return;
             }
 
@@ -372,31 +220,28 @@
                     if (doc.exists) {
                         displayMovie(doc.data());
                     } else {
-                        titleElement.textContent = 'خطأ: الفيلم هذا ما موجود';
-                        loader.textContent = 'الفيلم المطلوب غير موجود في قاعدة البيانات.';
+                        movieTitleElement.textContent = 'الفيلم غير موجود.';
                     }
                 })
                 .catch(error => {
-                    titleElement.textContent = 'حدث خطأ في الاتصال.';
-                    loader.textContent = 'حدث خطأ في الاتصال بقاعدة البيانات.';
+                    movieTitleElement.textContent = `خطأ في التحميل: ${error.message}`;
+                    console.error(error);
                 });
         }
         
         auth.onAuthStateChanged(user => {
             if (user) {
-                loadMovie();
-                logoutBtn.addEventListener('click', () => {
+                fetchMovieData();
+                document.getElementById('logout-btn').addEventListener('click', () => {
                     auth.signOut().then(() => {
                         window.location.href = './login.html';
                     });
                 });
             } else {
-                // Firebase يحفظ الجلسة تلقائياً، ولكن إذا انتهت الجلسة نرجع لصفحة الدخول
                 window.location.href = './login.html';
             }
         });
 
     </script>
-
 </body>
 </html>
