@@ -59,7 +59,6 @@
             margin: 20px auto;
             padding: 0 20px;
         }
-
         /* المشغل (جعله بالوسط ومحاط بإطار) */
         #player-wrapper {
             display: flex;
@@ -108,9 +107,13 @@
             transition: background-color 0.3s, transform 0.2s;
         }
         .server-btn:hover { background-color: #555; transform: translateY(-2px); }
-        .server-btn.active {
-            background-color: #007bff; /* لون أزرق مميز لـ Wistia */
+        .server-btn.wistia-btn.active {
+            background-color: #007bff; 
             box-shadow: 0 0 10px #007bff;
+        }
+        .server-btn.upload-btn.active {
+            background-color: var(--accent-color); 
+            box-shadow: 0 0 10px var(--accent-color);
         }
 
         /* تفاصيل الفيلم */
@@ -122,6 +125,7 @@
         }
         .meta-info {
             display: flex;
+            flex-wrap: wrap;
             gap: 30px;
             margin-bottom: 20px;
             border-bottom: 1px solid #444;
@@ -138,6 +142,33 @@
             font-size: 1.05em;
         }
         
+        /* 🔥 تصميم التقييم النجمي 🔥 */
+        .rating-box {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .rating-text {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: gold;
+            margin-left: 10px;
+        }
+        .stars {
+            font-size: 1.5em;
+            color: #555; /* لون النجوم غير الممتلئة */
+            position: relative;
+            direction: ltr; /* نجعل النجوم تُرسم من اليسار لليمين */
+        }
+        .filled-stars {
+            color: gold;
+            overflow: hidden;
+            position: absolute;
+            top: 0;
+            right: 0; /* يبدأ الرسم من اليمين (جهة القراءة العربية) */
+            height: 100%;
+        }
+
         /* الأنميشن */
         @keyframes fadeInScale {
             from { opacity: 0; transform: scale(0.95); }
@@ -177,10 +208,23 @@
         <div id="server-buttons"></div>
         
         <div id="details-container" class="movie-details" style="display: none;">
+            
+            <div class="rating-box">
+                <span class="rating-text"><span id="detail-rating-number">N/A</span>/10</span>
+                <div class="stars">
+                    ★★★★★
+                    <div class="filled-stars" id="filled-stars">★★★★★</div>
+                </div>
+            </div>
+            
             <div class="meta-info">
                 <div>
                     <strong>سنة الإنتاج:</strong>
                     <span id="detail-year">N/A</span>
+                </div>
+                <div>
+                    <strong>التصنيف:</strong>
+                    <span id="detail-category">N/A</span>
                 </div>
                 <div>
                     <strong>بطولة:</strong>
@@ -202,7 +246,6 @@
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥 تم لصق الـ API Key الخاص بك هنا!
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -226,17 +269,32 @@
         const detailsContainer = document.getElementById('details-container');
         const loader = document.getElementById('loader');
         const logoutBtn = document.getElementById('logout-btn');
+        const detailRatingNumber = document.getElementById('detail-rating-number');
+        const filledStars = document.getElementById('filled-stars');
+
+        // 🔥 دالة لحساب وعرض النجوم
+        function setStarRating(rating) {
+            // تحويل التقييم من 10 إلى 5 (مثلاً 9/10 = 4.5/5)
+            const ratingOutOfFive = (rating / 10) * 5;
+            
+            // حساب العرض كنسبة مئوية (4.5 / 5 * 100 = 90%)
+            const widthPercentage = (ratingOutOfFive / 5) * 100;
+
+            detailRatingNumber.textContent = rating.toFixed(1); // عرض رقم التقييم
+            filledStars.style.width = `${widthPercentage}%`;
+        }
 
 
         function displayMovie(movie) {
             titleElement.textContent = movie.title || 'فيلم بدون عنوان';
             
-            // عرض التفاصيل الجديدة
+            // عرض التفاصيل
             document.getElementById('detail-year').textContent = movie.releaseYear || 'غير محدد';
             document.getElementById('detail-cast').textContent = movie.cast || 'غير متوفر';
             document.getElementById('detail-description').textContent = movie.description || 'لم تتم إضافة وصف.';
+            document.getElementById('detail-category').textContent = movie.category || 'أخرى';
+            setStarRating(movie.rating || 0); // 🔥 عرض التقييم
             detailsContainer.style.display = 'block'; 
-            
             
             // باقي كود المشغّل
             const servers = movie.servers;
@@ -246,10 +304,9 @@
                 return;
             }
 
-            // ترتيب الأزرار (إضافة Wistia)
-            const serverOrder = ['wistia', 'dood', 'tape', 'uqload'];
+            // ترتيب الأزرار الجديد
+            const serverOrder = ['wistia1', 'wistia2', 'wistia3', 'dood', 'tape', 'uqload'];
             
-            // فلترة السيرفرات المتوفرة فقط
             const availableServers = serverOrder
                 .filter(name => servers[name])
                 .map(name => ({ name, url: servers[name] }));
@@ -261,20 +318,27 @@
                  return;
             }
 
-            // (د) شغل أول سيرفر موجود كافتراضي
+            // شغل أول سيرفر موجود كافتراضي
             let firstServerUrl = availableServers[0].url;
             player.src = firstServerUrl;
             
-            // (هـ) سوي الأزرار
+            // سوي الأزرار
             availableServers.forEach((server, index) => {
                 const button = document.createElement('button');
                 button.className = 'server-btn';
-                button.textContent = server.name.toUpperCase(); 
                 
-                // تمييز زر Wistia بلون أزرق
-                if (server.name === 'wistia') {
-                    button.classList.add('wistia-btn'); 
+                let buttonText = server.name.toUpperCase();
+                let buttonClass = 'upload-btn'; 
+                
+                if (server.name.startsWith('wistia')) {
+                    buttonText = server.name.toUpperCase().replace('WISTIA', 'WISTIA ');
+                    buttonClass = 'wistia-btn'; 
+                } else if (server.name === 'dood' || server.name === 'tape' || server.name === 'uqload') {
+                    buttonClass = 'upload-btn'; 
                 }
+                
+                button.textContent = buttonText;
+                button.classList.add(buttonClass);
 
                 if (index === 0) {
                     button.classList.add('active');
@@ -292,7 +356,7 @@
             loader.style.display = 'none';
         }
 
-        // ================ (3) الحارس الأمني ================
+        // ================ (4) الحارس الأمني ================
         function loadMovie() {
             const urlParams = new URLSearchParams(window.location.search);
             const movieId = urlParams.get('id');
@@ -315,7 +379,6 @@
                 .catch(error => {
                     titleElement.textContent = 'حدث خطأ في الاتصال.';
                     loader.textContent = 'حدث خطأ في الاتصال بقاعدة البيانات.';
-                    console.error("Error fetching movie: ", error);
                 });
         }
         
@@ -328,6 +391,7 @@
                     });
                 });
             } else {
+                // Firebase يحفظ الجلسة تلقائياً، ولكن إذا انتهت الجلسة نرجع لصفحة الدخول
                 window.location.href = './login.html';
             }
         });
