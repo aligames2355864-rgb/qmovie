@@ -6,11 +6,11 @@
     <title>q movie - الرئيسية</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 🔥🔥 الـ CSS الجمالي الذي تم اعتماده منك (النسخة المستقرة) 🔥🔥 */
+        /* 🔥🔥 التصميم النظيف والمستقر (الأخير) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d;
             --card-color: #1a1a1a;
-            --text-color: #f5f5f5;
+            --text-color: #e0e0e0;
             --accent-color: #e50914;
             --sidebar-width: 280px;
         }
@@ -23,13 +23,12 @@
             padding: 0;
             transition: margin-right 0.3s ease;
         }
-
         main {
             padding: 20px;
             transition: margin-right 0.3s ease;
         }
 
-        /* 🎬 الهيدر (شريط الأدوات العلوي) */
+        /* 🔥🔥 الهيدر (هيكلة مستقرة لحل مشكلة التداخل) 🔥🔥 */
         header {
             display: flex;
             flex-direction: column; 
@@ -43,7 +42,6 @@
             margin-bottom: 20px;
         }
 
-        /* 🔥🔥 الهيكلة الجديدة التي تمنع التداخل (الأزرار واللوجو) 🔥🔥 */
         .header-top-row {
             display: flex;
             justify-content: space-between;
@@ -51,17 +49,15 @@
             padding: 10px 20px;
             width: 100%;
         }
-
         .logo {
             font-size: 2em;
             color: var(--accent-color);
             font-weight: 700;
             text-shadow: 0 0 10px rgba(229, 9, 20, 0.6);
-            flex-grow: 1; /* يسمح للوجو بدفع الأزرار لليمين */
-            text-align: right;
             margin-right: 15px; 
+            flex-grow: 1; 
+            text-align: right;
         }
-
         #menu-toggle-btn {
             background: none;
             border: none;
@@ -70,22 +66,16 @@
             cursor: pointer;
             transition: 0.3s;
         }
-
-        /* 🔥 شريط البحث (يبقى في سطر منفصل وأسفل الأزرار) */
+        /* 🔥 شريط البحث */
         #search-input {
-            width: 95%;
-            margin: 10px auto 15px; /* مسافة أعلى وأسفل */
+            width: 95%; 
+            margin: 10px auto 15px; 
             padding: 12px;
             border-radius: 30px;
             border: none;
             background-color: rgba(255, 255, 255, 0.1);
             color: var(--text-color);
             font-size: 16px;
-            transition: 0.3s;
-        }
-        #search-input:focus {
-            background-color: rgba(255, 255, 255, 0.2);
-            outline: none;
         }
 
         /* 🎬 أزرار الهيدر */
@@ -94,7 +84,6 @@
             gap: 10px;
             align-items: center;
         }
-
         .header-action-btn {
             padding: 8px 14px;
             border-radius: 25px;
@@ -107,29 +96,16 @@
             transition: all 0.3s ease;
             white-space: nowrap;
         }
-
-        .header-action-btn:hover {
-            background: #b00710;
-            transform: scale(1.05);
-        }
-
-        #admin-panel-btn {
-            background-color: #007bff;
-        }
-
-        #contact-btn {
-            background-color: #4CAF50;
-        }
-
-        /* 🎬 القائمة الجانبية (Sidebar) */
+        
+        /* 🎬 القائمة الجانبية */
         #sidebar {
             height: 100%;
-            width: 0;
+            width: 0; 
             position: fixed;
+            z-index: 100; 
             top: 0;
             right: 0;
             background: #111;
-            z-index: 100;
             transition: width 0.3s ease;
             padding-top: 20px;
             overflow-y: auto;
@@ -139,53 +115,11 @@
             width: var(--sidebar-width);
             padding-right: 10px;
         }
-
-        .sidebar-category-link {
-            padding: 12px 20px;
-            color: var(--text-color);
-            display: block;
-            text-decoration: none;
-            font-size: 1.1em;
-            transition: background 0.3s;
-            text-align: right;
-        }
-
-        .sidebar-category-link:hover,
-        .sidebar-category-link.active {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
         body.sidebar-open main {
             margin-right: var(--sidebar-width);
         }
 
-        /* 🎬 أزرار التصنيفات */
-        #category-filter {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 25px 0;
-            justify-content: center;
-        }
-
-        .category-btn {
-            padding: 8px 16px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: all 0.3s;
-        }
-
-        .category-btn.active,
-        .category-btn:hover {
-            background-color: var(--accent-color);
-            color: #fff;
-            transform: scale(1.05);
-        }
-
-        /* 🎬 شبكة الأفلام */
+        /* 🎬 شبكة الأفلام (Grid) - الحجم الأصلي القوي */
         #movie-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -193,29 +127,25 @@
             padding-top: 10px;
             animation: fadeIn 0.6s ease-in;
         }
-
         .movie-item {
             background-color: var(--card-color);
             border-radius: 10px;
-            overflow: hidden;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
+            overflow: hidden;
             text-decoration: none;
         }
-
         .movie-item:hover {
             transform: scale(1.06);
             box-shadow: 0 10px 25px rgba(229, 9, 20, 0.3);
         }
-
         .movie-item img {
             width: 100%;
             height: 270px; /* 🔥 الارتفاع الذي يعجبك */
             object-fit: cover;
             border-bottom: 2px solid rgba(255, 255, 255, 0.05);
         }
-
         .movie-item h3 {
             padding: 10px;
             font-size: 1em;
@@ -223,7 +153,6 @@
             color: #eee;
             margin: 0;
         }
-
         /* 🔥 تصميم التاجات والتقييم */
         .movie-rating {
             top: 10px; right: 10px;
@@ -237,47 +166,13 @@
             color: white; padding: 4px 10px; border-radius: 0 6px 6px 0;
             font-size: 0.8em; position: absolute; font-weight: bold;
         }
-        .movie-type-tag { 
+        .movie-type-tag { /* 🔥 تاك المسلسل */
             top: 10px; left: 10px;
             background-color: #4CAF50; 
             color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.8em;
             position: absolute; font-weight: bold;
         }
         
-        /* 🔥 تصميم الإعلان الترويجي */
-        #main-banner {
-            height: 300px; 
-            border-radius: 12px; 
-            margin-bottom: 30px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-            display: none; 
-            align-items: flex-end;
-            text-decoration: none; 
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-        #banner-info {
-            background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
-            padding: 20px;
-            width: 100%;
-            color: white;
-            border-radius: 0 0 12px 12px;
-            text-align: right;
-        }
-        #banner-title {
-            font-size: 2em;
-            margin: 0;
-            color: white;
-        }
-
-
-        /* 🎬 تأثير دخول ناعم */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         /* 🎬 الموبايل */
         @media (max-width: 600px) {
              header { padding: 10px; }
@@ -363,7 +258,7 @@
         let allContent = []; 
         let currentFilter = 'all';
 
-        // 🔥 دالة فتح وإغلاق القائمة الجانبية
+        // 🔥 دالة فتح وإغلاق القائمة الجانبية (لم يتم تعديلها)
         function toggleSidebar() {
             if (sidebar.classList.contains('open')) {
                 sidebar.classList.remove('open');
@@ -405,7 +300,7 @@
             }
         }
         
-        // 🔥 دالة عرض الإعلان الترويجي
+        // (باقي دوال التصميم Banner و Categories هي نفسها)
         function setupBanner(content) {
             const featuredMovie = content.find(item => item.type === 'movie' && item.isFeatured && item.bannerUrl);
 
@@ -545,4 +440,24 @@
         auth.onAuthStateChanged(user => {
             if (user) {
                 if (user.uid === ADMIN_UID) {
-                    adminControls.innerHTML = `<a href="./admin_control.html" id="admin-panel-btn" class
+                    adminControls.innerHTML = `<a href="./admin_control.html" id="admin-panel-btn" class="header-action-btn">لوحة التحكم</a>`;
+                }
+
+                fetchContent(); 
+
+                logoutBtn.addEventListener('click', () => {
+                    auth.signOut().then(() => {
+                        window.location.href = './login.html';
+                    });
+                });
+
+            } else {
+                window.location.href = './login.html';
+            }
+        });
+        
+        // ================ (4) برمجة البحث ================
+        searchInput.addEventListener('input', filterAndDisplayContent);
+    </script>
+</body>
+</html>
