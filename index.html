@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>q movie - الرئيسية</title>
     <style>
-        /* 🔥🔥 التصميم النظيف والمريح للعين 🔥🔥 */
+        /* 🔥🔥 التصميم النظيف والمريح للعين (النسخة المستقرة) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
             --text-color: #e0e0e0; 
-            --accent-color: #e50914; /* الأحمر المميز */
+            --accent-color: #e50914; 
             --sidebar-width: 280px;
         }
         body {
@@ -27,70 +27,62 @@
             transition: margin-right 0.3s;
         }
         
-        /* 🔥 تصميم الهيدر (شريط الأدوات العلوي) */
+        /* 🔥 تصميم الهيدر (رجعناه نظيف) */
         header {
             display: flex;
-            flex-wrap: wrap; 
             justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
             background-color: var(--card-color);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            position: sticky;
-            top: 0;
-            z-index: 5;
+            margin-bottom: 20px;
         }
         .logo {
-            font-size: 2.2em;
+            font-size: 2em;
             color: var(--accent-color);
-            font-weight: 900;
-            text-shadow: 0 0 5px rgba(229, 9, 20, 0.5);
-            margin-left: 15px;
+            font-weight: bold;
+            margin-left: 10px;
         }
+        /* 🔥🔥 زر القائمة الجانبية (Hamburger) */
         #menu-toggle-btn {
             background: none;
             border: none;
             color: var(--text-color);
-            font-size: 28px;
+            font-size: 24px;
             cursor: pointer;
             padding: 5px;
         }
         #search-input {
-            flex-basis: 100%; /* ياخذ سطر جديد في الموبايل */
-            padding: 12px;
+            flex-grow: 1; 
+            padding: 10px;
             font-size: 16px;
             border-radius: 30px; 
             background-color: #2a2a2a; 
             color: var(--text-color);
-            margin-top: 10px;
-            order: 4;
+            margin: 0 20px;
+            max-width: 400px;
         }
-        /* 🔥🔥 أزرار العمليات (Admin, Contact, Logout) - مضمونة الظهور */
+        /* أزرار العمليات */
         .header-actions {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
         .header-action-btn {
-            padding: 10px 15px;
+            padding: 8px 12px;
             background-color: var(--accent-color);
             color: white;
             border-radius: 8px; 
             font-size: 14px;
             text-decoration: none;
-            transition: transform 0.2s;
             white-space: nowrap;
-        }
-        .header-action-btn:hover {
-            transform: translateY(-1px);
+            transition: transform 0.2s;
         }
         #admin-panel-btn {
-            background-color: #007bff; /* 🔥 زر الأدمن */
-        }
-        #contact-btn {
-            background-color: #4CAF50; /* زر التواصل */
+            background-color: #007bff; 
         }
 
-        /* 🔥🔥 القائمة الجانبية (Sidebar) */
+        /* 🔥🔥 تصميم القائمة الجانبية (Sidebar) */
         #sidebar {
             height: 100%;
             width: 0; 
@@ -107,48 +99,54 @@
             width: var(--sidebar-width);
             padding-right: 10px;
         }
-        /* 🔥 حركة المحتوى عند ظهور القائمة */
-        body.sidebar-open main {
-            margin-right: var(--sidebar-width);
+        .sidebar-category-link {
+            padding: 12px 15px;
+            font-size: 1.1em;
+            color: var(--text-color);
+            display: block;
+            transition: 0.2s;
+            text-align: right;
         }
         .sidebar-category-link:hover, .sidebar-category-link.active {
             background-color: #2a2a2a;
         }
+        body.sidebar-open main {
+            margin-right: var(--sidebar-width);
+        }
 
-        /* 🔥 شبكة الأفلام (Grid) - شكل ثابت وبارز */
+        /* 🔥🔥 شبكة الأفلام (Grid) - رجعناها قوية وجميلة */
         #movie-grid {
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* 🔥 حجم ثابت وبارز */
-            gap: 20px;
-            padding-top: 10px;
             display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            gap: 20px; 
+            padding-top: 10px;
         }
         .movie-item {
             background-color: var(--card-color);
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            transition: transform 0.3s;
+            border-radius: 8px; /* حواف ناعمة */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
             position: relative; 
             overflow: hidden;
             text-decoration: none;
         }
         .movie-item:hover {
-            transform: scale(1.05); /* أنميشن بارز */
+            transform: scale(1.05); /* أنميشن جميل عند المرور فوقه */
         }
         .movie-item img {
             width: 100%;
-            height: 270px; /* 🔥 الارتفاع المفضل لبوستر بارز */
+            height: 270px; /* 🔥 الارتفاع الأنيق */
             object-fit: cover;
-            border-radius: 10px 10px 0 0;
+            border-radius: 8px 8px 0 0;
         }
         .movie-item h3 {
             font-size: 1em;
             padding: 10px 8px 5px;
             margin: 0;
-            white-space: nowrap; 
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal; 
+            line-height: 1.3;
         }
-        /* 🔥 تصميم التاجات والتقييم */
+        /* 🔥 تصميم التقييم المصغر */
         .movie-rating {
             top: 10px; right: 10px;
             background-color: var(--accent-color);
@@ -164,23 +162,22 @@
         
         /* تعديلات الموبايل */
         @media (max-width: 600px) {
+            header {
+                flex-wrap: wrap; 
+                padding: 10px;
+            }
             .logo {
-                flex-basis: 100%;
-                text-align: center;
-                margin-bottom: 10px;
-                order: 1;
-            }
-            #menu-toggle-btn {
-                order: 0;
-            }
-            .header-actions {
-                flex-basis: 100%;
-                justify-content: space-between;
-                margin-top: 10px;
-                order: 3;
+                flex-grow: 1;
             }
             #search-input {
-                order: 4;
+                order: 3;
+                margin-top: 10px;
+                flex-basis: 100%;
+            }
+            .header-actions {
+                order: 2;
+                flex-grow: 1;
+                justify-content: flex-end;
             }
             #movie-grid {
                 grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
@@ -196,7 +193,7 @@
 
     <div id="sidebar">
         <button id="close-sidebar-btn" class="sidebar-category-link" onclick="toggleSidebar()" style="color: #ccc;">إغلاق X</button>
-        <h3>تصفح حسب التصنيف</h3>
+        <h3 style="padding: 0 15px; text-align: right; color: #fff;">تصفح حسب التصنيف</h3>
         <div id="sidebar-categories"></div>
     </div>
 
@@ -205,13 +202,13 @@
             <button id="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
             <div class="logo">q movie</div>
             
+            <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
+
             <div class="header-actions">
-                <a href="contact.html" id="contact-btn" class="header-action-btn">تواصل معنا</a> 
+                <a href="contact.html" id="contact-btn" class="header-action-btn" style="background-color: #4CAF50;">تواصل معنا</a> 
                 <div class="admin-controls"></div> 
                 <button id="logout-btn" class="header-action-btn">تسجيل خروج</button>
             </div>
-            
-            <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
         </header>
 
         <a id="main-banner" href="#">
@@ -278,7 +275,6 @@
         // ================ (2) جلب وعرض الأفلام (مع الترتيب والتصفية) ================
         async function fetchMovies() {
             try {
-                // الترتيب الأوتوماتيكي: جلب الأفلام و ترتيبها حسب تاريخ الإضافة تنازلياً (الأحدث أولاً)
                 const snapshot = await db.collection('movies').orderBy('timestamp', 'desc').get();
                 
                 if (snapshot.empty) { loader.textContent = 'ماكو أفلام حالياً.'; return; }
@@ -360,7 +356,7 @@
             links.forEach(link => link.classList.remove('active'));
             
             if (event.target) {
-                event.target.classList.add('active'); 
+                event.target.classList.add('active');
             } else {
                 buttons.forEach(btn => { if (btn.dataset.category === category) btn.classList.add('active'); });
                 links.forEach(link => { if (link.textContent.trim() === category || (category === 'all' && link.textContent.trim() === 'الكل')) link.classList.add('active'); });
