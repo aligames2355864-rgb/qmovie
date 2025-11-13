@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة / تعديل مسلسل</title>
+    <style>
+        /* 🔥🔥 الـ CSS الأساسي (نفسه لتوحيد المظهر) 🔥🔥 */
+        :root {
+            --bg-color: #0d0d0d; 
+            --card-color: #1a1a1a; 
+            --text-color: #f5f5f5; 
+            --accent-color: #e50914; 
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+        .container {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 700px;
+            margin: 20px auto;
+        }
+        h1 {
+            color: var(--accent-color); /* لون أحمر للمسلسلات */
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        input[type="text"], input[type="number"], textarea { 
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #333;
+            color: var(--text-color);
+            font-size: 16px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #f6121d;
+        }
+        .back-btn {
+            display: block;
+            margin-bottom: 20px;
+            text-align: right;
+            color: #007bff;
+            text-decoration: none;
+        }
+        #message {
+            color: #ff9a9a;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="series_list.html" class="back-btn">&larr; العودة لقائمة المسلسلات</a>
+    
+    <div class="container">
+        <h1 id="form-title">إضافة مسلسل جديد</h1>
+
+        <form id="series-form">
+            <h2>المعلومات الأساسية للمسلسل</h2>
+            <input type="text" id="title" placeholder="عنوان المسلسل (مطلوب)" required>
+            <input type="text" id="posterUrl" placeholder="رابط صورة البوستر (مطلوب)" required>
+            
+            <input type="text" id="releaseYear" placeholder="سنة بداية الإنتاج (مثال: 2023)">
+            <input type="text" id="cast" placeholder="أسماء الشخصيات الرئيسية">
+            <textarea id="description" placeholder="وصف المسلسل والقصة (مطلوب)" rows="4" required></textarea>
+
+            <input type="number" id="rating" placeholder="التقييم (من 1 إلى 10)" min="1" max="10" step="0.1" required>
+
+            <div id="message"></div>
+            
+            <button type="submit" id="submit-btn">إضافة المسلسل</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // ================ (1) إعدادات Firebase ================
+        // (نفس الكونفج والـ UID مالتك)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
+            authDomain: "qmove1.firebaseapp.com",
+            projectId: "qmove1",
+            storageBucket: "qmove1.appspot.com",
+            messagingSenderId: "166464805371",
+            appId: "1:166464805371:web:d65b0cb8b141e4b894935e"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
+
+        const form = document.getElementById('series-form');
+        const message = document.getElementById('message');
+        const urlParams = new URLSearchParams(window.location.search);
+        const seriesId = urlParams.get('seriesId'); 
+
+        // ================ (2) دالة جلب بيانات التعديل (لتعبئة الحقول) ================
+        if (seriesId) {
+            document.getElementById('form-title').textContent = 'تعديل مسلسل موجود';
+            document.getElementById('submit-btn').textContent = 'حفظ التعديلات';
+            
+            db.collection('series').doc(seriesId).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('title').value = data.title || '';
+                        document.getElementById('posterUrl').value = data.posterUrl || '';
+                        document.getElementById('releaseYear').value = data.releaseYear || '';
+                        document.getElementById('cast').value = data.cast || '';
+                        document.getElementById('description').value = data.description || '';
+                        document.getElementById('rating').value = data.rating || 5; 
+                    } else {
+                        message.textContent = 'المسلسل غير موجود.';
+                    }
+                })
+                .catch(error => {
+                    message.textContent = 'خطأ في جلب بيانات المسلسل.';
+                });
+        }
+
+        // ================ (3) دالة الإرسال ================
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            message.textContent = 'جاري الإرسال...';
+            
+            const title = document.getElementById('title').value;
+            const posterUrl = document.getElementById('posterUrl').value;
+            const releaseYear = document.getElementById('releaseYear').value;
+            const cast = document.getElementById('cast').value;
+            const description = document.getElementById('description').value;
+            const rating = parseFloat(document.getElementById('rating').value);
+            
+            const seriesData = {
+                title: title,
+                posterUrl: posterUrl,
+                releaseYear: releaseYear, 
+                cast: cast,                 
+                description: description,   
+                rating: rating,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            let savePromise;
+
+            if (seriesId) {
+                // وضع التعديل (تحديث)
+                savePromise = db.collection('series').doc(seriesId).update(seriesData);
+            } else {
+                // وضع الإضافة (جديد)
+                savePromise = db.collection('series').add(seriesData);
+            }
+
+            savePromise.then(() => {
+                message.textContent = seriesId ? 'تم حفظ التعديلات بنجاح!' : 'تم إضافة المسلسل بنجاح!';
+                message.style.color = 'lightgreen';
+                
+                setTimeout(() => {
+                     // بعد الإضافة/التعديل يرجع لقائمة المسلسلات
+                     window.location.href = './series_list.html';
+                }, 1500);
+
+            }).catch(error => {
+                message.textContent = 'فشل الإرسال. تأكد من صلاحياتك.';
+                message.style.color = '#ff9a9a';
+            });
+        });
+
+        // ================ (4) الحارس الأمني (الأدمن) ================
+        auth.onAuthStateChanged(user => {
+            if (!user || user.uid !== ADMIN_UID) {
+                alert('غير مصرح لك بدخول هذه الصفحة.');
+                window.location.href = './login.html';
+            }
+        });
+
+    </script>
+</body>
+</html>
