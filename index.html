@@ -4,15 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>q movie - الرئيسية</title>
-    <!-- 🔥 الخط العربي الأنيق -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 🔥🔥 الـ CSS الجمالي الذي تم اعتماده منك 🔥🔥 */
+        /* 🔥🔥 الـ CSS الجمالي الذي تم اعتماده منك (النسخة المستقرة) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d;
             --card-color: #1a1a1a;
             --text-color: #f5f5f5;
-            --accent-color: #e50914; 
+            --accent-color: #e50914;
             --sidebar-width: 280px;
         }
 
@@ -41,21 +40,16 @@
             z-index: 50;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
         }
 
-        /* 🔥 الهيكلة التي تمنع التداخل (Header Top Row) */
+        /* 🔥🔥 الهيكلة الجديدة التي تمنع التداخل (الأزرار واللوجو) 🔥🔥 */
         .header-top-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px;
-            width: 100%; 
-        }
-        .header-top-left {
-            display: flex;
-            align-items: center;
-            gap: 15px; /* مسافة بين زر القائمة واللوجو */
-            flex-grow: 1;
+            width: 100%;
         }
 
         .logo {
@@ -63,7 +57,9 @@
             color: var(--accent-color);
             font-weight: 700;
             text-shadow: 0 0 10px rgba(229, 9, 20, 0.6);
-            /* تم إزالة flex-grow لكي لا يدفع اللوجو الأزرار للخارج */
+            flex-grow: 1; /* يسمح للوجو بدفع الأزرار لليمين */
+            text-align: right;
+            margin-right: 15px; 
         }
 
         #menu-toggle-btn {
@@ -75,10 +71,10 @@
             transition: 0.3s;
         }
 
-        /* 🔥 شريط البحث */
+        /* 🔥 شريط البحث (يبقى في سطر منفصل وأسفل الأزرار) */
         #search-input {
             width: 95%;
-            margin: 10px auto 15px;
+            margin: 10px auto 15px; /* مسافة أعلى وأسفل */
             padding: 12px;
             border-radius: 30px;
             border: none;
@@ -125,7 +121,7 @@
             background-color: #4CAF50;
         }
 
-        /* 🎬 القائمة الجانبية */
+        /* 🎬 القائمة الجانبية (Sidebar) */
         #sidebar {
             height: 100%;
             width: 0;
@@ -143,9 +139,22 @@
             width: var(--sidebar-width);
             padding-right: 10px;
         }
-        .sidebar-category-link:hover, .sidebar-category-link.active {
+
+        .sidebar-category-link {
+            padding: 12px 20px;
+            color: var(--text-color);
+            display: block;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: background 0.3s;
+            text-align: right;
+        }
+
+        .sidebar-category-link:hover,
+        .sidebar-category-link.active {
             background-color: rgba(255, 255, 255, 0.1);
         }
+
         body.sidebar-open main {
             margin-right: var(--sidebar-width);
         }
@@ -158,6 +167,7 @@
             margin: 25px 0;
             justify-content: center;
         }
+
         .category-btn {
             padding: 8px 16px;
             background-color: rgba(255, 255, 255, 0.1);
@@ -167,7 +177,9 @@
             font-size: 0.9em;
             transition: all 0.3s;
         }
-        .category-btn.active, .category-btn:hover {
+
+        .category-btn.active,
+        .category-btn:hover {
             background-color: var(--accent-color);
             color: #fff;
             transform: scale(1.05);
@@ -181,6 +193,7 @@
             padding-top: 10px;
             animation: fadeIn 0.6s ease-in;
         }
+
         .movie-item {
             background-color: var(--card-color);
             border-radius: 10px;
@@ -190,10 +203,12 @@
             position: relative;
             text-decoration: none;
         }
+
         .movie-item:hover {
             transform: scale(1.06);
             box-shadow: 0 10px 25px rgba(229, 9, 20, 0.3);
         }
+
         .movie-item img {
             width: 100%;
             height: 270px; /* 🔥 الارتفاع الذي يعجبك */
@@ -222,7 +237,7 @@
             color: white; padding: 4px 10px; border-radius: 0 6px 6px 0;
             font-size: 0.8em; position: absolute; font-weight: bold;
         }
-        .movie-type-tag { /* 🔥 تاك المسلسل */
+        .movie-type-tag { 
             top: 10px; left: 10px;
             background-color: #4CAF50; 
             color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.8em;
@@ -266,8 +281,8 @@
         /* 🎬 الموبايل */
         @media (max-width: 600px) {
              header { padding: 10px; }
-             .header-top-row { margin-bottom: 5px; }
-             .logo { font-size: 1.8em; margin-right: 0; }
+             .header-top-row { width: 100%; margin-bottom: 5px; }
+             .logo { font-size: 1.8em; margin-right: 0; text-align: left; }
              #search-input { margin: 10px 0; }
              .header-actions { width: 100%; justify-content: space-between; margin-top: 10px; }
              #movie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
@@ -277,7 +292,6 @@
 </head>
 <body>
 
-    <!-- 🔥🔥 القائمة الجانبية (Sidebar) 🔥🔥 -->
     <div id="sidebar">
         <button id="close-sidebar-btn" class="sidebar-category-link" onclick="toggleSidebar()" style="color: #ccc;">إغلاق X</button>
         <h3 style="padding: 0 15px; text-align: right; color: var(--accent-color);">تصفح حسب التصنيف</h3>
@@ -299,7 +313,6 @@
             <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
         </header>
 
-        <!-- 🔥 مكان عرض الإعلان الترويجي -->
         <a id="main-banner" href="#">
             <div id="banner-info">
                 <h2 id="banner-title"></h2>
@@ -307,16 +320,13 @@
             </div>
         </a>
 
-        <!-- أزرار التصنيفات الأفقية -->
         <div id="category-filter">
-            <!-- سيتم توليدها بواسطة JS -->
-        </div>
+            </div>
 
         <div id="movie-grid"></div>
         <div id="loader">...جاري تحميل الأفلام</div>
     </main>
 
-    <!-- ======== مكتبات Firebase ======== -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -364,6 +374,7 @@
             }
         }
         document.getElementById('close-sidebar-btn').onclick = toggleSidebar;
+
 
         // ================ (2) جلب وعرض الأفلام والمسلسلات ================
         async function fetchContent() {
@@ -514,7 +525,7 @@
             });
         }
         
-        // (باقي دوال الحارس الأمني و الـ Banner هي نفسها)
+        // 🔥 دالة عرض الإعلان الترويجي
         function setupBanner(content) {
             const featuredMovie = content.find(item => item.type === 'movie' && item.isFeatured && item.bannerUrl);
 
@@ -534,24 +545,4 @@
         auth.onAuthStateChanged(user => {
             if (user) {
                 if (user.uid === ADMIN_UID) {
-                    adminControls.innerHTML = `<a href="./admin_control.html" id="admin-panel-btn" class="header-action-btn">لوحة التحكم</a>`;
-                }
-
-                fetchContent(); 
-
-                logoutBtn.addEventListener('click', () => {
-                    auth.signOut().then(() => {
-                        window.location.href = './login.html';
-                    });
-                });
-
-            } else {
-                window.location.href = './login.html';
-            }
-        });
-        
-        // ================ (4) برمجة البحث ================
-        searchInput.addEventListener('input', filterAndDisplayContent);
-    </script>
-</body>
-</html>
+                    adminControls.innerHTML = `<a href="./admin_control.html" id="admin-panel-btn" class
