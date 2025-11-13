@@ -3,266 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Q Movie - لوحة التحكم</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    
+    <title>My Cema - الرئيسية</title>
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
+        /* ستايل أساسي مرتب */
+        :root {
+            --bg-color: #141414;
+            --card-color: #1c1c1c;
+            --text-color: #f5f5f5;
+            --accent-color: #e50914; /* لون أحمر نتفلكس */
         }
-        #logged-in-area { display: none; }
-        #message { display: none; transition: all 0.3s ease; }
-        
-        /* ستايل كارت الفلم */
-        .movie-card {
-            background-color: #1f1f1f;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 2em;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        #search-input {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: var(--card-color);
+            color: var(--text-color);
+        }
+        /* Grid لعرض الأفلام */
+        #movie-grid {
+            display: grid;
+            /* هذا الكود يسوي الـ grid متجاوب (responsive) */
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        .movie-item {
+            background-color: var(--card-color);
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: transform 0.2s;
         }
-        .movie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(229, 9, 20, 0.4); /* توهج أحمر */
+        .movie-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
-        .movie-card img {
+        .movie-item img {
             width: 100%;
-            height: 300px; /* ارتفاع موحد للبوستر */
+            height: 270px; /* ارتفاع موحد للبوستر */
             object-fit: cover;
+            display: block;
+        }
+        .movie-item h3 {
+            font-size: 1em;
+            text-align: center;
+            padding: 10px;
+            margin: 0;
+            /* يضمن أن العنوان ما ياخذ أكثر من سطرين */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        /* في حالة التحميل */
+        #loader {
+            text-align: center;
+            font-size: 1.5em;
+            padding: 50px;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-4">
+<body>
 
-    <div id="login-signup-forms" class="max-w-md mx-auto">
-        <h1 class="text-5xl font-bold text-center text-red-600 mb-8">Q Movie</h1>
-        <form id="login-form" class="bg-gray-800 p-8 rounded-lg shadow-xl mb-6">
-            <h2 class="text-2xl font-bold mb-6 text-center">تسجيل الدخول</h2>
-            <div class="mb-4">
-                <label for="login-email" class="block mb-2">البريد الإلكتروني:</label>
-                <input type="email" id="login-email" required class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
-            </div>
-            <div class="mb-6">
-                <label for="login-password" class="block mb-2">كلمة المرور:</label>
-                <input type="password" id="login-password" required class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
-            </div>
-            <button id="login-button" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition duration-300">
-                دخول
-            </button>
-        </form>
-        <form id="signup-form" class="bg-gray-800 p-8 rounded-lg shadow-xl">
-            <h2 class="text-2xl font-bold mb-6 text-center">... أو إنشاء حساب جديد</h2>
-            <div class="mb-4">
-                <label for="signup-email" class="block mb-2">البريد الإلكتروني:</label>
-                <input type="email" id="signup-email" required class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
-            </div>
-            <div class="mb-6">
-                <label for="signup-password" class="block mb-2">كلمة المرور (6 أحرف أو أكثر):</label>
-                <input type="password" id="signup-password" required class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
-            </div>
-            <button id="signup-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-300">
-                إنشاء حساب
-            </button>
-        </form>
-    </div>
+    <header>
+        <div class="logo">My Cema</div>
+        <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
+    </header>
 
-    <div id="logged-in-area" class="w-full max-w-5xl mx-auto">
-        <div class="flex justify-between items-center bg-gray-800 p-4 rounded-lg shadow-xl mb-8">
-            <div>
-                <span>أهلاً بيك:</span>
-                <strong id="user-email" class="text-red-400"></strong>
-            </div>
-            <button id="logout-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition duration-300">
-                تسجيل الخروج
-            </button>
-        </div>
+    <main>
+        <div id="movie-grid"></div>
+        <div id="loader">...جاري تحميل الأفلام</div>
+    </main>
 
-        <div class="bg-gray-800 p-6 rounded-lg shadow-xl mb-8">
-            <h2 class="text-3xl font-bold mb-6 text-center text-red-500">لوحة تحكم الأدمن</h2>
-            <form id="add-movie-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="text" id="movie-title" placeholder="اسم الفلم" required class="p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500">
-                <input type="text" id="movie-poster" placeholder="رابط صورة البوستر" required class="p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
-                <input type="text" id="movie-wistia-id" placeholder="ID الفلم من Wistia" required class="p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
-                <button id="add-movie-button" class="md:col-span-3 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition duration-300">
-                    إضافة الفلم للقاعدة
-                </button>
-            </form>
-        </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script>
+        // ================ (1) إعدادات Firebase ================
+        // 🔥🔥🔥 تنبيه: لازم تخلي معلومات المشروع مالتك هنا 🔥🔥🔥
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
         
-        <div>
-            <h2 class="text-3xl font-bold mb-6 text-center">الأفلام المتوفرة</h2>
-            <div id="movie-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                </div>
-        </div>
-    </div>
-
-    <div id="message" class="max-w-md mx-auto mt-4 p-4 rounded-lg text-center"></div>
-
-    <script type="module">
-        // --- الخطوة 1: جلب المكتبات ---
-        // جلبنا مكتبات تسجيل الدخول (نفسها)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword, 
-            onAuthStateChanged,
-            signOut
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // تهيئة Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
         
-        // ****** الجديد: جلب مكتبات المخزن (Firestore) ******
-        import { 
-            getFirestore, 
-            collection, 
-            addDoc, 
-            query, 
-            onSnapshot 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // ================ (2) جلب وعرض الأفلام ================
+        
+        const grid = document.getElementById('movie-grid');
+        const loader = document.getElementById('loader');
+        const searchInput = document.getElementById('search-input');
+        
+        let allMovies = []; // راح نخزن كل الأفلام هنا علمود البحث
 
-        // --- الخطوة 2: إدخال "المفاتيح" ---
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' 
-            ? __firebase_config 
-            : `{
-                "apiKey": "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0",
-                "authDomain": "qmove1.firebaseapp.com",
-                "projectId": "qmove1",
-                "storageBucket": "qmove1.firebasestorage.app",
-                "messagingSenderId": "166464805371",
-                "appId": "1:166464805371:web:d65b0cb8b141e4b894935e"
-            }`);
+        // هاي الدالة تجيب الأفلام من Firebase
+        async function fetchMovies() {
+            try {
+                const snapshot = await db.collection('movies').get();
+                
+                if (snapshot.empty) {
+                    loader.textContent = 'ماكو أفلام حالياً.';
+                    return;
+                }
+                
+                // حولنا البيانات لشكل بسيط + ضفنا الـ ID
+                allMovies = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
 
-        // --- الخطوة 3: تشغيل Firebase ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app); // 'البواب' مال تسجيل الدخول
-        const db = getFirestore(app); // 'db' هو "المخزن" مالتنا
+                displayMovies(allMovies); // اعرض كل الأفلام أول مرة
+                loader.style.display = 'none'; // اخفي علامة التحميل
 
-        // --- الخطوة 4: نلزم العناصر ---
-        const loginFormArea = document.getElementById('login-signup-forms');
-        const loggedInArea = document.getElementById('logged-in-area');
-        const userEmail = document.getElementById('user-email');
-        const messageDiv = document.getElementById('message');
-        const logoutButton = document.getElementById('logout-button');
-        const addMovieButton = document.getElementById('add-movie-button');
-        const movieGrid = document.getElementById('movie-grid');
-
-        // (الأزرار مال تسجيل الدخول والإنشاء باقية نفسها)
-        const loginButton = document.getElementById('login-button');
-        const signupButton = document.getElementById('signup-button');
-
-        // --- الخطوة 5: وظيفة إظهار الرسائل (نفسها) ---
-        function showMessage(message, isError = false) {
-            messageDiv.textContent = message;
-            messageDiv.style.display = 'block';
-            messageDiv.className = isError 
-                ? 'max-w-md mx-auto mt-4 p-4 rounded-lg text-center bg-red-800 text-white' 
-                : 'max-w-md mx-auto mt-4 p-4 rounded-lg text-center bg-green-800 text-white';
+            } catch (error) {
+                console.error("خطأ بجلب الأفلام: ", error);
+                loader.textContent = 'حدث خطأ. حاول تحدث الصفحة.';
+            }
         }
 
-        // --- الخطوة 6: ربط الأزرار (تسجيل الدخول/الخروج) ---
-        // (الكود مال signupButton و loginButton و logoutButton بقى نفسه بالضبط)
-        signupButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => { showMessage('تم إنشاء الحساب بنجاح! وجاري تسجيل دخولك...', false); })
-                .catch((error) => { showMessage(`خطأ: ${error.message}`, true); });
-        });
-        loginButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => { showMessage('تم تسجيل الدخول بنجاح!', false); })
-                .catch((error) => { showMessage('خطأ: البريد الإلكتروني أو كلمة المرور غير صحيحة.', true); });
-        });
-        logoutButton.addEventListener('click', () => {
-            signOut(auth).catch((error) => { showMessage(`خطأ: ${error.message}`, true); });
-        });
+        // هاي الدالة ترسم الأفلام على الشاشة
+        function displayMovies(moviesList) {
+            grid.innerHTML = ''; // نظّف الـ grid قبل ما تضيف الجديد
+            
+            moviesList.forEach(movie => {
+                // نسوي "link" يودي لصفحة الفيلم
+                const movieLink = document.createElement('a');
+                // الرابط المهم: يرسل الـ ID لصفحة movie.html
+                movieLink.href = `./movie.html?id=${movie.id}`;
+                movieLink.className = 'movie-item';
 
-        // --- ****** الخطوة 7: الكود الجديد (لوحة تحكم الأدمن) ****** ---
-
-        // وظيفة "جلب وعرض" الأفلام
-        function loadMovies() {
-            // 'q' هو "السؤال" اللي نسأله للمخزن
-            // دنسأله: "انطيني كل شي موجود بمجموعة 'movies'"
-            const q = query(collection(db, "movies"));
-
-            // 'onSnapshot' هو "جاسوس"
-            // يظل يراقب المخزن، وأي فلم "جديد" ينضاف، يشتغل من وحده
-            onSnapshot(q, (querySnapshot) => {
-                movieGrid.innerHTML = ''; // نفرغ الشبكة قبل ما نعبيها
-                querySnapshot.forEach((doc) => {
-                    const movie = doc.data(); // 'doc.data()' هي بيانات الفلم (الاسم، البوستر، إلخ)
-                    
-                    // نصنع كارت الفلم (لاحظ إننا بعد ما نحتاج صفحة html لكل فلم!)
-                    // رح نسوي "صفحة مشاهدة" ديناميكية بالخطوة الجاية
-                    const movieCardHTML = `
-                        <div class="movie-card">
-                            <a href="watch.html?id=${doc.id}"> <img src="${movie.poster}" alt="${movie.title}">
-                                <div class="p-4">
-                                    <h3 class="font-bold text-lg text-center">${movie.title}</h3>
-                                </div>
-                            </a>
-                        </div>
-                    `;
-                    movieGrid.innerHTML += movieCardHTML;
-                });
+                // هاي كرت الفيلم (الصورة والعنوان)
+                movieLink.innerHTML = `
+                    <img src="${movie.posterUrl}" alt="${movie.title}" onerror="this.src='https.via.placeholder.com/180x270?text=No+Image';">
+                    <h3>${movie.title}</h3>
+                `;
+                
+                grid.appendChild(movieLink);
             });
         }
+
+        // ================ (3) برمجة البحث ================
         
-        // زر "إضافة الفلم"
-        addMovieButton.addEventListener('click', async (e) => {
-            e.preventDefault(); // نمنع الفورم
+        searchInput.addEventListener('input', (e) => {
+            // "e.target.value" هو النص اللي كتبه المستخدم
+            const searchTerm = e.target.value.toLowerCase();
             
-            // ناخذ البيانات من الحقول
-            const title = document.getElementById('movie-title').value;
-            const poster = document.getElementById('movie-poster').value;
-            const wistiaId = document.getElementById('movie-wistia-id').value;
+            // فلترة الأفلام المخزونة (allMovies)
+            const filteredMovies = allMovies.filter(movie => {
+                // شوف إذا "عنوان الفيلم" (بالـ lowercase) يتضمن "نص البحث"
+                return movie.title.toLowerCase().includes(searchTerm);
+            });
             
-            // نتأكد إن الحقول مو فارغة
-            if (!title || !poster || !wistiaId) {
-                showMessage('خطأ: لازم تملي كل الحقول.', true);
-                return;
-            }
-
-            try {
-                // 'addDoc' يعني "ضيف مستند جديد"
-                // 'collection(db, "movies")' يعني ضيفه للمجموعة اللي اسمها "movies"
-                const docRef = await addDoc(collection(db, "movies"), {
-                    title: title,
-                    poster: poster,
-                    wistiaId: wistiaId
-                });
-                showMessage('تم إضافة الفلم بنجاح!', false);
-                document.getElementById('add-movie-form').reset(); // نفرغ الفورم
-            } catch (error) {
-                showMessage(`خطأ جبير: ${error.message}`, true);
-            }
+            // اعرض بس الأفلام اللي تطابقت
+            displayMovies(filteredMovies);
         });
 
-
-        // --- الخطوة 8: "المراقب" (المعدل) ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // المستخدم مسجل دخول
-                loginFormArea.style.display = 'none';
-                loggedInArea.style.display = 'block';
-                userEmail.textContent = user.email;
-                messageDiv.style.display = 'none';
-                
-                // ****** الجديد: أول ما نسجل دخول، نحمل الأفلام ******
-                loadMovies();
-                
-            } else {
-                // المستخدم ما مسجل دخول
-                loginFormArea.style.display = 'block';
-                loggedInArea.style.display = 'none';
-                movieGrid.innerHTML = ''; // نفرغ الأفلام إذا سجل خروج
-            }
-        });
+        // ================ (4) تشغيل الكود ================
+        
+        // أول ما تفتح الصفحة، جيب الأفلام
+        document.addEventListener('DOMContentLoaded', fetchMovies);
 
     </script>
+
 </body>
 </html>
