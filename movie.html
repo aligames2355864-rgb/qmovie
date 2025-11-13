@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مشاهدة الفيلم</title>
     <style>
+        /* الأساسيات */
         :root {
             --bg-color: #141414;
             --card-color: #1c1c1c;
@@ -16,31 +17,32 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* 🔥 أنميشن الدخول */
         }
+        body.loaded {
+            opacity: 1;
+        }
+        
+        /* الهيدر والأزرار */
         header {
             display: flex;
             align-items: center;
             justify-content: space-between; 
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+            padding: 20px;
+            background-color: var(--card-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
         }
         .back-btn {
-            font-size: 2em;
+            font-size: 1.5em;
             color: var(--text-color);
             text-decoration: none;
-            padding: 0 10px;
+            padding: 5px 10px;
             border-radius: 5px;
-            background-color: var(--card-color);
+            transition: color 0.3s;
         }
-        .back-btn:hover { background-color: #333; }
-        #movie-title { font-size: 1.8em; margin: 0; }
-        
+        .back-btn:hover { color: var(--accent-color); }
         #logout-btn {
             padding: 8px 12px;
             background-color: var(--accent-color);
@@ -49,20 +51,33 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
-            flex-shrink: 0; 
         }
-        #logout-btn:hover { background-color: #f6121d; }
 
-        /* حاوية المشغّل (للحفاظ على نسبة 16:9) */
+        /* حاوية المشغّل والتفاصيل */
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* 🔥🔥 المشغل (جعله بالوسط ومحاط بإطار) */
+        #player-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
         #player-container {
-            position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* (9 / 16) * 100% */
+            max-width: 800px; /* حجم معقول في الوسط */
+            position: relative;
+            padding-bottom: 450px; /* ارتفاع ثابت للمشغل */
             height: 0;
             background-color: #000;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+            transform: scale(0.95);
+            animation: fadeInScale 0.8s ease-out forwards; /* 🔥 أنميشن الظهور */
         }
         #movie-player {
             position: absolute;
@@ -77,29 +92,58 @@
         #server-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
-            padding: 10px;
-            background-color: var(--card-color);
-            border-radius: 8px;
+            margin-bottom: 40px;
         }
         .server-btn {
-            padding: 10px 20px;
+            padding: 10px 25px;
             font-size: 1em;
             font-weight: bold;
             color: var(--text-color);
             background-color: #333;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.3s, transform 0.2s;
         }
-        .server-btn:hover { background-color: #555; }
+        .server-btn:hover { background-color: #555; transform: translateY(-2px); }
         .server-btn.active {
             background-color: var(--accent-color);
             box-shadow: 0 0 10px var(--accent-color);
         }
 
+        /* تفاصيل الفيلم */
+        .movie-details {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: right;
+        }
+        .meta-info {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 15px;
+        }
+        .meta-info div strong {
+            display: block;
+            font-size: 1.1em;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+        .description-box {
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+        
+        /* الأنميشن */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
         #loader {
             text-align: center;
             font-size: 1.5em;
@@ -107,33 +151,49 @@
         }
     </style>
 </head>
-<body>
+<body onload="document.body.classList.add('loaded')">
 
     <header>
-        <div class="header-left">
-            <a href="index.html" class="back-btn">&larr; رجوع</a>
-            <h1 id="movie-title">...</h1>
-        </div>
+        <a href="index.html" class="back-btn">&larr; الرئيسية</a>
+        <h1 id="movie-title">جاري التحميل...</h1>
         <button id="logout-btn">تسجيل خروج</button>
     </header>
 
     <main>
-        <div id="player-container">
-            <iframe 
-                id="movie-player" 
-                src="" 
-                frameborder="0" 
-                marginwidth="0" 
-                marginheight="0" 
-                scrolling="no" 
-                allowfullscreen>
-            </iframe>
-        </div>
-
-        <div id="server-buttons">
+        <div id="player-wrapper">
+            <div id="player-container">
+                <iframe 
+                    id="movie-player" 
+                    src="" 
+                    frameborder="0" 
+                    marginwidth="0" 
+                    marginheight="0" 
+                    scrolling="no" 
+                    allowfullscreen>
+                </iframe>
             </div>
-
+        </div>
+        
+        <div id="server-buttons"></div>
+        
+        <div id="details-container" class="movie-details" style="display: none;">
+            <div class="meta-info">
+                <div>
+                    <strong>سنة الإنتاج:</strong>
+                    <span id="detail-year">N/A</span>
+                </div>
+                <div>
+                    <strong>بطولة:</strong>
+                    <span id="detail-cast">N/A</span>
+                </div>
+            </div>
+            
+            <h2>القصة والوصف</h2>
+            <p id="detail-description" class="description-box"></p>
+        </div>
+        
         <div id="loader">...جاري تحميل الفيلم</div>
+
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -159,53 +219,27 @@
         // UID الخاص بك (المفتاح السري)
         const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
-        // ================ (2) جلب بيانات الفيلم المحدد ================
-        
+        // عناصر التحكم
         const titleElement = document.getElementById('movie-title');
         const player = document.getElementById('movie-player');
         const buttonsContainer = document.getElementById('server-buttons');
+        const detailsContainer = document.getElementById('details-container');
         const loader = document.getElementById('loader');
         const logoutBtn = document.getElementById('logout-btn');
 
-        async function loadMovie() {
-            // (أ) اقرأ الـ ID من الرابط (URL)
-            const urlParams = new URLSearchParams(window.location.search);
-            const movieId = urlParams.get('id');
-
-            if (!movieId) {
-                titleElement.textContent = 'خطأ: الفيلم غير محدد';
-                loader.style.display = 'none';
-                return;
-            }
-
-            try {
-                // (ب) روح لـ Firebase وجيب *بس* هذا الفيلم
-                const docRef = db.collection('movies').doc(movieId);
-                const doc = await docRef.get();
-
-                if (!doc.exists) {
-                    titleElement.textContent = 'خطأ: الفيلم هذا ما موجود';
-                    loader.style.display = 'none';
-                    return;
-                }
-
-                // (ج) اعرض البيانات
-                const movieData = doc.data();
-                displayMovie(movieData);
-
-            } catch (error) {
-                console.error("خطأ بجلب الفيلم: ", error);
-                titleElement.textContent = 'حدث خطأ. حاول تحدث الصفحة.';
-                loader.style.display = 'none';
-            }
-        }
 
         function displayMovie(movie) {
-            titleElement.textContent = movie.title;
+            titleElement.textContent = movie.title || 'فيلم بدون عنوان';
             
-            // "servers" هي الـ Map اللي بيها الروابط
+            // 🔥🔥 عرض التفاصيل الجديدة
+            document.getElementById('detail-year').textContent = movie.releaseYear || 'غير محدد';
+            document.getElementById('detail-cast').textContent = movie.cast || 'غير متوفر';
+            document.getElementById('detail-description').textContent = movie.description || 'لم تتم إضافة وصف.';
+            detailsContainer.style.display = 'block'; // أظهر الواجهة
+            
+            
+            // باقي كود المشغّل
             const servers = movie.servers;
-
             if (!servers || Object.keys(servers).length === 0) {
                 loader.textContent = 'ماكو سيرفرات مشاهدة لهذا الفيلم حالياً.';
                 player.style.display = 'none'; 
@@ -213,12 +247,9 @@
             }
 
             const serverEntries = Object.entries(servers);
-
-            // (د) شغل أول سيرفر موجود كافتراضي
             let firstServerUrl = serverEntries[0][1];
             player.src = firstServerUrl;
 
-            // (هـ) سوي الأزرار
             serverEntries.forEach(([serverName, serverUrl], index) => {
                 const button = document.createElement('button');
                 button.className = 'server-btn';
@@ -241,21 +272,41 @@
         }
 
         // ================ (3) الحارس الأمني ================
+        function loadMovie() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const movieId = urlParams.get('id');
+
+            if (!movieId) {
+                titleElement.textContent = 'خطأ: الفيلم غير محدد';
+                loader.textContent = 'الفيلم غير محدد.';
+                return;
+            }
+
+            db.collection('movies').doc(movieId).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        displayMovie(doc.data());
+                    } else {
+                        titleElement.textContent = 'خطأ: الفيلم هذا ما موجود';
+                        loader.textContent = 'الفيلم المطلوب غير موجود في قاعدة البيانات.';
+                    }
+                })
+                .catch(error => {
+                    titleElement.textContent = 'حدث خطأ في الاتصال.';
+                    loader.textContent = 'حدث خطأ في الاتصال بقاعدة البيانات.';
+                    console.error("Error fetching movie: ", error);
+                });
+        }
         
         auth.onAuthStateChanged(user => {
             if (user) {
-                // المستخدم مسجل دخول -> شغل تحميل الفيلم
                 loadMovie();
-
-                // برمجة زر تسجيل الخروج
                 logoutBtn.addEventListener('click', () => {
                     auth.signOut().then(() => {
                         window.location.href = './login.html';
                     });
                 });
-
             } else {
-                // المستخدم *ما* مسجل دخول -> اطرده
                 window.location.href = './login.html';
             }
         });
