@@ -1,42 +1,201 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>🎬 Q Movie</title>
-<style>
-body {
-  background-color: #141414;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  text-align: center;
-}
-h1 { color: #E50914; }
-.video-card {
-  background-color: #222;
-  display: inline-block;
-  margin: 15px;
-  padding: 10px;
-  border-radius: 8px;
-}
-video {
-  width: 300px;
-  border-radius: 4px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q Movie - تسجيل الدخول</title>
+    <!-- جلب مكتبة Tailwind CSS للتصميم السريع -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- جلب الخطوط -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* استخدام الخط اللي جبناه */
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        /* إخفاء العناصر مبدئياً */
+        #logged-in-area { display: none; }
+        /* ستايل بسيط لرسائل الخطأ */
+        #message {
+            display: none;
+            transition: all 0.3s ease;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
 
-<h1>🎬 Q Movie</h1>
-<h2>قائمة الأفلام</h2>
+    <div class="w-full max-w-md">
 
-<div class="video-card">
-  <h3>6days 1</h3>
-  <video controls>
-    <source src=https://drive.google.com/file/d/1WNheb3CRBO_yTfSozDsQcLmH26QeVsZm/view?usp=sharing.mp4 type="video/mp4">
-  </video>
-</div>
-<!-- أضف المزيد من الأفلام بنفس الشكل -->
+        <!-- ===== 1. منطقة تسجيل الدخول (تظهر بالبداية) ===== -->
+        <div id="login-signup-forms">
+            <h1 class="text-5xl font-bold text-center text-red-600 mb-8">Q Movie</h1>
+            
+            <!-- فورم تسجيل الدخول -->
+            <form id="login-form" class="bg-gray-800 p-8 rounded-lg shadow-xl mb-6">
+                <h2 class="text-2xl font-bold mb-6 text-center">تسجيل الدخول</h2>
+                <div class="mb-4">
+                    <label for="login-email" class="block mb-2">البريد الإلكتروني:</label>
+                    <input type="email" id="login-email" required class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
+                </div>
+                <div class="mb-6">
+                    <label for="login-password" class="block mb-2">كلمة المرور:</label>
+                    <input type="password" id="login-password" required class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
+                </div>
+                <button id="login-button" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded transition duration-300">
+                    دخول
+                </button>
+            </form>
+            
+            <!-- فورم إنشاء حساب -->
+            <form id="signup-form" class="bg-gray-800 p-8 rounded-lg shadow-xl">
+                <h2 class="text-2xl font-bold mb-6 text-center">... أو إنشاء حساب جديد</h2>
+                <div class="mb-4">
+                    <label for="signup-email" class="block mb-2">البريد الإلكتروني:</label>
+                    <input type="email" id="signup-email" required class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
+                </div>
+                <div class="mb-6">
+                    <label for="signup-password" class="block mb-2">كلمة المرور (6 أحرف أو أكثر):</label>
+                    <input type="password" id="signup-password" required class="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none focus:border-red-500 text-left" dir="ltr">
+                </div>
+                <button id="signup-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition duration-300">
+                    إنشاء حساب
+                </button>
+            </form>
+        </div>
 
+        <!-- ===== 2. المنطقة المخفية (تظهر بعد تسجيل الدخول) ===== -->
+        <div id="logged-in-area" class="bg-gray-800 p-8 rounded-lg shadow-xl text-center">
+            <h2 class="text-2xl font-bold mb-4">أهلاً بيك!</h2>
+            <p class="mb-6">تم تسجيل دخولك بنجاح بحساب: <strong id="user-email" class="text-red-400"></strong></p>
+            <p class="mb-6">... هنا رح تطلع قائمة الأفلام ...</p>
+            <button id="logout-button" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded transition duration-300">
+                تسجيل الخروج
+            </button>
+        </div>
+
+        <!-- ===== 3. منطقة الرسائل (للأخطاء والنجاح) ===== -->
+        <div id="message" class="mt-4 p-4 rounded-lg text-center"></div>
+
+    </div>
+
+    <!-- ====================================================== -->
+    <!-- ****** السحر كله يبدي من هنا (JavaScript) ****** -->
+    <!-- ====================================================== -->
+    <script type="module">
+        // --- الخطوة 1: جلب المكتبات ---
+        // هاي المكتبات "الجاهزة" من كوكل حتى نتصل بالسيرفر
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            onAuthStateChanged,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- الخطوة 2: إدخال "المفاتيح" ---
+        // هاي المفاتيح اللي إنت جبتها (أو اللي المنصة تنطينا إياها)
+        // ملاحظة: الكود مالتك جان بيه `getAnalytics`، شلته لأن ما نحتاجه لصفحة الدخول
+        
+        // الكود رح ياخذ المتغيرات من المنصة مباشرة
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' 
+            ? __firebase_config 
+            : `{
+                "apiKey": "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0",
+                "authDomain": "qmove1.firebaseapp.com",
+                "projectId": "qmove1",
+                "storageBucket": "qmove1.firebasestorage.app",
+                "messagingSenderId": "166464805371",
+                "appId": "1:166464805371:web:d65b0cb8b141e4b894935e"
+            }`);
+
+        // --- الخطوة 3: تشغيل Firebase ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); // 'auth' هو "البواب" مالتنا
+
+        // --- الخطوة 4: نلزم العناصر اللي بالصفحة ---
+        const loginForm = document.getElementById('login-signup-forms');
+        const loggedInArea = document.getElementById('logged-in-area');
+        const userEmail = document.getElementById('user-email');
+        const messageDiv = document.getElementById('message');
+
+        const loginButton = document.getElementById('login-button');
+        const signupButton = document.getElementById('signup-button');
+        const logoutButton = document.getElementById('logout-button');
+
+        // --- الخطوة 5: وظيفة إظهار الرسائل ---
+        function showMessage(message, isError = false) {
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.className = isError 
+                ? 'mt-4 p-4 rounded-lg text-center bg-red-800 text-white' 
+                : 'mt-4 p-4 rounded-lg text-center bg-green-800 text-white';
+        }
+
+        // --- الخطوة 6: ربط الأزرار ---
+
+        // زر إنشاء الحساب
+        signupButton.addEventListener('click', (e) => {
+            e.preventDefault(); // نمنع الفورم من إرسال البيانات (إحنا نرسلها بالجافاسكريبت)
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // نجح!
+                    showMessage('تم إنشاء الحساب بنجاح! وجاري تسجيل دخولك...', false);
+                    // (الـ onAuthStateChanged رح يشتغل تلقائياً ورا هاي الخطوة)
+                })
+                .catch((error) => {
+                    // فشل
+                    showMessage(`خطأ: ${error.message}`, true);
+                });
+        });
+
+        // زر تسجيل الدخول
+        loginButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // نجح!
+                    showMessage('تم تسجيل الدخول بنجاح!', false);
+                })
+                .catch((error) => {
+                    // فشل (غالباً الباسورد غلط)
+                    showMessage('خطأ: البريد الإلكتروني أو كلمة المرور غير صحيحة.', true);
+                });
+        });
+
+        // زر تسجيل الخروج
+        logoutButton.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                showMessage('تم تسجيل الخروج.', false);
+            }).catch((error) => {
+                showMessage(`خطأ: ${error.message}`, true);
+            });
+        });
+
+        // --- الخطوة 7: "المراقب" (أهم خطوة) ---
+        // هاي الوظيفة تشتغل "تلقائياً" من وحدها
+        // تشتغل من نفتح الصفحة، ومن نسجل دخول، ومن نسجل خروج
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // المستخدم مسجل دخول
+                loginForm.style.display = 'none'; // اخفي فورمات الدخول
+                loggedInArea.style.display = 'block'; // اظهر منطقة "أهلاً بيك"
+                userEmail.textContent = user.email; // اكتب ايميله
+                messageDiv.style.display = 'none'; // اخفي أي رسائل قديمة
+            } else {
+                // المستخدم ما مسجل دخول
+                loginForm.style.display = 'block'; // اظهر فورمات الدخول
+                loggedInArea.style.display = 'none'; // اخفي منطقة "أهلاً بيك"
+            }
+        });
+
+    </script>
 </body>
 </html>
-
