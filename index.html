@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cema - الرئيسية</title>
+    <title>q movie - الرئيسية</title>
     <style>
-        /* ستايل أساسي مرتب */
         :root {
             --bg-color: #141414;
             --card-color: #1c1c1c;
             --text-color: #f5f5f5;
-            --accent-color: #e50914; /* لون أحمر نتفلكس */
+            --accent-color: #e50914; 
         }
         body {
             font-family: Arial, sans-serif;
@@ -39,10 +38,21 @@
             background-color: var(--card-color);
             color: var(--text-color);
         }
-        /* Grid لعرض الأفلام */
+        /* زر تسجيل الخروج (جزء من السكيورتي) */
+        #logout-btn {
+            padding: 8px 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #logout-btn:hover {
+            background-color: #f6121d;
+        }
         #movie-grid {
             display: grid;
-            /* هذا الكود يسوي الـ grid متجاوب (responsive) */
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 20px;
         }
@@ -60,7 +70,7 @@
         }
         .movie-item img {
             width: 100%;
-            height: 270px; /* ارتفاع موحد للبوستر */
+            height: 270px;
             object-fit: cover;
             display: block;
         }
@@ -69,14 +79,12 @@
             text-align: center;
             padding: 10px;
             margin: 0;
-            /* يضمن أن العنوان ما ياخذ أكثر من سطرين */
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
-        /* في حالة التحميل */
         #loader {
             text-align: center;
             font-size: 1.5em;
@@ -87,8 +95,9 @@
 <body>
 
     <header>
-        <div class="logo">My Cema</div>
+        <div class="logo">q movie</div>
         <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
+        <button id="logout-btn">تسجيل خروج</button>
     </header>
 
     <main>
@@ -98,10 +107,11 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥🔥 تنبيه: لازم تخلي معلومات المشروع مالتك هنا 🔥🔥🔥
+        // 🔥🔥🔥 لازم تخلي الكونفج مالتك هنا 🔥🔥🔥
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_AUTH_DOMAIN",
@@ -111,85 +121,71 @@
             appId: "YOUR_APP_ID"
         };
         
-        // تهيئة Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        
-        // ================ (2) جلب وعرض الأفلام ================
+        // تهيئة خدمة المصادقة (السكيورتي)
+        const auth = firebase.auth();
+
+        // ================ (2) جلب وعرض الأفلام (نفس الكود) ================
         
         const grid = document.getElementById('movie-grid');
         const loader = document.getElementById('loader');
         const searchInput = document.getElementById('search-input');
+        const logoutBtn = document.getElementById('logout-btn');
         
-        let allMovies = []; // راح نخزن كل الأفلام هنا علمود البحث
+        let allMovies = []; 
 
-        // هاي الدالة تجيب الأفلام من Firebase
         async function fetchMovies() {
             try {
                 const snapshot = await db.collection('movies').get();
-                
-                if (snapshot.empty) {
-                    loader.textContent = 'ماكو أفلام حالياً.';
-                    return;
-                }
-                
-                // حولنا البيانات لشكل بسيط + ضفنا الـ ID
-                allMovies = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-
-                displayMovies(allMovies); // اعرض كل الأفلام أول مرة
-                loader.style.display = 'none'; // اخفي علامة التحميل
-
-            } catch (error) {
-                console.error("خطأ بجلب الأفلام: ", error);
-                loader.textContent = 'حدث خطأ. حاول تحدث الصفحة.';
-            }
+                if (snapshot.empty) { loader.textContent = 'ماكو أفلام حالياً.'; return; }
+                allMovies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayMovies(allMovies); 
+                loader.style.display = 'none';
+            } catch (error) { console.error("خطأ: ", error); }
         }
 
-        // هاي الدالة ترسم الأفلام على الشاشة
         function displayMovies(moviesList) {
-            grid.innerHTML = ''; // نظّف الـ grid قبل ما تضيف الجديد
-            
+            grid.innerHTML = ''; 
             moviesList.forEach(movie => {
-                // نسوي "link" يودي لصفحة الفيلم
                 const movieLink = document.createElement('a');
-                // الرابط المهم: يرسل الـ ID لصفحة movie.html
                 movieLink.href = `./movie.html?id=${movie.id}`;
                 movieLink.className = 'movie-item';
-
-                // هاي كرت الفيلم (الصورة والعنوان)
                 movieLink.innerHTML = `
                     <img src="${movie.posterUrl}" alt="${movie.title}" onerror="this.src='https.via.placeholder.com/180x270?text=No+Image';">
                     <h3>${movie.title}</h3>
                 `;
-                
                 grid.appendChild(movieLink);
             });
         }
 
-        // ================ (3) برمجة البحث ================
-        
+        // ================ (3) برمجة البحث (نفس الكود) ================
         searchInput.addEventListener('input', (e) => {
-            // "e.target.value" هو النص اللي كتبه المستخدم
             const searchTerm = e.target.value.toLowerCase();
-            
-            // فلترة الأفلام المخزونة (allMovies)
             const filteredMovies = allMovies.filter(movie => {
-                // شوف إذا "عنوان الفيلم" (بالـ lowercase) يتضمن "نص البحث"
                 return movie.title.toLowerCase().includes(searchTerm);
             });
-            
-            // اعرض بس الأفلام اللي تطابقت
             displayMovies(filteredMovies);
         });
 
-        // ================ (4) تشغيل الكود ================
+        // ================ (4) الحارس الأمني (السكيورتي) 🔥🔥🔥 ================
         
-        // أول ما تفتح الصفحة، جيب الأفلام
-        document.addEventListener('DOMContentLoaded', fetchMovies);
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // (أ) المستخدم مسجل دخول: اسمحله يشوف الأفلام
+                fetchMovies();
 
+                // (ب) برمجة زر تسجيل الخروج
+                logoutBtn.addEventListener('click', () => {
+                    auth.signOut(); 
+                });
+
+            } else {
+                // (ب) المستخدم *ما* مسجل دخول: اطرده لصفحة الدخول
+                window.location.href = './login.html';
+            }
+        });
+        
     </script>
 
 </body>
