@@ -105,9 +105,9 @@
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥 تأكد من وضع الكونفج النهائي لمشروع qmove1 هنا
+        // 🔥🔥 تم لصق الـ API Key الخاص بك هنا!
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", 
+            apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
             projectId: "qmove1",
             storageBucket: "qmove1.appspot.com",
@@ -119,13 +119,13 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         
-        // 🔥🔥 UID الخاص بك (المفتاح السري)
+        // UID الخاص بك (المفتاح السري)
         const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
         const form = document.getElementById('movie-form');
         const message = document.getElementById('message');
         const urlParams = new URLSearchParams(window.location.search);
-        const movieId = urlParams.get('id'); // إذا اكو ID، معناها 'تعديل'
+        const movieId = urlParams.get('id'); 
 
         // ================ (2) دالة جلب بيانات التعديل ================
         function loadMovieData(id) {
@@ -139,7 +139,6 @@
                         document.getElementById('title').value = data.title || '';
                         document.getElementById('posterUrl').value = data.posterUrl || '';
                         
-                        // ملء روابط السيرفرات
                         const servers = data.servers || {};
                         document.getElementById('dood').value = servers.dood || '';
                         document.getElementById('tape').value = servers.tape || '';
@@ -166,7 +165,6 @@
             const title = document.getElementById('title').value;
             const posterUrl = document.getElementById('posterUrl').value;
             
-            // تجميع روابط السيرفرات
             const servers = {};
             const doodUrl = document.getElementById('dood').value.trim();
             const tapeUrl = document.getElementById('tape').value.trim();
@@ -186,21 +184,17 @@
             let savePromise;
 
             if (movieId) {
-                // وضع التعديل
                 savePromise = db.collection('movies').doc(movieId).update(movieData);
             } else {
-                // وضع الإضافة
                 savePromise = db.collection('movies').add(movieData);
             }
 
             savePromise.then(() => {
                 message.textContent = movieId ? 'تم حفظ التعديلات بنجاح!' : 'تم إضافة الفيلم بنجاح!';
                 message.style.color = 'lightgreen';
-                // إذا إضافة جديدة، نظّف الفورم
                 if (!movieId) {
                     form.reset();
                 }
-                // ارجع للصفحة بعد ثواني
                 setTimeout(() => {
                      window.location.href = './admin_control.html';
                 }, 1500);
@@ -215,7 +209,6 @@
         // ================ (4) الحارس الأمني (الأدمن) ================
         auth.onAuthStateChanged(user => {
             if (!user || user.uid !== ADMIN_UID) {
-                // ممنوع الدخول! ارجع للرئيسية أو صفحة الدخول
                 alert('غير مصرح لك بدخول هذه الصفحة.');
                 window.location.href = './login.html';
             }
