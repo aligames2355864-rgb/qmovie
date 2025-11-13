@@ -138,10 +138,12 @@
                 const item = document.createElement('div');
                 item.className = 'series-list-item';
                 
+                // 🔥🔥 تعديل: إضافة زر تعديل المسلسل الرئيسي
                 item.innerHTML = `
                     <span class="title">${series.title} (${series.releaseYear || 'N/A'})</span>
                     <div class="series-actions">
-                        <a href="season_episode_manager.html?seriesId=${series.id}">إدارة المواسم</a>
+                        <a href="series_add_form.html?seriesId=${series.id}">تعديل المسلسل</a> 
+                        <a href="season_episode_manager.html?seriesId=${series.id}">إدارة المواسم والحلقات</a>
                         <button class="delete-btn" onclick="deleteSeries('${series.id}', '${series.title.replace(/'/g, "\\'")}')">حذف المسلسل</button>
                     </div>
                 `;
