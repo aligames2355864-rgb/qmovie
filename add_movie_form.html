@@ -28,7 +28,7 @@
             color: #007bff;
             margin-bottom: 20px;
         }
-        input[type="text"], textarea { /* 🔥 إضافة textarea للوصف */
+        input[type="text"], textarea { 
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
@@ -90,9 +90,10 @@
             <input type="text" id="releaseYear" placeholder="سنة الإنتاج (مثال: 2023)">
             <input type="text" id="cast" placeholder="أسماء الشخصيات (مثال: Tom Hardy, Cillian Murphy)">
             <textarea id="description" placeholder="وصف الفيلم والقصة (مطلوب)" rows="4" required></textarea>
+
             <div class="link-group">
                 <h3>روابط السيرفرات (Embed URLs)</h3>
-                <input type="text" id="dood" placeholder="سيرفر Doodstream">
+                <input type="text" id="wistia" placeholder="سيرفر Wistia (انسخ رابط iframe/fallback)"> <input type="text" id="dood" placeholder="سيرفر Doodstream">
                 <input type="text" id="tape" placeholder="سيرفر Streamtape">
                 <input type="text" id="uqload" placeholder="سيرفر Uqload">
             </div>
@@ -141,12 +142,12 @@
                         const data = doc.data();
                         document.getElementById('title').value = data.title || '';
                         document.getElementById('posterUrl').value = data.posterUrl || '';
-                        // 🔥🔥 تعبئة الحقول الجديدة
                         document.getElementById('releaseYear').value = data.releaseYear || '';
                         document.getElementById('cast').value = data.cast || '';
                         document.getElementById('description').value = data.description || '';
                         
                         const servers = data.servers || {};
+                        document.getElementById('wistia').value = servers.wistia || ''; // 🔥 تعبئة حقل Wistia
                         document.getElementById('dood').value = servers.dood || '';
                         document.getElementById('tape').value = servers.tape || '';
                         document.getElementById('uqload').value = servers.uqload || '';
@@ -171,17 +172,18 @@
             
             const title = document.getElementById('title').value;
             const posterUrl = document.getElementById('posterUrl').value;
-            // 🔥🔥 سحب قيم الحقول الجديدة
             const releaseYear = document.getElementById('releaseYear').value;
             const cast = document.getElementById('cast').value;
             const description = document.getElementById('description').value;
 
             // تجميع روابط السيرفرات
             const servers = {};
+            const wistiaUrl = document.getElementById('wistia').value.trim(); // 🔥 سحب قيمة Wistia
             const doodUrl = document.getElementById('dood').value.trim();
             const tapeUrl = document.getElementById('tape').value.trim();
             const uqloadUrl = document.getElementById('uqload').value.trim();
             
+            if (wistiaUrl) servers.wistia = wistiaUrl; // 🔥 تخزين قيمة Wistia
             if (doodUrl) servers.dood = doodUrl;
             if (tapeUrl) servers.tape = tapeUrl;
             if (uqloadUrl) servers.uqload = uqloadUrl;
@@ -189,9 +191,9 @@
             const movieData = {
                 title: title,
                 posterUrl: posterUrl,
-                releaseYear: releaseYear, // 🔥 حقل جديد
-                cast: cast,                 // 🔥 حقل جديد
-                description: description,   // 🔥 حقل جديد
+                releaseYear: releaseYear, 
+                cast: cast,                 
+                description: description,   
                 servers: servers,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
