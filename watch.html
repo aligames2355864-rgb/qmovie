@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- العنوان رح يتغير بالجافاسكريبت -->
+    <title>Q Movie - جاري التحميل...</title>
+    <!-- جلب مكتبة Tailwind CSS للتصميم السريع -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- جلب الخطوط -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0c0c0c;
+        }
+        /* هذا الستايل علمود نخلي الفيديو 16:9 */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* نسبة 16:9 */
+            height: 0;
+            overflow: hidden;
+            width: 100%;
+            background-color: #000;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4">
+
+    <!-- الهيدر (بيه زر رجوع للصفحة الرئيسية) -->
+    <header class="flex justify-between items-center mb-8 max-w-5xl mx-auto">
+        <h1 class="text-4xl font-bold text-red-600">Q Movie</h1>
+        <a href="index.html" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+            &rarr; الرجوع للرئيسية
+        </a>
+    </header>
+
+    <main class="max-w-5xl mx-auto">
+        <!-- هذا الكونتينر اللي رح نخلي بيه الفلم -->
+        <div id="movie-player-container" class="bg-gray-800 rounded-lg shadow-xl overflow-hidden">
+            <!-- الفيديو رح يظهر هنا... -->
+            <div id="loading-message" class="p-10 text-center text-2xl">
+                جاري تحميل الفلم...
+            </div>
+        </div>
+    </main>
+    
+    <!-- رسالة الخطأ (إذا الـ ID غلط) -->
+    <div id="message" class="max-w-md mx-auto mt-4 p-4 rounded-lg text-center" style="display: none;"></div>
+
+
+    <!-- ====================================================== -->
+    <!-- ****** JavaScript (جلب الفلم من المخزن) ****** -->
+    <!-- ====================================================== -->
+    <script type="module">
+        // --- الخطوة 1: جلب المكتبات ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // ****** الجديد: نحتاج "getDoc" (جلب مستند واحد) و "doc" ******
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // (ما نحتاج مكتبة تسجيل الدخول "auth" هنا لأننا غيرنا القواعد)
+
+        // --- الخطوة 2: إدخال "المفاتيح" (نفسها بالضبط) ---
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' 
+            ? __firebase_config 
+            : `{
+                "apiKey": "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0",
+                "authDomain": "qmove1.firebaseapp.com",
+                "projectId": "qmove1",
+                "storageBucket": "qmove1.firebasestorage.app",
+                "messagingSenderId": "166464805371",
+                "appId": "1:166464805371:web:d65b0cb8b141e4b894935e"
+            }`);
+
+        // --- الخطوة 3: تشغيل Firebase ---
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); // 'db' هو "المخزن" مالتنا
+
+        // --- الخطوة 4: وظيفة إظهار الرسائل ---
+        const messageDiv = document.getElementById('message');
+        function showMessage(message, isError = true) {
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.className = 'max-w-md mx-auto mt-4 p-4 rounded-lg text-center bg-red-800 text-white';
+        }
+
+        // --- الخطوة 5: (أهم خطوة) جلب الـ ID من الرابط ---
+        async function loadMovie() {
+            try {
+                // 'URLSearchParams' هو "محلل الروابط"
+                // ياخذ الرابط اللي فوك ويطلع منه "المتغيرات"
+                const params = new URLSearchParams(window.location.search);
+                const movieId = params.get('id'); // نطلع المتغير اللي اسمه 'id'
+
+                if (!movieId) {
+                    throw new Error("لم يتم العثور على ID الفلم بالرابط.");
+                }
+
+                // --- الخطوة 6: نروح نسأل المخزن ---
+                // 'docRef' هو "العنوان" الكامل للفلم بداخل المخزن
+                const docRef = doc(db, "movies", movieId); // (المخزن، المجموعة، الـ ID)
+                const docSnap = await getDoc(docRef); // 'getDoc' يجيب البيانات (مرة وحدة)
+
+                if (docSnap.exists()) {
+                    // لكَينا الفلم!
+                    const movie = docSnap.data();
+                    
+                    // نبني كود المشغّل (Wistia)
+                    const playerHTML = `
+                        <div class="video-container">
+                            <iframe 
+                                src="https://fast.wistia.net/embed/iframe/${movie.wistiaId}" 
+                                title="Movie Video Player" 
+                                allow="autoplay; fullscreen; picture-in-picture" 
+                                allowfullscreen="true"
+                                webkitallowfullscreen="true"
+                                mozallowfullscreen="true">
+                            </iframe>
+                        </div>
+                        <div class="p-6 bg-gray-800">
+                            <h2 class="text-3xl font-bold text-white">${movie.title}</h2>
+                        </div>
+                    `;
+                    
+                    // نخلي الكود بالصفحة ونغير عنوان التاب
+                    document.getElementById('movie-player-container').innerHTML = playerHTML;
+                    document.title = `Q Movie - مشاهدة ${movie.title}`;
+                    
+                } else {
+                    // الـ ID موجود بالرابط، بس ماكو فلم بهذا الـ ID بالمخزن
+                    throw new Error("عذراً، هذا الفلم غير موجود بقاعدة البيانات.");
+                }
+
+            } catch (error) {
+                // فشل كل شي
+                document.getElementById('loading-message').style.display = 'none';
+                showMessage(`خطأ فادح: ${error.message}`);
+            }
+        }
+        
+        // --- الخطوة 7: نشغل الكود ---
+        loadMovie();
+        
+    </script>
+</body>
+</html>
