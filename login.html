@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>q movie - تسجيل الدخول</title>
+    <style>
+        :root {
+            --bg-color: #141414;
+            --card-color: #1c1c1c;
+            --text-color: #f5f5f5;
+            --accent-color: #e50914;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #login-form {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 8px;
+            width: 350px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background- علاويييي: #333;
+            color: var(--text-color);
+            font-size: 16px;
+            box-sizing: border-box; 
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #f6121d;
+        }
+        #error-message {
+            color: #ff9a9a;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+        .link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .link a {
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        .link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-form">
+        <h1>تسجيل الدخول</h1>
+        <form id="form">
+            <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+            <input type="password" id="password" placeholder="كلمة المرور" required>
+            <button type="submit">دخول</button>
+        </form>
+        <p id="error-message"></p>
+        <div class="link">
+            <p>ما عندك حساب؟ <a href="./register.html">سجل الآن</a></p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // ================ (1) إعدادات Firebase ================
+        // 🔥🔥🔥 لازم تخلي الكونفج مالتك هنا (نفسه مال index) 🔥🔥🔥
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // ================ (2) برمجة الفورم ================
+        const loginForm = document.getElementById('form');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('error-message');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); 
+            
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            errorMessage.style.display = 'none'; 
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // نجح تسجيل الدخول -> ودّيه للرئيسية
+                    window.location.href = './index.html';
+                })
+                .catch((error) => {
+                    // فشل تسجيل الدخول
+                    errorMessage.textContent = 'الإيميل أو كلمة المرور خطأ.';
+                    errorMessage.style.display = 'block';
+                });
+        });
+
+    </script>
+</body>
+</html>
