@@ -23,6 +23,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            gap: 15px; /* مسافة بين العناصر */
         }
         .logo {
             font-size: 2em;
@@ -30,7 +31,7 @@
             font-weight: bold;
         }
         #search-input {
-            width: 300px;
+            flex-grow: 1; /* ياخذ مساحة أكبر */
             padding: 10px;
             font-size: 16px;
             border-radius: 5px;
@@ -38,7 +39,8 @@
             background-color: var(--card-color);
             color: var(--text-color);
         }
-        #logout-btn {
+        /* زر تسجيل الخروج والأدمن */
+        .header-action-btn {
             padding: 8px 12px;
             background-color: var(--accent-color);
             color: white;
@@ -46,8 +48,18 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 14px;
+            text-decoration: none;
+            white-space: nowrap;
         }
-        #logout-btn:hover { background-color: #f6121d; }
+        .header-action-btn:hover {
+            background-color: #f6121d;
+        }
+        #admin-panel-btn {
+            background-color: #007bff; /* لون أزرق لزر الأدمن */
+        }
+        #admin-panel-btn:hover {
+            background-color: #0056b3;
+        }
         #movie-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -94,7 +106,10 @@
     <header>
         <div class="logo">q movie</div>
         <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
-        <button id="logout-btn">تسجيل خروج</button>
+        
+        <div class="admin-controls"></div> 
+        
+        <button id="logout-btn" class="header-action-btn">تسجيل خروج</button>
     </header>
 
     <main>
@@ -108,39 +123,48 @@
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥 هذا الكونفج مالتك... جاهز! 🔥🔥
+        // 🔥🔥 تأكد من وضع الكونفج النهائي لمشروع qmove1 هنا
         const firebaseConfig = {
-          apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0",
-          authDomain: "qmove1.firebaseapp.com",
-          projectId: "qmove1",
-          storageBucket: "qmove1.firebasestorage.app",
-          messagingSenderId: "166464805371",
-          appId: "1:166464805371:web:d65b0cb8b141e4b894935e",
-          measurementId: "G-3EXSHD3GN8"
+            apiKey: "YOUR_API_KEY", 
+            authDomain: "qmove1.firebaseapp.com",
+            projectId: "qmove1",
+            storageBucket: "qmove1.appspot.com",
+            messagingSenderId: "166464805371",
+            appId: "1:166464805371:web:d65b0cb8b141e4b894935e"
         };
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
+        
+        // 🔥🔥 UID الخاص بك (المفتاح السري)
+        const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
         // ================ (2) جلب وعرض الأفلام ================
         const grid = document.getElementById('movie-grid');
         const loader = document.getElementById('loader');
         const searchInput = document.getElementById('search-input');
         const logoutBtn = document.getElementById('logout-btn');
+        const adminControls = document.querySelector('.admin-controls');
+        
         let allMovies = []; 
 
         async function fetchMovies() {
             try {
                 const snapshot = await db.collection('movies').get();
+                // ... (باقي كود جلب الأفلام)
                 if (snapshot.empty) { loader.textContent = 'ماكو أفلام حالياً.'; return; }
                 allMovies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 displayMovies(allMovies); 
                 loader.style.display = 'none';
-            } catch (error) { console.error("خطأ: ", error); }
+            } catch (error) { 
+                console.error("خطأ بجلب الأفلام: ", error);
+                loader.textContent = 'حدث خطأ. حاول تحدث الصفحة.';
+            }
         }
 
         function displayMovies(moviesList) {
+            // ... (باقي كود عرض الأفلام)
             grid.innerHTML = ''; 
             moviesList.forEach(movie => {
                 const movieLink = document.createElement('a');
@@ -154,23 +178,27 @@
             });
         }
 
-        // ================ (3) برمجة البحث ================
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filteredMovies = allMovies.filter(movie => {
-                return movie.title.toLowerCase().includes(searchTerm);
-            });
-            displayMovies(filteredMovies);
-        });
-
-        // ================ (4) الحارس الأمني (السكيورتي) ================
+        // ================ (3) الحارس الأمني (السكيورتي) 🔥🔥🔥 ================
         auth.onAuthStateChanged(user => {
             if (user) {
+                // (أ) المستخدم مسجل دخول
+                
+                // 🔥🔥 التحقق من الأدمن: إذا كان المستخدم هو الـ UID مالتك
+                if (user.uid === ADMIN_UID) {
+                    adminControls.innerHTML = `<a href="./admin_control.html" id="admin-panel-btn" class="header-action-btn">لوحة التحكم</a>`;
+                }
+
                 fetchMovies();
+
+                // (ب) برمجة زر تسجيل الخروج
                 logoutBtn.addEventListener('click', () => {
-                    auth.signOut(); 
+                    auth.signOut().then(() => {
+                        window.location.href = './login.html';
+                    });
                 });
+
             } else {
+                // المستخدم *ما* مسجل دخول: اطرده لصفحة الدخول
                 window.location.href = './login.html';
             }
         });
