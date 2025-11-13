@@ -19,7 +19,7 @@
             margin: 0;
             padding: 0;
             opacity: 0;
-            transition: opacity 1s ease-in-out; /* 🔥 أنميشن الدخول */
+            transition: opacity 1s ease-in-out; 
         }
         body.loaded {
             opacity: 1;
@@ -60,7 +60,7 @@
             padding: 0 20px;
         }
 
-        /* 🔥🔥 المشغل (جعله بالوسط ومحاط بإطار) */
+        /* المشغل (جعله بالوسط ومحاط بإطار) */
         #player-wrapper {
             display: flex;
             justify-content: center;
@@ -68,16 +68,16 @@
         }
         #player-container {
             width: 100%;
-            max-width: 800px; /* حجم معقول في الوسط */
+            max-width: 800px; 
             position: relative;
-            padding-bottom: 450px; /* ارتفاع ثابت للمشغل */
+            padding-bottom: 450px; 
             height: 0;
             background-color: #000;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
             transform: scale(0.95);
-            animation: fadeInScale 0.8s ease-out forwards; /* 🔥 أنميشن الظهور */
+            animation: fadeInScale 0.8s ease-out forwards; 
         }
         #movie-player {
             position: absolute;
@@ -109,8 +109,8 @@
         }
         .server-btn:hover { background-color: #555; transform: translateY(-2px); }
         .server-btn.active {
-            background-color: var(--accent-color);
-            box-shadow: 0 0 10px var(--accent-color);
+            background-color: #007bff; /* لون أزرق مميز لـ Wistia */
+            box-shadow: 0 0 10px #007bff;
         }
 
         /* تفاصيل الفيلم */
@@ -231,11 +231,11 @@
         function displayMovie(movie) {
             titleElement.textContent = movie.title || 'فيلم بدون عنوان';
             
-            // 🔥🔥 عرض التفاصيل الجديدة
+            // عرض التفاصيل الجديدة
             document.getElementById('detail-year').textContent = movie.releaseYear || 'غير محدد';
             document.getElementById('detail-cast').textContent = movie.cast || 'غير متوفر';
             document.getElementById('detail-description').textContent = movie.description || 'لم تتم إضافة وصف.';
-            detailsContainer.style.display = 'block'; // أظهر الواجهة
+            detailsContainer.style.display = 'block'; 
             
             
             // باقي كود المشغّل
@@ -246,21 +246,42 @@
                 return;
             }
 
-            const serverEntries = Object.entries(servers);
-            let firstServerUrl = serverEntries[0][1];
-            player.src = firstServerUrl;
+            // ترتيب الأزرار (إضافة Wistia)
+            const serverOrder = ['wistia', 'dood', 'tape', 'uqload'];
+            
+            // فلترة السيرفرات المتوفرة فقط
+            const availableServers = serverOrder
+                .filter(name => servers[name])
+                .map(name => ({ name, url: servers[name] }));
 
-            serverEntries.forEach(([serverName, serverUrl], index) => {
+
+            if (availableServers.length === 0) {
+                 loader.textContent = 'ماكو سيرفرات مشاهدة لهذا الفيلم حالياً.';
+                 player.style.display = 'none';
+                 return;
+            }
+
+            // (د) شغل أول سيرفر موجود كافتراضي
+            let firstServerUrl = availableServers[0].url;
+            player.src = firstServerUrl;
+            
+            // (هـ) سوي الأزرار
+            availableServers.forEach((server, index) => {
                 const button = document.createElement('button');
                 button.className = 'server-btn';
-                button.textContent = serverName.toUpperCase(); 
+                button.textContent = server.name.toUpperCase(); 
+                
+                // تمييز زر Wistia بلون أزرق
+                if (server.name === 'wistia') {
+                    button.classList.add('wistia-btn'); 
+                }
 
                 if (index === 0) {
                     button.classList.add('active');
                 }
 
                 button.onclick = () => {
-                    player.src = serverUrl;
+                    player.src = server.url;
                     document.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
                 };
