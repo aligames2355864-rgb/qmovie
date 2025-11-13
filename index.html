@@ -18,26 +18,38 @@
             margin: 0;
             padding: 20px;
         }
+        /* تصميم الهيدر (متجاوب) */
         header {
             display: flex;
+            flex-wrap: wrap; /* يسمح للعناصر بالنزول لأسطر جديدة في الموبايل */
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            gap: 15px; 
+            gap: 10px; 
         }
         .logo {
             font-size: 2em;
             color: var(--accent-color);
             font-weight: bold;
+            flex-basis: 100%; /* ياخذ سطر كامل في الموبايل */
+            text-align: center;
         }
         #search-input {
-            flex-grow: 1; 
+            flex-grow: 1; /* ياخذ مساحة أكبر */
             padding: 10px;
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid #333;
             background-color: var(--card-color);
             color: var(--text-color);
+            min-width: 150px;
+        }
+        /* أزرار العمليات (Admin & Logout & Contact) */
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            flex-grow: 1; /* ياخذ باقي المساحة */
+            justify-content: flex-end; /* يدفع الأزرار لليمين */
         }
         .header-action-btn {
             padding: 8px 12px;
@@ -56,13 +68,16 @@
         #admin-panel-btn {
             background-color: #007bff; 
         }
-        #admin-panel-btn:hover {
-            background-color: #0056b3;
+        #contact-btn {
+            background-color: #4CAF50; /* لون اخضر للتواصل */
         }
+
+        /* شبكة الأفلام (Grid) */
         #movie-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
+            /* 🔥🔥 التعديل: حجم أصغر للأفلام على الموبايل */
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+            gap: 15px; 
         }
         .movie-item {
             background-color: var(--card-color);
@@ -78,14 +93,14 @@
         }
         .movie-item img {
             width: 100%;
-            height: 270px;
+            height: 195px; /* ارتفاع متناسب مع شاشات الموبايل */
             object-fit: cover;
             display: block;
         }
         .movie-item h3 {
-            font-size: 1em;
+            font-size: 0.9em;
             text-align: center;
-            padding: 10px;
+            padding: 8px;
             margin: 0;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -98,6 +113,29 @@
             font-size: 1.5em;
             padding: 50px;
         }
+
+        /* تعديلات الموبايل (عندما تكون الشاشة صغيرة) */
+        @media (max-width: 600px) {
+            header {
+                padding: 10px;
+            }
+            .logo {
+                font-size: 1.8em;
+                margin-bottom: 10px;
+            }
+            #search-input {
+                order: 3; /* يجعله أسفل الأزرار في الموبايل */
+                flex-basis: 100%;
+            }
+            .header-actions {
+                flex-basis: 100%;
+                justify-content: space-between;
+                order: 2;
+            }
+            #movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* أصغر حجم للأفلام */
+            }
+        }
     </style>
 </head>
 <body>
@@ -105,8 +143,14 @@
     <header>
         <div class="logo">q movie</div>
         <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
-        <div class="admin-controls"></div> 
-        <button id="logout-btn" class="header-action-btn">تسجيل خروج</button>
+        
+        <div class="header-actions">
+            <a href="contact.html" id="contact-btn" class="header-action-btn">تواصل معنا</a> 
+            
+            <div class="admin-controls"></div> 
+            
+            <button id="logout-btn" class="header-action-btn">تسجيل خروج</button>
+        </div>
     </header>
 
     <main>
@@ -120,7 +164,7 @@
 
     <script>
         // ================ (1) إعدادات Firebase ================
-        // 🔥🔥 تم لصق الـ API Key الخاص بك هنا!
+        // 🔥🔥 الـ API Key الخاص بك!
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -163,7 +207,8 @@
             grid.innerHTML = ''; 
             moviesList.forEach(movie => {
                 const movieLink = document.createElement('a');
-                movieLink.href = `./movie.html?id=${movie.id}`;
+                // الربط على movie.html (الصفحة اللي عدلناها)
+                movieLink.href = `./movie.html?id=${movie.id}`; 
                 movieLink.className = 'movie-item';
                 movieLink.innerHTML = `
                     <img src="${movie.posterUrl}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/180x270?text=No+Image';">
@@ -178,6 +223,7 @@
             if (user) {
                 // التحقق من الأدمن: إذا كان المستخدم هو الـ UID مالتك
                 if (user.uid === ADMIN_UID) {
+                    // أظهر زر لوحة التحكم
                     adminControls.innerHTML = `<a href="./admin_control.html" id="admin-panel-btn" class="header-action-btn">لوحة التحكم</a>`;
                 }
 
@@ -192,6 +238,15 @@
             } else {
                 window.location.href = './login.html';
             }
+        });
+        
+        // ================ (4) برمجة البحث ================
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredMovies = allMovies.filter(movie => {
+                return movie.title.toLowerCase().includes(searchTerm);
+            });
+            displayMovies(filteredMovies);
         });
     </script>
 </body>
