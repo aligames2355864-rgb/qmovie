@@ -28,7 +28,7 @@
             color: #007bff;
             margin-bottom: 20px;
         }
-        input[type="text"] {
+        input[type="text"], textarea { /* 🔥 إضافة textarea للوصف */
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
@@ -38,6 +38,7 @@
             color: var(--text-color);
             font-size: 16px;
             box-sizing: border-box;
+            resize: vertical;
         }
         button {
             width: 100%;
@@ -85,7 +86,10 @@
             <h2>المعلومات الأساسية</h2>
             <input type="text" id="title" placeholder="عنوان الفيلم (مطلوب)" required>
             <input type="text" id="posterUrl" placeholder="رابط صورة البوستر (مطلوب)" required>
-
+            
+            <input type="text" id="releaseYear" placeholder="سنة الإنتاج (مثال: 2023)">
+            <input type="text" id="cast" placeholder="أسماء الشخصيات (مثال: Tom Hardy, Cillian Murphy)">
+            <textarea id="description" placeholder="وصف الفيلم والقصة (مطلوب)" rows="4" required></textarea>
             <div class="link-group">
                 <h3>روابط السيرفرات (Embed URLs)</h3>
                 <input type="text" id="dood" placeholder="سيرفر Doodstream">
@@ -119,7 +123,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         
-        // UID الخاص بك (المفتاح السري)
         const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
         const form = document.getElementById('movie-form');
@@ -127,7 +130,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const movieId = urlParams.get('id'); 
 
-        // ================ (2) دالة جلب بيانات التعديل ================
+        // ================ (2) دالة جلب بيانات التعديل (لتعبئة الحقول) ================
         function loadMovieData(id) {
             document.getElementById('form-title').textContent = 'تعديل فيلم موجود';
             document.getElementById('submit-btn').textContent = 'حفظ التعديلات';
@@ -138,6 +141,10 @@
                         const data = doc.data();
                         document.getElementById('title').value = data.title || '';
                         document.getElementById('posterUrl').value = data.posterUrl || '';
+                        // 🔥🔥 تعبئة الحقول الجديدة
+                        document.getElementById('releaseYear').value = data.releaseYear || '';
+                        document.getElementById('cast').value = data.cast || '';
+                        document.getElementById('description').value = data.description || '';
                         
                         const servers = data.servers || {};
                         document.getElementById('dood').value = servers.dood || '';
@@ -164,7 +171,12 @@
             
             const title = document.getElementById('title').value;
             const posterUrl = document.getElementById('posterUrl').value;
-            
+            // 🔥🔥 سحب قيم الحقول الجديدة
+            const releaseYear = document.getElementById('releaseYear').value;
+            const cast = document.getElementById('cast').value;
+            const description = document.getElementById('description').value;
+
+            // تجميع روابط السيرفرات
             const servers = {};
             const doodUrl = document.getElementById('dood').value.trim();
             const tapeUrl = document.getElementById('tape').value.trim();
@@ -177,6 +189,9 @@
             const movieData = {
                 title: title,
                 posterUrl: posterUrl,
+                releaseYear: releaseYear, // 🔥 حقل جديد
+                cast: cast,                 // 🔥 حقل جديد
+                description: description,   // 🔥 حقل جديد
                 servers: servers,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
