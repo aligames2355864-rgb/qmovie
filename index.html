@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>q movie - الرئيسية</title>
     <style>
-        /* 🔥🔥 التصميم النظيف والمريح للعين (النسخة المستقرة) 🔥🔥 */
+        /* 🔥🔥 التصميم النظيف والمستقر 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
@@ -27,7 +27,7 @@
             transition: margin-right 0.3s;
         }
         
-        /* 🔥 تصميم الهيدر (رجعناه نظيف) */
+        /* 🔥 تصميم الهيدر (هيكلة جديدة ومستقرة) */
         header {
             display: flex;
             justify-content: space-between;
@@ -35,38 +35,43 @@
             padding: 15px 20px;
             background-color: var(--card-color);
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-            margin-bottom: 20px;
+            flex-wrap: wrap; /* للسماح للبحث بالنزول في الموبايل */
+        }
+        .header-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 10px;
         }
         .logo {
             font-size: 2em;
             color: var(--accent-color);
             font-weight: bold;
-            margin-left: 10px;
+            flex-grow: 1;
+            text-align: right;
+            margin-right: 15px;
         }
-        /* 🔥🔥 زر القائمة الجانبية (Hamburger) */
         #menu-toggle-btn {
             background: none;
             border: none;
             color: var(--text-color);
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
             padding: 5px;
         }
         #search-input {
-            flex-grow: 1; 
+            width: 100%;
             padding: 10px;
             font-size: 16px;
             border-radius: 30px; 
             background-color: #2a2a2a; 
             color: var(--text-color);
-            margin: 0 20px;
-            max-width: 400px;
         }
-        /* أزرار العمليات */
+        /* 🔥🔥 أزرار العمليات (Admin, Contact, Logout) */
         .header-actions {
             display: flex;
             gap: 10px;
-            align-items: center;
         }
         .header-action-btn {
             padding: 8px 12px;
@@ -75,46 +80,11 @@
             border-radius: 8px; 
             font-size: 14px;
             text-decoration: none;
-            white-space: nowrap;
             transition: transform 0.2s;
-        }
-        #admin-panel-btn {
-            background-color: #007bff; 
+            white-space: nowrap;
         }
 
-        /* 🔥🔥 تصميم القائمة الجانبية (Sidebar) */
-        #sidebar {
-            height: 100%;
-            width: 0; 
-            position: fixed;
-            z-index: 100; 
-            top: 0;
-            right: 0;
-            background-color: #1a1a1a;
-            transition: 0.3s;
-            padding-top: 20px;
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.7);
-        }
-        #sidebar.open {
-            width: var(--sidebar-width);
-            padding-right: 10px;
-        }
-        .sidebar-category-link {
-            padding: 12px 15px;
-            font-size: 1.1em;
-            color: var(--text-color);
-            display: block;
-            transition: 0.2s;
-            text-align: right;
-        }
-        .sidebar-category-link:hover, .sidebar-category-link.active {
-            background-color: #2a2a2a;
-        }
-        body.sidebar-open main {
-            margin-right: var(--sidebar-width);
-        }
-
-        /* 🔥🔥 شبكة الأفلام (Grid) - رجعناها قوية وجميلة */
+        /* 🔥 شبكة الأفلام (Grid) - شكل ثابت وبارز */
         #movie-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
@@ -123,65 +93,65 @@
         }
         .movie-item {
             background-color: var(--card-color);
-            border-radius: 8px; /* حواف ناعمة */
+            border-radius: 8px; 
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s;
             position: relative; 
             overflow: hidden;
             text-decoration: none;
         }
-        .movie-item:hover {
-            transform: scale(1.05); /* أنميشن جميل عند المرور فوقه */
-        }
         .movie-item img {
             width: 100%;
-            height: 270px; /* 🔥 الارتفاع الأنيق */
+            height: 270px; 
             object-fit: cover;
             border-radius: 8px 8px 0 0;
         }
-        .movie-item h3 {
-            font-size: 1em;
-            padding: 10px 8px 5px;
-            margin: 0;
-            white-space: normal; 
-            line-height: 1.3;
+        .movie-item:hover {
+            transform: scale(1.03); 
         }
-        /* 🔥 تصميم التقييم المصغر */
-        .movie-rating {
-            top: 10px; right: 10px;
-            background-color: var(--accent-color);
-            color: gold; padding: 3px 8px; border-radius: 6px; font-size: 0.9em;
-            position: absolute; font-weight: bold;
+
+        /* 🔥🔥 رجعنا التصنيفات أسفل الهيدر (ليست متداخلة) */
+        #category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            justify-content: center;
         }
-        .movie-category-tag {
-            bottom: 40px; left: 0; 
-            background-color: rgba(0, 123, 255, 0.9);
-            color: white; padding: 4px 8px; border-radius: 0 6px 6px 0;
-            font-size: 0.8em; position: absolute; font-weight: bold;
+        .category-btn {
+            padding: 8px 15px;
+            background-color: #333;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        .category-btn.active, .category-btn:hover {
+            background-color: #007bff;
         }
         
         /* تعديلات الموبايل */
         @media (max-width: 600px) {
-            header {
-                flex-wrap: wrap; 
-                padding: 10px;
+            .header-top-row {
+                flex-wrap: wrap;
+                margin-bottom: 0;
             }
             .logo {
-                flex-grow: 1;
-            }
-            #search-input {
-                order: 3;
-                margin-top: 10px;
-                flex-basis: 100%;
+                text-align: left;
+                margin-right: 0;
             }
             .header-actions {
-                order: 2;
-                flex-grow: 1;
-                justify-content: flex-end;
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+            #search-input {
+                margin-top: 15px;
             }
             #movie-grid {
                 grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-                gap: 10px;
             }
             .movie-item img {
                 height: 195px;
@@ -199,16 +169,17 @@
 
     <main id="main-content">
         <header>
-            <button id="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
-            <div class="logo">q movie</div>
-            
-            <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
-
-            <div class="header-actions">
-                <a href="contact.html" id="contact-btn" class="header-action-btn" style="background-color: #4CAF50;">تواصل معنا</a> 
-                <div class="admin-controls"></div> 
-                <button id="logout-btn" class="header-action-btn">تسجيل خروج</button>
+            <div class="header-top-row">
+                <button id="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div class="logo">q movie</div>
+                
+                <div class="header-actions">
+                    <a href="contact.html" id="contact-btn" class="header-action-btn" style="background-color: #4CAF50;">تواصل معنا</a> 
+                    <div class="admin-controls"></div> 
+                    <button id="logout-btn" class="header-action-btn">تسجيل خروج</button>
+                </div>
             </div>
+            <input type="text" id="search-input" placeholder="ابحث عن فيلم...">
         </header>
 
         <a id="main-banner" href="#">
@@ -281,6 +252,7 @@
                 
                 allMovies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 
+                // يتم عرض الإعلان والتصنيفات في البداية
                 setupBanner(allMovies);
                 setupCategoryButtons(allMovies); 
                 setupSidebarCategories(allMovies); 
@@ -293,7 +265,7 @@
             }
         }
         
-        // 🔥 دالة عرض الإعلان الترويجي
+        // (باقي دوال التصميم Banner و Categories هي نفسها)
         function setupBanner(movies) {
             const featuredMovie = movies.find(movie => movie.isFeatured && movie.bannerUrl);
 
@@ -308,7 +280,6 @@
             }
         }
         
-        // 🔥 دالة توليد أزرار القائمة الجانبية
         function setupSidebarCategories(movies) {
             const categories = new Set(movies.map(m => m.category).filter(c => c && c !== 'all'));
             sidebarCategories.innerHTML = '';
@@ -330,7 +301,6 @@
             });
         }
         
-        // 🔥 دالة إنشاء أزرار التصنيفات الأفقية
         function setupCategoryButtons(movies) {
             const categories = new Set(movies.map(m => m.category).filter(c => c));
             categoryFilter.innerHTML = '<button class="category-btn active" data-category="all">الكل</button>';
