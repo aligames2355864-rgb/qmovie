@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>q movie - الرئيسية</title>
     <style>
-        /* 🔥🔥 هذا هو الـ CSS الذي تم اعتماده منك (النسخة النظيفة) 🔥🔥 */
+        /* 🔥🔥 هذا هو الـ CSS الذي تم اعتماده منك (النسخة المستقرة والجميلة) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
@@ -15,7 +15,7 @@
         }
         body {
             font-family: 'Arial', sans-serif;
-            background-color: var(--bg-color);
+            background: radial-gradient(circle at top, #141414, #000); /* خلفية عميقة */
             color: var(--text-color);
             margin: 0;
             padding: 0;
@@ -43,7 +43,7 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 5px; 
         }
         .logo {
             font-size: 2em;
@@ -62,7 +62,7 @@
             padding: 5px;
         }
         #search-input {
-            width: 100%;
+            width: 100%; /* 🔥 سطر منفصل للبحث */
             padding: 10px;
             font-size: 16px;
             border-radius: 30px; 
@@ -70,6 +70,7 @@
             color: var(--text-color);
             margin-top: 10px;
         }
+        
         /* أزرار العمليات */
         .header-actions {
             display: flex;
@@ -147,7 +148,7 @@
             background-color: #007bff;
         }
 
-        /* 🔥 شبكة الأفلام (Grid) */
+        /* 🔥 شبكة الأفلام (Grid) - الحجم الأصلي القوي */
         #movie-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
@@ -165,7 +166,7 @@
         }
         .movie-item img {
             width: 100%;
-            height: 270px; 
+            height: 270px; /* 🔥 الارتفاع الذي يعجبك */
             object-fit: cover;
             border-radius: 8px 8px 0 0;
         }
@@ -187,29 +188,75 @@
             color: gold; padding: 3px 8px; border-radius: 6px; font-size: 0.9em;
             position: absolute; font-weight: bold;
         }
-        /* 🔥 تاجات المسلسلات والأفلام */
         .movie-category-tag {
             bottom: 40px; left: 0; 
             background-color: rgba(0, 123, 255, 0.9);
             color: white; padding: 4px 8px; border-radius: 0 6px 6px 0;
             font-size: 0.8em; position: absolute; font-weight: bold;
         }
-        .movie-type-tag { /* 🔥 تاك للمسلسل */
+        .movie-type-tag { /* 🔥 تاك المسلسل */
             top: 10px; left: 10px;
             background-color: #4CAF50; /* أخضر للمسلسلات */
             color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.8em;
             position: absolute; font-weight: bold;
         }
+
+        /* 🔥 تصميم الإعلان الترويجي */
+        #main-banner {
+            height: 300px; 
+            border-radius: 12px; 
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            display: none; 
+            align-items: flex-end;
+            text-decoration: none; 
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        #banner-info {
+            background: linear-gradient(to top, rgba(0,0,0,0.2), rgba(0,0,0,0.8));
+            padding: 20px;
+            width: 100%;
+            color: white;
+            border-radius: 0 0 12px 12px;
+            text-align: right;
+        }
+        #banner-title {
+            font-size: 2em;
+            margin: 0;
+            color: white;
+        }
         
         /* تعديلات الموبايل */
         @media (max-width: 600px) {
-            header { padding: 10px; }
-            .header-top-row { width: 100%; margin-bottom: 5px; }
-            .logo { flex-grow: 1; margin-right: 0; text-align: left; }
-            #search-input { margin: 10px 0; }
-            .header-actions { width: 100%; justify-content: space-between; margin-top: 10px; }
-            #movie-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-            .movie-item img { height: 195px; }
+            header {
+                flex-wrap: wrap; 
+                padding: 10px;
+            }
+            .header-top-row {
+                width: 100%; 
+                margin-bottom: 5px;
+            }
+            .logo {
+                flex-grow: 1;
+                margin-right: 0;
+                text-align: left;
+            }
+            #search-input {
+                margin: 10px 0;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+            #movie-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+            }
+            .movie-item img {
+                height: 195px;
+            }
         }
     </style>
 </head>
@@ -276,33 +323,44 @@
         const loader = document.getElementById('loader');
         const searchInput = document.getElementById('search-input');
         const logoutBtn = document.getElementById('logout-btn');
-        const adminControls = document.querySelector('.admin-controls');
+        const adminControls = document.querySelector('.header-actions .admin-controls'); // 🔥 تأكد من المسار الصحيح
         const bannerElement = document.getElementById('main-banner');
         const categoryFilter = document.getElementById('category-filter');
         const sidebar = document.getElementById('sidebar');
         const sidebarCategories = document.getElementById('sidebar-categories');
         const body = document.body;
 
-        let allContent = []; // 🔥 تم تغيير الاسم ليضم الأفلام والمسلسلات
+        let allContent = []; 
         let currentFilter = 'all';
 
-        // 🔥🔥 دالة جلب الأفلام والمسلسلات معاً (التعديل الرئيسي)
+        // 🔥 دالة فتح وإغلاق القائمة الجانبية
+        function toggleSidebar() {
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                body.classList.remove('sidebar-open');
+            } else {
+                sidebar.classList.add('open');
+                body.classList.add('sidebar-open');
+            }
+        }
+        document.getElementById('close-sidebar-btn').onclick = toggleSidebar;
+
+
+        // ================ (2) جلب وعرض الأفلام والمسلسلات ================
         async function fetchContent() {
             try {
-                // 1. جلب الأفلام
+                // 1. جلب الأفلام (Movies)
                 const moviesSnapshot = await db.collection('movies').orderBy('timestamp', 'desc').get();
                 const movies = moviesSnapshot.docs.map(doc => ({ id: doc.id, type: 'movie', ...doc.data() }));
 
-                // 2. جلب المسلسلات
+                // 2. جلب المسلسلات (Series)
                 const seriesSnapshot = await db.collection('series').orderBy('timestamp', 'desc').get();
                 const series = seriesSnapshot.docs.map(doc => ({ id: doc.id, type: 'series', ...doc.data() }));
 
-                // 3. دمج المحتوى
                 allContent = [...movies, ...series];
                 
                 if (allContent.length === 0) { loader.textContent = 'ماكو محتوى حالياً.'; return; }
                 
-                // يتم ترتيب الكل حسب الوقت (Movies + Series)
                 allContent.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
                 setupBanner(allContent);
@@ -317,14 +375,14 @@
             }
         }
         
-        // 🔥 دالة عرض الإعلان الترويجي (تعمل على الأفلام فقط حالياً)
+        // (باقي دوال التصميم Banner و Categories هي نفسها)
         function setupBanner(content) {
             const featuredMovie = content.find(item => item.type === 'movie' && item.isFeatured && item.bannerUrl);
 
             if (featuredMovie) {
                 bannerElement.style.display = 'flex';
                 bannerElement.style.backgroundImage = `linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('${featuredMovie.bannerUrl}')`;
-                bannerElement.href = `./movie.html?id=${featuredMovie.id}`; // يربط على صفحة الفيلم
+                bannerElement.href = `./movie.html?id=${featuredMovie.id}`; 
                 document.getElementById('banner-title').textContent = featuredMovie.title || 'فيلم مميز';
                 document.getElementById('banner-description').textContent = featuredMovie.description || 'شاهد الآن أحدث الأفلام المميزة!';
             } else {
@@ -332,7 +390,6 @@
             }
         }
         
-        // 🔥 دالة توليد أزرار القائمة الجانبية (تجمع تصنيفات الأفلام والمسلسلات)
         function setupSidebarCategories(content) {
             const categories = new Set(content.map(m => m.category).filter(c => c && c !== 'all'));
             sidebarCategories.innerHTML = '';
@@ -354,7 +411,6 @@
             });
         }
         
-        // 🔥 دالة إنشاء أزرار التصنيفات الأفقية
         function setupCategoryButtons(content) {
             const categories = new Set(content.map(m => m.category).filter(c => c));
             categoryFilter.innerHTML = '<button class="category-btn active" data-category="all">الكل</button>';
@@ -390,10 +446,9 @@
                 toggleSidebar(); 
             }
             
-            filterAndDisplayContent(); // 🔥 تغيير اسم الدالة للتصفية
+            filterAndDisplayContent();
         }
 
-        // 🔥🔥 دالة التصفية الرئيسية (تستخدم على البحث والتصنيفات)
         function filterAndDisplayContent() {
              const searchTerm = searchInput.value.toLowerCase();
              
@@ -409,10 +464,9 @@
                 });
              }
 
-             displayContent(filteredContent); // 🔥 تغيير اسم الدالة للعرض
+             displayContent(filteredContent);
         }
 
-        // 🔥🔥 دالة عرض المحتوى (الأفلام والمسلسلات)
         function displayContent(contentList) {
             grid.innerHTML = ''; 
             if (contentList.length === 0) {
@@ -422,24 +476,21 @@
 
             contentList.forEach(item => {
                 const itemLink = document.createElement('a');
-                
-                // 🔥🔥 التعديل: ربط الفيلم بـ movie.html والمسلسل بـ series_watch.html
+                // 🔥🔥 التعديل لربط المسلسلات بصفحة المشاهدة الجديدة
                 itemLink.href = item.type === 'movie' ? `./movie.html?id=${item.id}` : `./series_watch.html?seriesId=${item.id}`;
                 itemLink.className = 'movie-item';
                 
-                // تاجات العرض
                 const ratingDisplay = item.rating ? `<div class="movie-rating">⭐ ${item.rating.toFixed(1)}</div>` : '';
                 const categoryTag = item.category ? `<div class="movie-category-tag">${item.category}</div>` : '';
                 
-                // 🔥 تاك إضافي لتمييز المسلسلات
                 const typeTag = item.type === 'series' ? `<div class="movie-type-tag" style="background-color: #4CAF50;">مسلسل</div>` : '';
-
 
                 itemLink.innerHTML = `
                     <img src="${item.posterUrl}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/180x270?text=No+Image';">
                     ${ratingDisplay}
                     ${categoryTag}
-                    ${typeTag} <h3>${item.title}</h3>
+                    ${typeTag}
+                    <h3>${item.title}</h3>
                 `;
                 grid.appendChild(itemLink);
             });
@@ -468,7 +519,7 @@
                     adminControls.innerHTML = `<a href="./admin_control.html" id="admin-panel-btn" class="header-action-btn">لوحة التحكم</a>`;
                 }
 
-                fetchContent(); // 🔥 تغيير اسم الدالة للجلب الكلي
+                fetchContent(); 
 
                 logoutBtn.addEventListener('click', () => {
                     auth.signOut().then(() => {
