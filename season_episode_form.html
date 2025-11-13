@@ -58,8 +58,9 @@
             <textarea id="description" placeholder="وصف موجز للحلقة (اختياري)" rows="3"></textarea>
 
             <h2 style="margin-top: 30px;">روابط المشغل (Embed)</h2>
-            <input type="text" id="wistia1" placeholder="سيرفر Wistia 1 (رابط iframe/fallback)">
-            <input type="text" id="dood" placeholder="سيرفر Doodstream (رابط iframe)">
+            <input type="text" id="playerjs" placeholder="1. PlayerJS Link (الخيار الأساسي)">
+            <input type="text" id="wistia" placeholder="2. Wistia Link (الخيار الاحتياطي الأول)">
+            <input type="text" id="dood" placeholder="3. Doodstream/Uqload Link (الخيار الاحتياطي الثاني)">
 
             <div id="message"></div>
             
@@ -95,7 +96,7 @@
         
         const seriesId = urlParams.get('seriesId');
         const seasonNum = urlParams.get('seasonNum');
-        const episodeId = urlParams.get('episodeId'); // للتحقق من وضع التعديل
+        const episodeId = urlParams.get('episodeId'); 
 
         document.getElementById('back-link').href = `season_episode_manager.html?seriesId=${seriesId}`;
 
@@ -125,10 +126,12 @@
                         document.getElementById('description').value = data.description || '';
                         
                         const servers = data.servers || {};
-                        document.getElementById('wistia1').value = servers.wistia1 || '';
+                        // 🔥🔥 تعبئة حقول المشغلات الثلاثة
+                        document.getElementById('playerjs').value = servers.playerjs || '';
+                        document.getElementById('wistia').value = servers.wistia || '';
                         document.getElementById('dood').value = servers.dood || '';
 
-                        // 🔥 منع تعديل رقم الحلقة في وضع التعديل لتجنب تكرار الـ ID
+                        // منع تعديل رقم الحلقة في وضع التعديل
                         document.getElementById('episodeNumber').disabled = true; 
                     } else {
                         message.textContent = 'الحلقة غير موجودة.';
@@ -148,15 +151,18 @@
             const title = document.getElementById('title').value;
             const description = document.getElementById('description').value;
 
-            const wistia1Url = document.getElementById('wistia1').value.trim();
-            const doodUrl = document.getElementById('dood').value.trim();
+            // 🔥🔥 سحب قيم المشغلات الثلاثة
+            const playerjsLink = document.getElementById('playerjs').value.trim();
+            const wistiaLink = document.getElementById('wistia').value.trim();
+            const doodLink = document.getElementById('dood').value.trim();
             
             const episodeData = {
                 episodeNumber: episodeNumber,
                 title: title,
                 description: description,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                servers: { wistia1: wistia1Url, dood: doodUrl }
+                // 🔥🔥 تخزين المشغلات الثلاثة في الداتابيس
+                servers: { playerjs: playerjsLink, wistia: wistiaLink, dood: doodLink }
             };
 
             const collectionPath = `series/${seriesId}/seasons/${seasonNum}/episodes`;
@@ -165,7 +171,6 @@
             if (episodeId) {
                 savePromise = db.collection(collectionPath).doc(episodeId).update(episodeData);
             } else {
-                // إضافة حلقة جديدة (استخدام رقم الحلقة كـ ID)
                 savePromise = db.collection(collectionPath).doc(episodeNumber).set(episodeData);
             }
 
@@ -174,7 +179,6 @@
                 message.style.color = 'lightgreen';
                 
                 setTimeout(() => {
-                     // يرجع لصفحة إدارة المواسم
                      window.location.href = `season_episode_manager.html?seriesId=${seriesId}`;
                 }, 1500);
 
