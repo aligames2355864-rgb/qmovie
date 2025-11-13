@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة / تعديل حلقة</title>
+    <style>
+        /* 🔥🔥 الـ CSS الأساسي (للفورم) 🔥🔥 */
+        :root {
+            --bg-color: #0d0d0d; 
+            --card-color: #1a1a1a; 
+            --text-color: #f5f5f5; 
+            --accent-color: #e50914; 
+            --primary-color: #007bff;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle at top, #141414, #000);
+            color: var(--text-color);
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            background-color: var(--card-color);
+            padding: 30px; border-radius: 12px; max-width: 700px; margin: 20px auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+        h1 { color: var(--accent-color); margin-bottom: 20px; text-align: center; }
+        h2 { color: var(--text-color); font-size: 1.2em; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        
+        input[type="text"], input[type="number"], textarea { 
+            width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #333;
+            background-color: #333; color: var(--text-color); font-size: 16px; box-sizing: border-box; resize: vertical;
+        }
+        button {
+            width: 100%; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 5px;
+            background-color: var(--primary-color); color: white; transition: background-color 0.2s;
+        }
+        button:hover { background-color: #0056b3; }
+        .back-btn { display: block; margin-bottom: 20px; text-align: right; color: var(--primary-color); text-decoration: none; }
+        #message { color: var(--accent-color); text-align: center; margin-top: 10px; font-weight: bold; }
+        
+        input:disabled { background-color: #111; color: #aaa; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <a id="back-link" href="series_list.html" class="back-btn">&larr; العودة لإدارة المواسم</a>
+    
+    <div class="container">
+        <h1 id="form-title">إضافة حلقة جديدة</h1>
+        <p id="series-info" style="text-align: center; color: #aaa;"></p>
+
+        <form id="episode-form">
+            <h2>المعلومات الأساسية</h2>
+            <input type="number" id="episodeNumber" placeholder="رقم الحلقة (مثال: 1, 10)" required min="1">
+            <input type="text" id="title" placeholder="عنوان الحلقة (مثال: نهاية العالم)" required>
+            <textarea id="description" placeholder="وصف موجز للحلقة (اختياري)" rows="3"></textarea>
+
+            <h2 style="margin-top: 30px;">روابط المشغل (Embed)</h2>
+            <input type="text" id="wistia1" placeholder="سيرفر Wistia 1 (رابط iframe/fallback)">
+            <input type="text" id="dood" placeholder="سيرفر Doodstream (رابط iframe)">
+
+            <div id="message"></div>
+            
+            <button type="submit" id="submit-btn">حفظ الحلقة</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // ===============================================
+        //  إعدادات Firebase والـ UID
+        // ===============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
+            authDomain: "qmove1.firebaseapp.com",
+            projectId: "qmove1",
+            storageBucket: "qmove1.appspot.com",
+            messagingSenderId: "166464805371",
+            appId: "1:166464805371:web:d65b0cb8b141e4b894935e"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
+
+        const form = document.getElementById('episode-form');
+        const message = document.getElementById('message');
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        const seriesId = urlParams.get('seriesId');
+        const seasonNum = urlParams.get('seasonNum');
+        const episodeId = urlParams.get('episodeId'); // للتحقق من وضع التعديل
+
+        document.getElementById('back-link').href = `season_episode_manager.html?seriesId=${seriesId}`;
+
+
+        // ===============================================
+        //  دوآل جلب وتحميل البيانات
+        // ===============================================
+
+        // 🔥 جلب اسم المسلسل وعرضه في الهيدر
+        db.collection('series').doc(seriesId).get().then(doc => {
+            if (doc.exists) {
+                document.getElementById('series-info').textContent = `مسلسل: ${doc.data().title} | الموسم ${seasonNum}`;
+            }
+        });
+        
+        // 🔥 تعبئة الفورم في وضع التعديل (Edit Mode)
+        if (episodeId) {
+            document.getElementById('form-title').textContent = 'تعديل الحلقة';
+            document.getElementById('submit-btn').textContent = 'حفظ التعديلات';
+            
+            db.collection(`series/${seriesId}/seasons/${seasonNum}/episodes`).doc(episodeId).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('episodeNumber').value = data.episodeNumber || '';
+                        document.getElementById('title').value = data.title || '';
+                        document.getElementById('description').value = data.description || '';
+                        
+                        const servers = data.servers || {};
+                        document.getElementById('wistia1').value = servers.wistia1 || '';
+                        document.getElementById('dood').value = servers.dood || '';
+
+                        // 🔥 منع تعديل رقم الحلقة في وضع التعديل لتجنب تكرار الـ ID
+                        document.getElementById('episodeNumber').disabled = true; 
+                    } else {
+                        message.textContent = 'الحلقة غير موجودة.';
+                    }
+                })
+                .catch(error => {
+                    message.textContent = `خطأ في جلب بيانات الحلقة: ${error.message}`;
+                });
+        }
+        
+        // 🔥 إرسال البيانات
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            message.textContent = 'جاري الإرسال...';
+            
+            const episodeNumber = document.getElementById('episodeNumber').value;
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+
+            const wistia1Url = document.getElementById('wistia1').value.trim();
+            const doodUrl = document.getElementById('dood').value.trim();
+            
+            const episodeData = {
+                episodeNumber: episodeNumber,
+                title: title,
+                description: description,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                servers: { wistia1: wistia1Url, dood: doodUrl }
+            };
+
+            const collectionPath = `series/${seriesId}/seasons/${seasonNum}/episodes`;
+            let savePromise;
+
+            if (episodeId) {
+                savePromise = db.collection(collectionPath).doc(episodeId).update(episodeData);
+            } else {
+                // إضافة حلقة جديدة (استخدام رقم الحلقة كـ ID)
+                savePromise = db.collection(collectionPath).doc(episodeNumber).set(episodeData);
+            }
+
+            savePromise.then(() => {
+                message.textContent = episodeId ? 'تم حفظ التعديلات بنجاح!' : 'تم إضافة الحلقة بنجاح!';
+                message.style.color = 'lightgreen';
+                
+                setTimeout(() => {
+                     // يرجع لصفحة إدارة المواسم
+                     window.location.href = `season_episode_manager.html?seriesId=${seriesId}`;
+                }, 1500);
+
+            }).catch(error => {
+                message.textContent = `فشل الحفظ. تأكد من أن رقم الحلقة ${episodeNumber} غير مكرر.`;
+                message.style.color = 'var(--accent-color)';
+                console.error("Error writing episode: ", error);
+            });
+        });
+
+        // 🔥 حارس الأمان (مهم جداً)
+        auth.onAuthStateChanged(user => {
+            if (!user || user.uid !== ADMIN_UID) {
+                window.location.href = './login.html';
+            }
+        });
+    </script>
+</body>
+</html>
