@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الأدمن - q movie</title>
+    <style>
+        :root {
+            --bg-color: #141414;
+            --card-color: #1c1c1c;
+            --text-color: #f5f5f5;
+            --accent-color: #e50914;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .container {
+            background-color: var(--card-color);
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 800px;
+            margin: 50px auto;
+            min-height: 400px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: var(--accent-color);
+            margin-bottom: 30px;
+        }
+        .action-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50; /* لون اخضر للإضافة */
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .action-btn:hover {
+            background-color: #45a049;
+        }
+        #logout-btn {
+            background-color: #333;
+            margin-top: 20px;
+            padding: 10px;
+        }
+        #logout-btn:hover {
+            background-color: #555;
+        }
+        .movie-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            text-align: right;
+        }
+        .movie-list-item:last-child {
+            border-bottom: none;
+        }
+        .movie-actions button {
+            background: none;
+            border: none;
+            color: #007bff;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .movie-actions button:hover {
+            text-decoration: underline;
+        }
+        .movie-actions .delete-btn {
+            color: var(--accent-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 id="welcome-message">...</h1>
+        
+        <a href="add_movie_form.html" class="action-btn">🎬 إضافة فيلم جديد</a>
+        
+        <h2>قائمة الأفلام الحالية</h2>
+        <div id="admin-movie-list">
+            <p id="list-loader">جاري تحميل قائمة الأفلام...</p>
+        </div>
+        
+        <button id="logout-btn" class="action-btn">تسجيل خروج</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // ================ (1) إعدادات Firebase ================
+        // 🔥🔥 تأكد من وضع الكونفج النهائي لمشروع qmove1 هنا
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY", 
+            authDomain: "qmove1.firebaseapp.com",
+            projectId: "qmove1",
+            storageBucket: "qmove1.appspot.com",
+            messagingSenderId: "166464805371",
+            appId: "1:166464805371:web:d65b0cb8b141e4b894935e"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // 🔥🔥 UID الخاص بك (المفتاح السري)
+        const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
+
+        const welcomeMessage = document.getElementById('welcome-message');
+        const listContainer = document.getElementById('admin-movie-list');
+        const listLoader = document.getElementById('list-loader');
+
+        // ================ (2) دالة الحذف ================
+        function deleteMovie(movieId, movieTitle) {
+            if (confirm(`هل أنت متأكد من حذف فيلم: ${movieTitle}؟`)) {
+                db.collection('movies').doc(movieId).delete()
+                    .then(() => {
+                        alert(`تم حذف الفيلم بنجاح: ${movieTitle}`);
+                        fetchAdminMovies(); // حدث القائمة
+                    })
+                    .catch(error => {
+                        alert("حدث خطأ في الحذف. تأكد من صلاحياتك.");
+                        console.error("Error removing document: ", error);
+                    });
+            }
+        }
+        
+        // ================ (3) دالة عرض الأفلام في لوحة التحكم ================
+        function renderAdminMovies(movies) {
+            listContainer.innerHTML = ''; // تنظيف القائمة
+            if (movies.length === 0) {
+                listContainer.innerHTML = '<p>لا توجد أفلام مضافة حالياً.</p>';
+                return;
+            }
+
+            movies.forEach(movie => {
+                const item = document.createElement('div');
+                item.className = 'movie-list-item';
+                
+                // اسم الفيلم
+                item.innerHTML = `
+                    <span>${movie.title}</span>
+                    <div class="movie-actions">
+                        <button onclick="window.location.href='add_movie_form.html?id=${movie.id}'">تعديل</button>
+                        <button class="delete-btn" onclick="deleteMovie('${movie.id}', '${movie.title.replace(/'/g, "\\'")}')">حذف</button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+        
+        // ================ (4) دالة جلب الأفلام للأدمن ================
+        function fetchAdminMovies() {
+            listLoader.style.display = 'block';
+            db.collection('movies').get()
+                .then(snapshot => {
+                    const movies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderAdminMovies(movies);
+                    listLoader.style.display = 'none';
+                })
+                .catch(error => {
+                    listLoader.textContent = 'خطأ في جلب الأفلام. تأكد من اتصال الإنترنت.';
+                    console.error("Error fetching admin movies: ", error);
+                });
+        }
+
+
+        // ================ (5) الحارس الأمني ================
+        auth.onAuthStateChanged(user => {
+            if (user && user.uid === ADMIN_UID) {
+                // أنت الأدمن!
+                welcomeMessage.textContent = `مرحباً يا علاوي! (${user.email})`;
+                fetchAdminMovies(); // جلب الأفلام وعرضها
+            } else if (user) {
+                // مستخدم مسجل دخول لكنه ليس الأدمن
+                alert('غير مصرح لك بالدخول. سيتم إرجاعك للرئيسية.');
+                window.location.href = './index.html';
+            } else {
+                // لم يسجل دخول
+                window.location.href = './login.html';
+            }
+        });
+
+        // ================ (6) زر تسجيل الخروج ================
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            auth.signOut().then(() => {
+                window.location.href = './login.html';
+            });
+        });
+
+    </script>
+</body>
+</html>
