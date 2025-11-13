@@ -11,6 +11,7 @@
             --card-color: #1a1a1a; 
             --text-color: #e0e0e0; 
             --accent-color: #e50914; 
+            --primary-color: #007bff;
         }
         body {
             font-family: Arial, sans-serif;
@@ -19,6 +20,7 @@
             padding: 0;
             margin: 0;
             transition: opacity 0.5s ease-in-out;
+            opacity: 0;
         }
         body.loaded { opacity: 1; }
         
@@ -50,6 +52,7 @@
         /* 🔥🔥 قائمة المواسم والحلقات */
         .season-section {
             background-color: var(--card-color); padding: 20px; border-radius: 12px; margin-top: 25px;
+            text-align: right;
         }
         .season-header {
             font-size: 1.6em; color: var(--accent-color); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;
@@ -60,9 +63,15 @@
         .episode-button {
             padding: 8px 15px; background-color: #2a2a2a; color: var(--text-color); border-radius: 5px;
             text-decoration: none; transition: 0.2s; border: 1px solid #444;
+            transition: all 0.3s;
+        }
+        .episode-button:hover {
+            transform: scale(1.05);
+            background-color: #444;
         }
         .episode-button.current-episode {
-            background-color: #007bff; border-color: #007bff; font-weight: bold;
+            background-color: var(--accent-color); border-color: var(--accent-color); font-weight: bold;
+            box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
         }
 
         /* 🔥🔥 تفاصيل المسلسل (الوصف والتقييم) */
@@ -124,7 +133,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
-        // ================ (1) إعدادات Firebase ================
+        // ===============================================
+        //  إعدادات Firebase والـ UID
+        // ===============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -139,20 +150,14 @@
         const auth = firebase.auth();
         const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
-        // عناصر التحكم
         const seriesTitleElement = document.getElementById('series-title');
         const player = document.getElementById('movie-player');
         const buttonsContainer = document.getElementById('server-buttons');
         const seasonsContainer = document.getElementById('seasons-container');
-        const loadingIndicator = document.getElementById('loading-indicator');
         const detailRatingNumber = document.getElementById('detail-rating-number');
         const filledStars = document.getElementById('filled-stars');
 
-        let currentEpisodeId = null; // لتتبع الحلقة الحالية
-        let currentServers = null; // لتخزين سيرفرات الحلقة المعروضة
-
-
-        // 🔥 دالة لعرض التقييم النجمي
+        // 🔥 دالة لعرض التقييم النجمي (موجودة في movie.html)
         function setStarRating(rating) {
             const widthPercentage = (rating / 10) * 100;
             detailRatingNumber.textContent = rating ? rating.toFixed(1) : 'N/A';
@@ -161,8 +166,6 @@
         
         // 🔥 دالة عرض الحلقة في المشغل
         function playEpisode(episodeServers, episodeId) {
-            currentServers = episodeServers;
-            currentEpisodeId = episodeId;
             buttonsContainer.innerHTML = ''; // تنظيف الأزرار القديمة
 
             const serverOrder = ['wistia1', 'dood', 'tape', 'uqload'];
@@ -177,11 +180,9 @@
                  return;
             }
 
-            // شغل أول سيرفر موجود كافتراضي
             let firstServerUrl = availableServers[0].url;
             player.src = firstServerUrl;
             
-            // سوي الأزرار
             availableServers.forEach((server, index) => {
                 const button = document.createElement('button');
                 button.className = 'server-btn';
@@ -213,7 +214,7 @@
 
 
         // ===============================================
-        //  دوآل جلب وعرض البيانات
+        //  دوآل جلب وعرض البيانات (المواسم والحلقات)
         // ===============================================
 
         // 🔥 يعرض الحلقات داخل الموسم
@@ -231,14 +232,14 @@
                         button.className = 'episode-button';
                         button.textContent = `حلقة ${episode.episodeNumber}`;
                         
-                        // 🔥 عند الضغط على الحلقة، شغلها في المشغل العلوي
+                        // 🔥🔥 هذا هو الكود المصحح لربط زر الحلقة بالمشغل
                         button.onclick = (e) => {
                              e.preventDefault();
                              // تفعيل زر الحلقة الحالي
                              document.querySelectorAll('.episode-button').forEach(btn => btn.classList.remove('current-episode'));
                              button.classList.add('current-episode');
 
-                             seriesTitleElement.textContent = `${data.title} - الموسم ${seasonNumber} - حلقة ${episode.episodeNumber}`;
+                             seriesTitleElement.textContent = `${seriesTitleElement.textContent.split(' - ')[0]} - الموسم ${seasonNumber} - حلقة ${episode.episodeNumber}`;
                              playEpisode(episode.servers, doc.id);
                         };
                         episodesElement.appendChild(button);
@@ -260,23 +261,44 @@
                 `;
                 seasonsContainer.appendChild(section);
                 
-                // تحميل حلقات هذا الموسم
                 const episodesElement = document.getElementById(`episodes-grid-${season.seasonNumber}`);
                 renderEpisodes(seriesId, season.seasonNumber, episodesElement);
             });
+
+             // 🔥 تشغيل أول حلقة في أول موسم بشكل تلقائي
+             if (seasons.length > 0) {
+                 const firstSeasonNumber = seasons[0].seasonNumber;
+                 db.collection(`series/${seriesId}/seasons/${firstSeasonNumber}/episodes`).orderBy('episodeNumber', 'asc').limit(1).get()
+                     .then(snapshot => {
+                         if (!snapshot.empty) {
+                             const firstEpisode = snapshot.docs[0].data();
+                             const firstEpisodeId = snapshot.docs[0].id;
+
+                             // عرض عنوان الحلقة الأولى
+                             seriesTitleElement.textContent = `${seriesTitleElement.textContent.split(' - ')[0]} - الموسم ${firstSeasonNumber} - حلقة ${firstEpisode.episodeNumber}`;
+                             
+                             // تشغيل الحلقة الأولى
+                             playEpisode(firstEpisode.servers, firstEpisodeId);
+
+                             // تفعيل زر الحلقة في الواجهة (يحدث بعد ثواني من ظهور القائمة)
+                             setTimeout(() => {
+                                 const firstButton = document.querySelector(`#episodes-grid-${firstSeasonNumber} .episode-button`);
+                                 if (firstButton) {
+                                     firstButton.classList.add('current-episode');
+                                 }
+                             }, 1000);
+                         }
+                     });
+             }
         }
 
         // 🔥 جلب بيانات المسلسل الرئيسي
         function fetchSeriesData() {
             const urlParams = new URLSearchParams(window.location.search);
             const seriesId = urlParams.get('seriesId');
+            
+            if (!seriesId) return;
 
-            if (!seriesId) {
-                seriesTitleElement.textContent = 'خطأ: لم يتم تحديد المسلسل.';
-                return;
-            }
-
-            // 1. جلب بيانات المسلسل الرئيسية
             db.collection('series').doc(seriesId).get()
                 .then(doc => {
                     if (doc.exists) {
@@ -289,7 +311,7 @@
                         document.getElementById('detail-description').textContent = data.description || 'لم يتم إضافة وصف.';
                         setStarRating(data.rating || 0);
 
-                        // 2. جلب المواسم والحلقات
+                        // جلب المواسم والحلقات
                         return db.collection(`series/${seriesId}/seasons`).orderBy('seasonNumber', 'asc').get();
                     } else {
                         throw new Error('المسلسل غير موجود في قاعدة البيانات.');
@@ -301,7 +323,6 @@
                 })
                 .catch(error => {
                     seriesTitleElement.textContent = `خطأ في التحميل: ${error.message}`;
-                    console.error(error);
                 });
         }
 
