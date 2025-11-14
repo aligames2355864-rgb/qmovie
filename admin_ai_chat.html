@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحكم AI: إضافة مسلسلات</title>
+    <style>
+        /* 🔥🔥 الـ CSS الأساسي 🔥🔥 */
+        :root {
+            --bg-color: #0d0d0d; 
+            --card-color: #1a1a1a; 
+            --text-color: #e0e0e0; 
+            --accent-color: #e50914; 
+            --primary-color: #007bff;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: radial-gradient(circle at top, #141414, #000);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background-color: var(--card-color);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+        h1 { color: var(--accent-color); margin-bottom: 10px; text-align: center; }
+        
+        /* 🔥 منطقة الإعدادات والأمان */
+        #settings-area {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        #api-key-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #1a1a1a;
+            color: lightgreen;
+        }
+
+        /* 🔥 منطقة الدردشة والنتائج */
+        #chat-window {
+            height: 400px;
+            background-color: #111;
+            border: 1px solid #444;
+            border-radius: 8px;
+            overflow-y: scroll;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: right;
+            white-space: pre-wrap; /* للحفاظ على تنسيق الـ JSON */
+        }
+        #chat-window p {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #007bff;
+            align-self: flex-end;
+            text-align: right;
+        }
+        .ai-response {
+            background-color: var(--accent-color);
+            color: #fff;
+            align-self: flex-start;
+            text-align: right;
+        }
+        .ai-json {
+             background-color: #0056b3;
+             padding: 15px;
+             font-family: monospace;
+             font-size: 0.9em;
+             cursor: pointer;
+             margin-top: 10px;
+        }
+        .ai-json:hover {
+            opacity: 0.9;
+        }
+
+        /* 🔥 منطقة الإدخال */
+        #input-area {
+            display: flex;
+            gap: 10px;
+        }
+        #prompt-input {
+            flex-grow: 1;
+            padding: 12px;
+            border-radius: 5px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+        #submit-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 لوحة تحكم Gemini AI</h1>
+        
+        <div id="settings-area">
+            <p style="color: yellow;">⚠️ **أمان!** المفتاح موجود الآن في الحقل أدناه. لا تشارك هذه الصفحة.</p>
+            <input type="text" id="api-key-input" value="AIzaSyCHuLIBTyg-tO-V4y3iH1v5A9Fkf3Tg0Bw" placeholder="GEMINI API KEY">
+        </div>
+
+        <div id="chat-window">
+            <p style="color: #ccc; text-align: center;">ابدأ بإرسال أمر لإضافة مسلسل أو فيلم (مثال: أضف مسلسل The Last of Us مع المواسم 1 و 2).</p>
+        </div>
+
+        <div id="input-area">
+            <input type="text" id="prompt-input" placeholder="أدخل أمر إضافة المسلسل/الفيلم...">
+            <button id="submit-btn" onclick="sendMessage()">إرسال</button>
+        </div>
+        
+        <p style="font-size: 0.9em; text-align: center; margin-top: 15px;">* بعد الإرسال، انسخ الـ JSON مباشرةً من الشاشة وألصقه في صفحة الإضافة اليدوية.</p>
