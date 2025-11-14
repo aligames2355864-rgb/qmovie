@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة مسلسل بواسطة AI</title>
+    <style>
+        /* 🔥🔥 الـ CSS الأساسي (موحد مع باقي الموقع) 🔥🔥 */
+        :root {
+            --bg-color: #0d0d0d; 
+            --card-color: #1a1a1a; 
+            --text-color: #f5f5f5; 
+            --accent-color: #e50914; 
+            --primary-color: #007bff;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle at top, #141414, #000);
+            color: var(--text-color);
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            background-color: var(--card-color);
+            padding: 30px; border-radius: 12px; max-width: 800px; margin: 20px auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+        h1 { color: var(--accent-color); margin-bottom: 10px; text-align: center; }
+        h2 { color: var(--primary-color); font-size: 1.2em; margin-bottom: 20px; text-align: center; }
+        
+        textarea { 
+            width: 100%; height: 350px; padding: 15px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #333;
+            background-color: #333; color: lightgreen; font-size: 14px; box-sizing: border-box; resize: vertical;
+        }
+        button {
+            width: 100%; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 5px;
+            background-color: var(--accent-color); color: white; cursor: pointer; transition: background-color 0.2s;
+        }
+        button:hover { background-color: #b00710; }
+        .back-btn { display: block; margin-bottom: 20px; text-align: right; color: var(--primary-color); text-decoration: none; }
+        #message { color: #ff9a9a; text-align: center; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <a href="series_list.html" class="back-btn">&larr; العودة لقائمة المسلسلات</a>
+    
+    <div class="container">
+        <h1>🤖 إضافة مسلسل بواسطة AI/JSON</h1>
+        <h2>انسخ وألصق بيانات المسلسل المُنظّمة هنا (JSON)</h2>
+
+        <form id="ai-form">
+            <textarea id="jsonInput" placeholder="الصق هنا كود JSON الذي تم إنشاؤه بواسطة Gemini..." required></textarea>
+
+            <div id="message"></div>
+            
+            <button type="submit" id="submit-btn">تحليل وإضافة المسلسل</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <script>
+        // ===============================================
+        //  إعدادات Firebase والـ UID
+        // ===============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
+            authDomain: "qmove1.firebaseapp.com",
+            projectId: "qmove1",
+            storageBucket: "qmove1.appspot.com",
+            messagingSenderId: "166464805371",
+            appId: "1:166464805371:web:d65b0cb8b141e4b894935e"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
+
+        const form = document.getElementById('ai-form');
+        const jsonInput = document.getElementById('jsonInput');
+        const message = document.getElementById('message');
+
+        // 🔥 دالة الإرسال لـ Firestore
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            message.textContent = 'جاري التحليل والرفع...';
+            
+            try {
+                // 1. تحليل JSON (فك التشفير)
+                const seriesData = JSON.parse(jsonInput.value.trim());
+
+                // 2. التحقق من الحقول الأساسية (كإجراء أمان)
+                if (!seriesData.title || !seriesData.description || !seriesData.posterUrl) {
+                    message.textContent = 'خطأ: ملف JSON ناقص (Title, Description, أو PosterUrl).';
+                    return;
+                }
+                
+                // 3. إضافة الحقول الإدارية الضرورية
+                seriesData.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+                seriesData.rating = parseFloat(seriesData.rating) || 5.0; // التأكد من أن التقييم رقمي
+                
+                // 4. الخزن في Firestore
+                db.collection('series').add(seriesData)
+                    .then((docRef) => {
+                        message.textContent = `تم إضافة المسلسل بنجاح! ID: ${docRef.id}`;
+                        message.style.color = 'lightgreen';
+                        form.reset();
+                        
+                        // 🔥 رسالة خاصة للمهندس: يجب إضافة المواسم والحلقات من الصفحة الأخرى
+                        alert(`تم إضافة المسلسل. الآن، يرجى الذهاب لـ "إدارة المواسم" وإضافة الحلقات يدوياً.`);
+
+                        setTimeout(() => {
+                             window.location.href = './series_list.html';
+                        }, 2000);
+                    })
+                    .catch(error => {
+                        message.textContent = 'فشل الخزن في الداتابيس. تأكد من قواعد الأمان.';
+                        message.style.color = 'var(--accent-color)';
+                    });
+
+            } catch (error) {
+                message.textContent = 'خطأ في تحليل JSON. تأكد أن الكود يبدأ وينتهي بـ { } ولا يوجد به أخطاء إملائية.';
+                console.error("JSON Parse Error:", error);
+            }
+        });
+
+        // 🔥 حارس الأمان (مهم جداً)
+        auth.onAuthStateChanged(user => {
+            if (!user || user.uid !== ADMIN_UID) {
+                window.location.href = './login.html';
+            }
+        });
+    </script>
+</body>
+</html>
