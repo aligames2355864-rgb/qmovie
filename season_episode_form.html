@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إضافة / تعديل حلقة</title>
     <style>
-        /* 🔥🔥 الـ CSS الأساسي (للفورم) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
@@ -79,7 +75,7 @@
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
             projectId: "qmove1",
-            storageBucket: "qmove1.appspot.com",
+            storageBucket: "qmove1.firebasestorage.app",
             messagingSenderId: "166464805371",
             appId: "1:166464805371:web:d65b0cb8b141e4b894935e"
         };
@@ -120,16 +116,17 @@
                 .then(doc => {
                     if (doc.exists) {
                         const data = doc.data();
-                        document.getElementById('episodeNumber').value = data.episodeNumber || '';
+                        
+                        // 🔥🔥🔥 ملاحظة: الـ episodeNumber يجب أن يكون رقمي هنا
+                        document.getElementById('episodeNumber').value = data.episodeNumber || ''; 
+                        
                         document.getElementById('title').value = data.title || '';
                         document.getElementById('description').value = data.description || '';
                         
                         const servers = data.servers || {};
-                        // 🔥🔥 تعبئة حقول المشغلات الثنائية
                         document.getElementById('bunnystream').value = servers.bunnystream || '';
                         document.getElementById('dood').value = servers.dood || '';
 
-                        // منع تعديل رقم الحلقة في وضع التعديل
                         document.getElementById('episodeNumber').disabled = true; 
                     } else {
                         message.textContent = 'الحلقة غير موجودة.';
@@ -145,20 +142,28 @@
             e.preventDefault();
             message.textContent = 'جاري الإرسال...';
             
-            const episodeNumber = document.getElementById('episodeNumber').value;
+            const episodeNumberInput = document.getElementById('episodeNumber').value;
             const title = document.getElementById('title').value;
             const description = document.getElementById('description').value;
 
-            // 🔥🔥 سحب قيم المشغلات الثنائية
             const bunnystreamLink = document.getElementById('bunnystream').value.trim();
             const doodLink = document.getElementById('dood').value.trim();
             
+            // 🔥🔥🔥 الإصلاح: تحويل رقم الحلقة إلى integer قبل الخزن 🔥🔥🔥
+            const episodeNumberNumeric = parseInt(episodeNumberInput); 
+            
+            // التأكد من أن التحويل تم بنجاح
+            if (isNaN(episodeNumberNumeric)) {
+                 message.textContent = 'خطأ: رقم الحلقة غير صالح.';
+                 message.style.color = 'var(--accent-color)';
+                 return;
+            }
+
             const episodeData = {
-                episodeNumber: episodeNumber,
+                episodeNumber: episodeNumberNumeric, // 🔥 يخزن كـ Number
                 title: title,
                 description: description,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                // 🔥🔥 تخزين المشغلات الثنائية في الداتابيس
                 servers: { bunnystream: bunnystreamLink, dood: doodLink }
             };
 
@@ -166,9 +171,11 @@
             let savePromise;
 
             if (episodeId) {
+                // وضع التعديل
                 savePromise = db.collection(collectionPath).doc(episodeId).update(episodeData);
             } else {
-                savePromise = db.collection(collectionPath).doc(episodeNumber).set(episodeData);
+                // وضع الإضافة: نستخدم رقم الحلقة (النص) كـ ID (حتى لو خرب الترتيب النصي، الأفضل نستخدم ID فريد)
+                savePromise = db.collection(collectionPath).doc(episodeNumberInput).set(episodeData);
             }
 
             savePromise.then(() => {
@@ -180,7 +187,7 @@
                 }, 1500);
 
             }).catch(error => {
-                message.textContent = `فشل الحفظ. تأكد من أن رقم الحلقة ${episodeNumber} غير مكرر.`;
+                message.textContent = `فشل الحفظ: تأكد من أن رقم الحلقة ${episodeNumberInput} غير مكرر.`;
                 message.style.color = 'var(--accent-color)';
                 console.error("Error writing episode: ", error);
             });
