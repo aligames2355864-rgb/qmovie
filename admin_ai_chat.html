@@ -61,7 +61,7 @@
             padding: 15px;
             margin-bottom: 15px;
             text-align: right;
-            white-space: pre-wrap; /* للحفاظ على تنسيق الـ JSON */
+            white-space: pre-wrap;
         }
         #chat-window p {
             margin: 10px 0;
@@ -120,7 +120,7 @@
         
         <div id="settings-area">
             <p style="color: yellow;">⚠️ **أمان!** المفتاح موجود الآن في الحقل أدناه. لا تشارك هذه الصفحة.</p>
-            <input type="text" id="api-key-input" value="AIzaSyCHuLIBTyg-tO-V4y3iH1v5A9Fkf3Tg0Bw" placeholder="GEMINI API KEY">
+            <input type="text" id="api-key-input" value="AIzaSyDTBvYaNGsNuQlaFjjtKlG9rlIbUvVuMJs" placeholder="GEMINI API KEY">
         </div>
 
         <div id="chat-window">
@@ -133,3 +133,126 @@
         </div>
         
         <p style="font-size: 0.9em; text-align: center; margin-top: 15px;">* بعد الإرسال، انسخ الـ JSON مباشرةً من الشاشة وألصقه في صفحة الإضافة اليدوية.</p>
+    </div>
+
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const promptInput = document.getElementById('prompt-input');
+        const apiKeyInput = document.getElementById('api-key-input');
+
+        // 🔥🔥🔥 دالة الاتصال بـ Gemini API 🔥🔥🔥
+        async function callGeminiAPI(prompt) {
+            const apiKey = apiKeyInput.value.trim(); // سيقرأ المفتاح الذي قمنا بلصقه
+            if (!apiKey) {
+                appendMessage('AI', 'الرجاء لصق مفتاح API Key أولاً!', 'ai-response');
+                return null;
+            }
+
+            const SYSTEM_INSTRUCTION = `You are a movie database helper. Your task is to analyze the user's request (for a movie or series) and output ONLY a clean, valid JSON object. 
+            
+            Structure MUST include: "title", "description", "posterUrl" (placeholder), "releaseYear", "cast", "rating" (numeric out of 10), and "category". 
+            
+            If the user asks for EPISODES/SEASONS, you MUST include a "seasons" array, where each season has an "episodes" array, and each episode includes "episodeNumber", "title", "bunnyStreamLink" (placeholder), and "uqloadLink" (placeholder).
+            
+            DO NOT include any text before or after the JSON.`;
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            
+            const typingMessage = appendMessage('AI', 'الذكاء الاصطناعي يكتب الآن...', 'ai-response');
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                        config: {
+                            systemInstruction: SYSTEM_INSTRUCTION,
+                            responseMimeType: "application/json",
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    // إذا كان هناك خطأ في المفتاح أو الخدمة
+                    const errorData = await response.json();
+                    const errorMessage = errorData.error?.message || `HTTP Error: ${response.status}`;
+                    throw new Error(errorMessage);
+                }
+
+                const data = await response.json();
+                const jsonText = data.candidates[0]?.content?.parts[0]?.text.trim();
+                
+                if (typingMessage && typingMessage.parentNode) {
+                    typingMessage.parentNode.removeChild(typingMessage);
+                }
+
+                if (jsonText) {
+                    appendJSONResponse(jsonText);
+                } else {
+                    appendMessage('AI', 'لم يتم الحصول على بيانات JSON منظمة. حاول أن تكون أكثر تحديداً في طلبك.', 'ai-response');
+                }
+
+            } catch (error) {
+                 if (typingMessage && typingMessage.parentNode) {
+                    typingMessage.parentNode.removeChild(typingMessage);
+                }
+                appendMessage('AI', `❌ خطأ في الاتصال: ${error.message}. يرجى المحاولة مرة أخرى أو التأكد من أن المفتاح يعمل.`, 'ai-response');
+                console.error("Gemini API Error:", error);
+            }
+        }
+
+        // دالة عرض الرسائل في الواجهة
+        function appendMessage(sender, text, className) {
+            const messageElement = document.createElement('p');
+            messageElement.className = className;
+            messageElement.textContent = `${sender}: ${text}`;
+            chatWindow.appendChild(messageElement);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // النزول للأسفل
+            return messageElement;
+        }
+
+        // دالة عرض كود JSON القابل للنسخ
+        function appendJSONResponse(jsonText) {
+            appendMessage('AI', 'تم تحليل البيانات بنجاح. اضغط على الكود لنسخه:', 'ai-response');
+            
+            const jsonDiv = document.createElement('div');
+            jsonDiv.className = 'ai-json';
+            jsonDiv.textContent = jsonText;
+            jsonDiv.onclick = () => {
+                navigator.clipboard.writeText(jsonText);
+                alert('تم نسخ JSON. الآن ألصقه في صفحة الإضافة اليدوية.');
+            };
+            chatWindow.appendChild(jsonDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+
+        // 🔥🔥 دالة الإرسال الرئيسية
+        function sendMessage() {
+            const prompt = promptInput.value.trim();
+            if (prompt === '') return;
+
+            appendMessage('أنا', prompt, 'user-message');
+            callGeminiAPI(prompt);
+            promptInput.value = '';
+        }
+
+        // ربط زر الإرسال و زر Enter
+        document.getElementById('submit-btn').addEventListener('click', sendMessage);
+        promptInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // ربط القائمة الجانبية بالصفحة الرئيسية
+        const backButton = document.createElement('a');
+        backButton.href = 'index.html';
+        backButton.className = 'back-btn';
+        backButton.textContent = '→ العودة للرئيسية';
+        document.body.prepend(backButton);
+
+    </script>
+</body>
+</html>
