@@ -47,14 +47,14 @@
     
     <div class="container">
         <h1>🤖 إضافة مسلسل بواسطة AI/JSON</h1>
-        <h2>انسخ وألصق بيانات المسلسل المُنظّمة هنا (JSON)</h2>
+        <h2>انسخ وألصق بيانات المسلسل المُنظّمة مع مواسمه وحلقاته هنا</h2>
 
         <form id="ai-form">
-            <textarea id="jsonInput" placeholder="الصق هنا كود JSON الذي تم إنشاؤه بواسطة Gemini..." required></textarea>
+            <textarea id="jsonInput" placeholder="الصق هنا كود JSON الذي تم إنشاؤه بواسطة Gemini (بما فيه المواسم والحلقات)..." required></textarea>
 
             <div id="message"></div>
             
-            <button type="submit" id="submit-btn">تحليل وإضافة المسلسل</button>
+            <button type="submit" id="submit-btn">تحليل وإضافة المسلسل والحلقات</button>
         </form>
     </div>
 
@@ -84,46 +84,97 @@
         const jsonInput = document.getElementById('jsonInput');
         const message = document.getElementById('message');
 
-        // 🔥 دالة الإرسال لـ Firestore
+        // 🔥 دالة الإرسال لـ Firestore (المعدلة)
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             message.textContent = 'جاري التحليل والرفع...';
             
             try {
                 // 1. تحليل JSON (فك التشفير)
-                const seriesData = JSON.parse(jsonInput.value.trim());
+                const fullSeriesData = JSON.parse(jsonInput.value.trim());
 
-                // 2. التحقق من الحقول الأساسية (كإجراء أمان)
-                if (!seriesData.title || !seriesData.description || !seriesData.posterUrl) {
-                    message.textContent = 'خطأ: ملف JSON ناقص (Title, Description, أو PosterUrl).';
+                // 2. التحقق من الحقول الأساسية
+                if (!fullSeriesData.title || !fullSeriesData.seasons || fullSeriesData.seasons.length === 0) {
+                    message.textContent = 'خطأ: ملف JSON ناقص أو لا يحتوي على مواسم (Seasons).';
                     return;
                 }
+
+                // فصل تفاصيل المسلسل عن المواسم والحلقات
+                const seriesDetails = {
+                    title: fullSeriesData.title,
+                    description: fullSeriesData.description || "",
+                    posterUrl: fullSeriesData.posterUrl || "",
+                    releaseYear: parseFloat(fullSeriesData.releaseYear) || 2020,
+                    cast: fullSeriesData.cast || "",
+                    rating: parseFloat(fullSeriesData.rating) || 5.0,
+                    category: fullSeriesData.category || "General",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                const seasonsData = fullSeriesData.seasons;
+
+                // 3. بدأ سلسلة كتابة البيانات: (مسلسل -> مواسم -> حلقات)
                 
-                // 3. إضافة الحقول الإدارية الضرورية
-                seriesData.timestamp = firebase.firestore.FieldValue.serverTimestamp();
-                seriesData.rating = parseFloat(seriesData.rating) || 5.0; // التأكد من أن التقييم رقمي
-                
-                // 4. الخزن في Firestore
-                db.collection('series').add(seriesData)
-                    .then((docRef) => {
-                        message.textContent = `تم إضافة المسلسل بنجاح! ID: ${docRef.id}`;
+                // A) إنشاء مستند المسلسل الرئيسي
+                db.collection('series').add(seriesDetails)
+                    .then(seriesDocRef => {
+                        const seriesId = seriesDocRef.id;
+                        
+                        // B) استخدام Batch لكتابة جميع المواسم والحلقات دفعة واحدة
+                        const batch = db.batch();
+                        
+                        seasonsData.forEach(season => {
+                            const seasonNumber = season.seasonNumber;
+                            
+                            // 1. إنشاء مستند الموسم (في Seasons Collection)
+                            const seasonRef = db.collection('seasons').doc();
+                            const seasonId = seasonRef.id;
+                            
+                            batch.set(seasonRef, {
+                                seriesId: seriesId,
+                                seasonNumber: seasonNumber,
+                                title: `Season ${seasonNumber}`, // اسم افتراضي للموسم
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            
+                            // 2. إنشاء مستندات الحلقات (في Episodes Collection)
+                            if (season.episodes && Array.isArray(season.episodes)) {
+                                season.episodes.forEach(episode => {
+                                    const episodeRef = db.collection('episodes').doc();
+                                    
+                                    batch.set(episodeRef, {
+                                        seriesId: seriesId,
+                                        seasonId: seasonId,
+                                        episodeNumber: episode.episodeNumber,
+                                        title: episode.title || `Episode ${episode.episodeNumber}`,
+                                        bunnyStreamLink: episode.bunnyStreamLink || "",
+                                        uqloadLink: episode.uqloadLink || "",
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+                                });
+                            }
+                        });
+                        
+                        // C) تنفيذ عملية ال Batch (الخزن الفعلي)
+                        return batch.commit().then(() => seriesId);
+                    })
+                    .then(seriesId => {
+                        message.textContent = `✅ تم إضافة المسلسل وكل المواسم والحلقات بنجاح! ID: ${seriesId}`;
                         message.style.color = 'lightgreen';
                         form.reset();
                         
-                        // 🔥 رسالة خاصة للمهندس: يجب إضافة المواسم والحلقات من الصفحة الأخرى
-                        alert(`تم إضافة المسلسل. الآن، يرجى الذهاب لـ "إدارة المواسم" وإضافة الحلقات يدوياً.`);
-
                         setTimeout(() => {
                              window.location.href = './series_list.html';
-                        }, 2000);
+                        }, 3000);
                     })
                     .catch(error => {
-                        message.textContent = 'فشل الخزن في الداتابيس. تأكد من قواعد الأمان.';
+                        message.textContent = '❌ فشل الخزن في الداتابيس. راجع console لتفاصيل الخطأ.';
                         message.style.color = 'var(--accent-color)';
+                        console.error("Full Deployment Error:", error);
                     });
 
             } catch (error) {
-                message.textContent = 'خطأ في تحليل JSON. تأكد أن الكود يبدأ وينتهي بـ { } ولا يوجد به أخطاء إملائية.';
+                message.textContent = '❌ خطأ في تحليل JSON. تأكد أن الكود يبدأ وينتهي بـ { } وليس فيه أخطاء إملائية.';
                 console.error("JSON Parse Error:", error);
             }
         });
