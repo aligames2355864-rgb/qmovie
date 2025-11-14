@@ -39,7 +39,7 @@
             background-color: var(--primary-color); color: white; transition: 0.3s;
             text-decoration: none;
         }
-        .action-group button:hover, .episode-actions a.action-btn-small:hover { background-color: #0056b3; }
+        .action-group button:hover { background-color: #0056b3; }
         
         /* قائمة المواسم */
         #seasons-list { list-style: none; padding: 0; }
@@ -47,6 +47,11 @@
             background-color: #222; padding: 15px; margin-bottom: 15px; border-radius: 8px;
         }
         .season-header { display: flex; justify-content: space-between; align-items: center; font-size: 1.3em; margin-bottom: 10px; }
+        .season-actions a, .season-actions button { /* 🔥 أزرار الموسم */
+             margin-left: 10px; font-size: 0.9em; padding: 5px 10px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer;
+        }
+        .season-actions .add-episode-btn { background-color: #4CAF50; color: white; text-decoration: none; }
+        .season-actions .delete-season-btn { background-color: var(--accent-color); color: white; }
 
         /* قائمة الحلقات */
         .episodes-list { list-style: none; padding-right: 0; margin-top: 10px; }
@@ -58,7 +63,7 @@
             padding: 5px 10px; font-size: 0.9em; margin-left: 5px; cursor: pointer;
             border-radius: 4px; color: white; border: none; text-decoration: none;
         }
-        .episode-actions .edit-btn { background-color: #4CAF50; }
+        .episode-actions .edit-btn { background-color: #007bff; }
         .episode-actions .delete-btn { background-color: var(--accent-color); }
     </style>
 </head>
@@ -132,6 +137,24 @@
                     });
             }
         }
+        
+        // 🔥🔥 حذف موسم (الآن أصبح متاحاً)
+        function deleteSeason(seriesId, seasonNumber) {
+            if (confirm(`تحذير! هل أنت متأكد من حذف الموسم ${seasonNumber}؟ يجب أن تحذف جميع الحلقات يدوياً أولاً!`)) {
+                
+                // رسالة تنبيه للمهندس: يجب حذف الحلقات أولا!
+                alert('تنبيه: سأحذف الموسم، لكن يجب التأكد من أنك حذفت كل الحلقات يدويًا لتجنب الأخطاء!');
+
+                db.collection(`series/${seriesId}/seasons`).doc(seasonNumber).delete()
+                    .then(() => {
+                        alert(`تم حذف الموسم ${seasonNumber}.`);
+                        fetchSeasons(seriesId);
+                    })
+                    .catch(error => {
+                        errorMessageElement.textContent = `فشل الحذف: ${error.message}`;
+                    });
+            }
+        }
 
         // 🔥🔥 إضافة موسم جديد (تبقى كـ Prompt لأنها أسرع)
         function promptAddSeason() {
@@ -196,8 +219,9 @@
                 li.innerHTML = `
                     <div class="season-header">
                         <span>الموسم ${season.seasonNumber}</span>
-                        <div class="episode-actions">
-                            <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${season.seasonNumber}" class="edit-btn">+ إضافة حلقة</a>
+                        <div class="season-actions">
+                            <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${season.seasonNumber}" class="add-episode-btn">+ إضافة حلقة</a>
+                            <button class="delete-season-btn" onclick="deleteSeason('${seriesId}', '${season.seasonNumber}')">حذف الموسم</button>
                         </div>
                     </div>
                     <ul id="episodes-list-${season.seasonNumber}" class="episodes-list">
