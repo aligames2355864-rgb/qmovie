@@ -39,7 +39,6 @@
             background-color: var(--primary-color); color: white; transition: 0.3s;
             text-decoration: none;
         }
-        .action-group button:hover { background-color: #0056b3; }
         
         /* قائمة المواسم */
         #seasons-list { list-style: none; padding: 0; }
@@ -47,7 +46,7 @@
             background-color: #222; padding: 15px; margin-bottom: 15px; border-radius: 8px;
         }
         .season-header { display: flex; justify-content: space-between; align-items: center; font-size: 1.3em; margin-bottom: 10px; }
-        .season-actions a, .season-actions button { /* 🔥 أزرار الموسم */
+        .season-actions a, .season-actions button { 
              margin-left: 10px; font-size: 0.9em; padding: 5px 10px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer;
         }
         .season-actions .add-episode-btn { background-color: #4CAF50; color: white; text-decoration: none; }
@@ -138,11 +137,10 @@
             }
         }
         
-        // 🔥🔥 حذف موسم (الآن أصبح متاحاً)
+        // 🔥🔥 حذف موسم 
         function deleteSeason(seriesId, seasonNumber) {
             if (confirm(`تحذير! هل أنت متأكد من حذف الموسم ${seasonNumber}؟ يجب أن تحذف جميع الحلقات يدوياً أولاً!`)) {
                 
-                // رسالة تنبيه للمهندس: يجب حذف الحلقات أولا!
                 alert('تنبيه: سأحذف الموسم، لكن يجب التأكد من أنك حذفت كل الحلقات يدويًا لتجنب الأخطاء!');
 
                 db.collection(`series/${seriesId}/seasons`).doc(seasonNumber).delete()
@@ -156,7 +154,7 @@
             }
         }
 
-        // 🔥🔥 إضافة موسم جديد (تبقى كـ Prompt لأنها أسرع)
+        // 🔥🔥 إضافة موسم جديد 
         function promptAddSeason() {
             const seasonNumber = (prompt("أدخل رقم الموسم الجديد (مثال: 1, 2):") || '').trim();
             if (!seasonNumber) return;
@@ -181,21 +179,26 @@
             const episodesListElement = document.getElementById(`episodes-list-${seasonNumber}`);
             episodesListElement.innerHTML = 'جاري التحميل...';
 
-            db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).orderBy('episodeNumber', 'asc').get()
+            db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).get()
                 .then(snapshot => {
                     episodesListElement.innerHTML = '';
                     if (snapshot.empty) {
                          episodesListElement.innerHTML = '<li>لا توجد حلقات.</li>';
                          return;
                     }
-                    snapshot.forEach(doc => {
-                        const episode = doc.data();
+                    
+                    // 🔥🔥 الإصلاح هنا: نقوم بفرز البيانات رقمياً في JavaScript 🔥🔥
+                    let episodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    episodes.sort((a, b) => parseInt(a.episodeNumber) - parseInt(b.episodeNumber));
+
+
+                    episodes.forEach(episode => {
                         const li = document.createElement('li');
                         li.innerHTML = `
                             <span>الحلقة ${episode.episodeNumber}: ${episode.title}</span>
                             <div class="episode-actions">
-                                <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${seasonNumber}&episodeId=${doc.id}" class="edit-btn">تعديل</a>
-                                <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${doc.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
+                                <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${seasonNumber}&episodeId=${episode.id}" class="edit-btn">تعديل</a>
+                                <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${episode.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
                             </div>
                         `;
                         episodesListElement.appendChild(li);
