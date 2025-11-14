@@ -47,10 +47,11 @@
             padding: 10px 25px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; transition: 0.3s;
             background-color: #333; color: var(--text-color);
         }
+        .server-btn.active { background-color: #007bff; box-shadow: 0 0 10px #007bff; }
         .server-btn:hover { background-color: #555; }
         
         /* تخصيص ألوان الأزرار */
-        .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
+        .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; } 
         .server-btn.dood-btn.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
 
         /* 🔥🔥 قائمة المواسم والحلقات */
@@ -64,18 +65,18 @@
         .episode-button-grid {
             display: flex; flex-wrap: wrap; gap: 10px;
         }
-        .episode-button {
+        .episode-button { /* 🔥 الآن هي أزرار تشغيل نقية */
             padding: 8px 15px; background-color: #2a2a2a; color: var(--text-color); border-radius: 5px;
             text-decoration: none; transition: 0.2s; border: 1px solid #444;
-            transition: all 0.3s;
+            transition: all 0.3s; cursor: pointer;
         }
         .episode-button:hover {
             transform: scale(1.05);
             background-color: #444;
         }
         .episode-button.current-episode {
-            background-color: var(--accent-color); border-color: var(--accent-color); font-weight: bold;
-            box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+            background-color: var(--primary-color); border-color: var(--primary-color); font-weight: bold;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
         }
 
         /* 🔥🔥 تفاصيل المسلسل (الوصف والتقييم) */
@@ -232,29 +233,27 @@
                          return;
                     }
                     
-                    // 🔥🔥 الإصلاح النهائي: الفرز الرقمي في JavaScript (يعالج مشكلة الترتيب)
+                    // 🔥🔥 الفرز الرقمي (يعالج مشكلة الترتيب)
                     let episodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    episodes.sort((a, b) => parseInt(a.episodeNumber) - parseInt(b.episodeNumber)); // الفرز الآن رقمي 1, 2, ..., 10
+                    episodes.sort((a, b) => parseInt(a.episodeNumber) - parseInt(b.episodeNumber)); 
 
 
-                    episodes.forEach((episode, index) => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `
-                            <span>الحلقة ${episode.episodeNumber}: ${episode.title}</span>
-                            <div class="episode-actions">
-                                <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${seasonNumber}&episodeId=${episode.id}" class="edit-btn">تعديل</a>
-                                <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${episode.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
-                            </div>
-                        `;
-                        episodesElement.appendChild(li);
+                    episodes.forEach(episode => {
+                        // 🔥🔥 التعديل: هنا هو زر التشغيل النقّي (بدون تعديل/حذف) 🔥🔥
+                        const button = document.createElement('a'); 
+                        button.className = 'episode-button';
+                        button.textContent = `حلقة ${episode.episodeNumber}: ${episode.title}`;
+                        
+                        // ربط الزر بوظيفة التشغيل
+                        button.onclick = (e) => {
+                             e.preventDefault();
+                             document.querySelectorAll('.episode-button').forEach(btn => btn.classList.remove('current-episode'));
+                             button.classList.add('current-episode');
 
-                        // 🔥🔥 تشغيل الحلقة الأولى في أول موسم بشكل تلقائي (مصحح)
-                        // هذا الجزء يجب أن يعمل الآن بعد أن أصبح الترتيب صحيحاً
-                        if (index === 0 && document.querySelector('h1').textContent.includes('الموسم 1') && !document.querySelector('.current-episode')) {
-                             li.querySelector('span').classList.add('current-episode'); 
                              seriesTitleElement.textContent = `${seriesTitleElement.textContent.split(' - ')[0]} - الموسم ${seasonNumber} - حلقة ${episode.episodeNumber}`;
                              playEpisode(episode.servers, episode.id);
-                        }
+                        };
+                        episodesElement.appendChild(button);
                     });
                 });
         }
@@ -275,6 +274,30 @@
                 const episodesElement = document.getElementById(`episodes-grid-${season.seasonNumber}`);
                 renderEpisodes(seriesId, season.seasonNumber, episodesElement);
             });
+
+             // 🔥🔥 تشغيل أول حلقة في أول موسم بشكل تلقائي
+             if (seasons.length > 0) {
+                 const firstSeasonNumber = seasons[0].seasonNumber;
+                 db.collection(`series/${seriesId}/seasons/${firstSeasonNumber}/episodes`).orderBy('episodeNumber', 'asc').limit(1).get()
+                     .then(snapshot => {
+                         if (!snapshot.empty) {
+                             const firstEpisode = snapshot.docs[0].data();
+                             const firstEpisodeId = snapshot.docs[0].id;
+
+                             seriesTitleElement.textContent = `${seriesTitleElement.textContent.split(' - ')[0]} - الموسم ${firstSeasonNumber} - حلقة ${firstEpisode.episodeNumber}`;
+                             
+                             playEpisode(firstEpisode.servers, firstEpisodeId);
+
+                             setTimeout(() => {
+                                 // تفعيل زر الحلقة الأولى بعد التشغيل التلقائي
+                                 const firstButton = document.querySelector(`#episodes-grid-${firstSeasonNumber} .episode-button`);
+                                 if (firstButton) {
+                                     firstButton.classList.add('current-episode');
+                                 }
+                             }, 1000);
+                         }
+                     });
+             }
         }
 
         function fetchSeriesData() {
