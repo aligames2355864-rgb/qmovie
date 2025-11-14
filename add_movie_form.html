@@ -79,9 +79,8 @@
             <hr style="border-color: #555; margin: 20px 0;">
 
             <h2>روابط المشغلات</h2>
-            <input type="text" id="playerjs" placeholder="1. PlayerJS Link (الخيار الأساسي)">
-            <input type="text" id="wistia" placeholder="2. Wistia Link (الخيار الاحتياطي الأول)">
-            <input type="text" id="dood" placeholder="3. Doodstream/Uqload Link (الخيار الاحتياطي الثاني)">
+            <input type="text" id="bunnystream" placeholder="1. BunnyStream Link (احترافي/نظيف)"> <input type="text" id="dood" placeholder="2. UQLOAD Link (مجاني/إعلانات)">
+
             <div id="message"></div>
             
             <button type="submit" id="submit-btn">إضافة الفيلم</button>
@@ -123,23 +122,18 @@
                 .then(doc => {
                     if (doc.exists) {
                         const data = doc.data();
+                        
+                        // تعبئة البيانات الأساسية
                         document.getElementById('title').value = data.title || '';
                         document.getElementById('posterUrl').value = data.posterUrl || '';
-                        document.getElementById('releaseYear').value = data.releaseYear || '';
-                        document.getElementById('cast').value = data.cast || '';
                         document.getElementById('description').value = data.description || '';
-                        
                         document.getElementById('category').value = data.category || 'Other';
                         document.getElementById('rating').value = data.rating || 5; 
-                        document.getElementById('bannerUrl').value = data.bannerUrl || '';
-                        document.getElementById('isFeatured').checked = data.isFeatured || false;
                         
-                        // 🔥🔥 تعبئة حقول المشغلات المتعددة
+                        // 🔥🔥 تعبئة حقول المشغلات
                         const servers = data.servers || {};
-                        document.getElementById('playerjs').value = servers.playerjs || '';
-                        document.getElementById('wistia').value = servers.wistia || '';
+                        document.getElementById('bunnystream').value = servers.bunnystream || ''; // 🔥 BunnyStream
                         document.getElementById('dood').value = servers.dood || '';
-
                     } else {
                         message.textContent = 'الفيلم غير موجود.';
                     }
@@ -158,19 +152,16 @@
             e.preventDefault();
             message.textContent = 'جاري الإرسال...';
             
-            // سحب البيانات الأساسية
             const title = document.getElementById('title').value;
             const posterUrl = document.getElementById('posterUrl').value;
             const description = document.getElementById('description').value;
 
-            // سحب بيانات التصنيف
             const category = document.getElementById('category').value;
             const rating = parseFloat(document.getElementById('rating').value);
             const isFeatured = document.getElementById('isFeatured').checked;
             
-            // 🔥🔥 سحب قيم المشغلات الثلاثة
-            const playerjsLink = document.getElementById('playerjs').value.trim();
-            const wistiaLink = document.getElementById('wistia').value.trim();
+            // 🔥🔥 سحب قيمة المشغلات الثنائية
+            const bunnystreamLink = document.getElementById('bunnystream').value.trim(); // 🔥 BunnyStream
             const doodLink = document.getElementById('dood').value.trim();
 
             const movieData = {
@@ -182,9 +173,8 @@
                 isFeatured: isFeatured,
                 // 🔥🔥 تخزين الروابط في مصفوفة servers
                 servers: {
-                    playerjs: playerjsLink,
-                    wistia: wistiaLink,
-                    dood: doodLink,
+                    bunnystream: bunnystreamLink, // 🔥 BunnyStream
+                    dood: doodLink, 
                 },
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
