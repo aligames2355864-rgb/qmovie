@@ -5,85 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم الأفلام</title>
     <style>
-        /* 🔥🔥 التصميم الجمالي المعتمد (مريح ومناسب للعين) 🔥🔥 */
+        /* 🔥🔥 الـ CSS الأساسي (للوحة التحكم) 🔥🔥 */
         :root {
-            --bg-color: #0d0d0d; /* أسود عميق */
-            --card-color: #1a1a1a; /* لون بطاقة داكن */
-            --text-color: #e0e0e0; /* أبيض ناعم */
-            --accent-color: #e50914; /* أحمر حاد (للأكشن) */
-            --primary-color: #007bff; /* أزرق (لأزرار الإدارة) */
+            --bg-color: #0d0d0d; 
+            --card-color: #1a1a1a; 
+            --text-color: #e0e0e0; 
+            --accent-color: #e50914; 
+            --primary-color: #007bff;
         }
         body {
-            font-family: 'Arial', sans-serif;
-            background: radial-gradient(circle at top, #141414, #000); /* خلفية متدرجة */
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle at top, #141414, #000);
             color: var(--text-color);
             padding: 20px;
             margin: 0;
         }
         .container {
             background-color: var(--card-color);
-            padding: 30px;
-            border-radius: 12px; /* حواف أنيقة */
-            max-width: 900px;
-            margin: 20px auto;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); /* ظل جذاب */
+            padding: 30px; border-radius: 12px; max-width: 900px; margin: 20px auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
-        
-        /* 🔥🔥 زر العودة وزر الخروج */
+        /* زر العودة */
         .back-to-home {
-            display: block;
-            text-align: right;
-            margin-bottom: 25px;
-            font-size: 1.1em;
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        #logout-btn {
-            background-color: var(--accent-color);
-            font-weight: bold;
-            padding: 10px 15px;
-            border-radius: 8px;
-            width: auto;
-            display: block;
-            margin-top: 25px;
+            display: block; text-align: right; margin-bottom: 25px; font-size: 1.1em; color: var(--primary-color); text-decoration: none; transition: color 0.3s;
         }
 
-        h1 { 
-            color: var(--accent-color); 
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        h2 { 
-            color: var(--text-color); 
-            font-size: 1.5em; 
-            margin-top: 30px;
-            border-bottom: 2px solid var(--primary-color); 
-            padding-bottom: 5px;
-            text-align: right;
-        }
-        
-        /* 🔥🔥 التنقل بين الأفلام والمسلسلات */
-        .admin-nav {
+        /* 🔥🔥 شريط الأدوات العلوي 🔥🔥 */
+        .top-admin-tools {
             display: flex;
-            justify-content: center;
-            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 25px;
         }
-        .admin-nav-btn {
-            padding: 12px 25px;
-            font-size: 1.1em;
+        .ai-control-link {
+            padding: 8px 15px;
+            background-color: #f7a800; /* لون ذهبي/أصفر لـ AI */
+            color: black;
             font-weight: bold;
-            border: none;
             border-radius: 8px;
             text-decoration: none;
             transition: all 0.3s;
-            background-color: #333;
-            color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
-        .admin-nav-btn:hover {
-             background-color: #444;
+        .ai-control-link:hover {
+            background-color: #ffc107;
+            transform: scale(1.05);
+        }
+        
+        /* 🔥 التنقل بين الأفلام والمسلسلات */
+        .admin-nav { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
+        .admin-nav-btn {
+            padding: 12px 25px; font-size: 1.1em; font-weight: bold; border: none; border-radius: 8px; text-decoration: none;
+            background-color: #333; color: white; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); transition: 0.3s;
         }
         .admin-nav-btn.active {
             background-color: var(--primary-color);
@@ -91,66 +63,37 @@
             box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
         }
 
-        /* 🔥🔥 قائمة الأفلام (العرض) */
+        /* تصميم القوائم */
         .action-btn {
-            padding: 12px 20px;
-            font-weight: bold;
-            border-radius: 8px;
-            background-color: #4CAF50; 
-            color: white;
-            text-decoration: none;
-            display: block;
-            width: 100%;
-            text-align: center;
-            margin-bottom: 15px;
+            padding: 12px 20px; font-weight: bold; border-radius: 8px;
+            background-color: #4CAF50; color: white; text-decoration: none; display: block; width: 100%; margin-bottom: 15px;
         }
         
         .movie-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            background-color: #222; /* خلفية البطاقة */
-            border-radius: 6px;
-            transition: background-color 0.3s;
+            display: flex; justify-content: space-between; align-items: center; padding: 15px; margin-bottom: 10px;
+            background-color: #222; border-radius: 6px; transition: background-color 0.3s;
         }
-        .movie-list-item:hover {
-            background-color: #2a2a2a;
-        }
-        .movie-actions button {
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            margin-left: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: color 0.2s;
-        }
-        .movie-actions .delete-btn { 
-            color: var(--accent-color); 
-        }
-        .movie-actions button:hover { text-decoration: underline; }
-        
-        /* 🔥🔥 تنسيق شاشة التحميل */
-        #list-loader {
-            color: #aaa;
-            text-align: center;
-            padding: 40px;
+        #logout-btn { background-color: var(--accent-color); margin-top: 20px; padding: 10px 15px; width: auto; }
+        .movie-actions button, .movie-actions a {
+            background: none; border: none; color: var(--primary-color); margin-left: 15px; cursor: pointer; text-decoration: none; font-weight: bold;
         }
     </style>
 </head>
 <body>
     
-    <a href="index.html" class="back-to-home">&larr; العودة للرئيسية</a>
-
     <div class="container">
+        
+        <div class="top-admin-tools">
+            <a href="index.html" class="back-to-home">&larr; العودة للرئيسية</a>
+            <a href="admin_ai_chat.html" class="ai-control-link">🤖 تحكم AI</a>
+        </div>
         <h1 id="welcome-message">مرحباً بك يا علاوي!</h1>
 
         <div class="admin-nav">
             <a href="admin_control.html" class="admin-nav-btn active">إدارة الأفلام</a>
             <a href="series_list.html" class="admin-nav-btn">إدارة المسلسلات</a>
         </div>
+
         <a href="add_movie_form.html" class="action-btn">🎬 إضافة فيلم جديد</a>
         
         <h2>قائمة الأفلام الحالية</h2>
@@ -159,6 +102,7 @@
         </div>
         
         <button id="logout-btn" class="header-action-btn">تسجيل خروج</button>
+        <div id="error-message" style="color: var(--accent-color); text-align: center; margin-top: 20px;"></div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -166,8 +110,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
+        // ... (كود الـ JS الخاص بالـ Fetch والـ CRUD والـ Security يبقى كما هو في الأسفل)
         // ================ (1) إعدادات Firebase ================
-        // (تم لصق الكونفج هنا)
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -185,6 +129,7 @@
         const listContainer = document.getElementById('admin-movie-list');
         const listLoader = document.getElementById('list-loader');
         const welcomeMessage = document.getElementById('welcome-message');
+        const errorMessageElement = document.getElementById('error-message');
 
 
         // ================ (2) دالة الحذف ================
@@ -196,7 +141,7 @@
                         fetchMovies(); 
                     })
                     .catch(error => {
-                        alert("حدث خطأ في الحذف. تأكد من صلاحياتك.");
+                        errorMessageElement.textContent = `خطأ في الحذف: ${error.message}`;
                     });
             }
         }
@@ -216,7 +161,7 @@
                 item.innerHTML = `
                     <span>${movie.title} (${movie.releaseYear || 'N/A'})</span>
                     <div class="movie-actions">
-                        <button onclick="window.location.href='add_movie_form.html?id=${movie.id}'">تعديل</button>
+                        <a href="add_movie_form.html?id=${movie.id}">تعديل</a>
                         <button class="delete-btn" onclick="deleteMovie('${movie.id}', '${movie.title.replace(/'/g, "\\'")}')">حذف</button>
                     </div>
                 `;
