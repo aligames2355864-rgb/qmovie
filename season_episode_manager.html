@@ -34,36 +34,33 @@
         
         /* تصميم الأزرار الرئيسية */
         .action-group { margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; }
-        .action-group button { 
+        .action-group button, .episode-actions a.action-btn-small { 
             padding: 10px 15px; font-weight: bold; border-radius: 5px; border: none; cursor: pointer;
             background-color: var(--primary-color); color: white; transition: 0.3s;
+            text-decoration: none;
         }
-        .action-group button:hover { background-color: #0056b3; }
         
-        /* 🔥 قائمة المواسم (إصلاح التداخل) */
+        /* قائمة المواسم */
         #seasons-list { list-style: none; padding: 0; }
         #seasons-list > li {
             background-color: #222; padding: 15px; margin-bottom: 15px; border-radius: 8px;
         }
         .season-header { display: flex; justify-content: space-between; align-items: center; font-size: 1.3em; margin-bottom: 10px; }
-
-        /* 🔥🔥 تنسيق أزرار الموسم (السطر اللي طلع مخربط بالصورة) */
-        .season-actions {
-            display: flex; /* لترتيب الأزرار أفقياً */
-            align-items: center;
-        }
         .season-actions a, .season-actions button { 
              margin-left: 10px; font-size: 0.9em; padding: 8px 12px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer;
-             text-decoration: none; color: white;
         }
-        .season-actions .add-episode-btn { background-color: #4CAF50; }
-        .season-actions .delete-season-btn { background-color: var(--accent-color); }
+        .season-actions .add-episode-btn { background-color: #4CAF50; color: white; text-decoration: none; }
+        .season-actions .delete-season-btn { background-color: var(--accent-color); color: white; }
 
         /* قائمة الحلقات */
         .episodes-list { list-style: none; padding-right: 0; margin-top: 10px; }
         .episodes-list > li { 
             background-color: #333; margin-bottom: 8px; padding: 10px; border-radius: 5px;
             display: flex; justify-content: space-between; align-items: center;
+        }
+        .episode-actions button, .episode-actions a { 
+            padding: 5px 10px; font-size: 0.9em; margin-left: 5px; cursor: pointer;
+            border-radius: 4px; color: white; border: none; text-decoration: none;
         }
         .episode-actions .edit-btn { background-color: #007bff; }
         .episode-actions .delete-btn { background-color: var(--accent-color); }
@@ -192,7 +189,7 @@
                     
                     // 🔥🔥 الفرز الرقمي (لحل مشكلة الـ 10 قبل الـ 1)
                     let episodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    episodes.sort((a, b) => parseInt(a.episodeNumber) - parseInt(b.episodeNumber));
+                    episodes.sort((a, b) => parseInt(a.episodeNumber) - parseInt(b.episodeNumber)); // تم الإصلاح
 
 
                     episodes.forEach(episode => {
@@ -201,7 +198,7 @@
                             <span>الحلقة ${episode.episodeNumber}: ${episode.title}</span>
                             <div class="episode-actions">
                                 <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${seasonNumber}&episodeId=${episode.id}" class="edit-btn">تعديل</a>
-                                <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${doc.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
+                                <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${episode.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
                             </div>
                         `;
                         episodesListElement.appendChild(li);
