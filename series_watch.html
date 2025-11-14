@@ -50,8 +50,8 @@
         .server-btn:hover { background-color: #555; }
         
         /* تخصيص ألوان الأزرار */
-        .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; } /* 🔥 BunnyStream (أخضر) */
-        .server-btn.dood-btn.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); } /* 🔥 UQLOAD (أحمر) */
+        .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
+        .server-btn.dood-btn.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
 
         /* 🔥🔥 قائمة المواسم والحلقات */
         .season-section {
@@ -156,10 +156,9 @@
         const seriesTitleElement = document.getElementById('series-title');
         const player = document.getElementById('movie-player');
         const buttonsContainer = document.getElementById('server-buttons');
-        const seasonsContainer = document.getElementById('seasons-container'); // 🔥 تم تعريف هذا العنصر
+        const seasonsContainer = document.getElementById('seasons-container'); 
         const detailRatingNumber = document.getElementById('detail-rating-number');
         const filledStars = document.getElementById('filled-stars');
-
 
         // 🔥 دالة لعرض التقييم النجمي
         function setStarRating(rating) {
@@ -225,29 +224,37 @@
         // ===============================================
 
         function renderEpisodes(seriesId, seasonNumber, episodesElement) {
-            db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).orderBy('episodeNumber', 'asc').get()
+            db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).get()
                 .then(snapshot => {
                     episodesElement.innerHTML = '';
                     if (snapshot.empty) {
                          episodesElement.innerHTML = 'لا توجد حلقات في هذا الموسم.';
                          return;
                     }
-                    snapshot.forEach(doc => {
-                        const episode = doc.data();
-                        const button = document.createElement('a');
-                        button.className = 'episode-button';
-                        button.textContent = `حلقة ${episode.episodeNumber}: ${episode.title}`;
-                        
-                        // 🔥🔥 هذا هو الكود المصحح لربط زر الحلقة بالمشغل
-                        button.onclick = (e) => {
-                             e.preventDefault();
-                             document.querySelectorAll('.episode-button').forEach(btn => btn.classList.remove('current-episode'));
-                             button.classList.add('current-episode');
+                    
+                    // 🔥🔥 الإصلاح النهائي: الفرز الرقمي في JavaScript (يعالج مشكلة الترتيب)
+                    let episodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    episodes.sort((a, b) => parseInt(a.episodeNumber) - parseInt(b.episodeNumber)); // الفرز الآن رقمي 1, 2, ..., 10
 
+
+                    episodes.forEach((episode, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <span>الحلقة ${episode.episodeNumber}: ${episode.title}</span>
+                            <div class="episode-actions">
+                                <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${seasonNumber}&episodeId=${episode.id}" class="edit-btn">تعديل</a>
+                                <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${episode.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
+                            </div>
+                        `;
+                        episodesElement.appendChild(li);
+
+                        // 🔥🔥 تشغيل الحلقة الأولى في أول موسم بشكل تلقائي (مصحح)
+                        // هذا الجزء يجب أن يعمل الآن بعد أن أصبح الترتيب صحيحاً
+                        if (index === 0 && document.querySelector('h1').textContent.includes('الموسم 1') && !document.querySelector('.current-episode')) {
+                             li.querySelector('span').classList.add('current-episode'); 
                              seriesTitleElement.textContent = `${seriesTitleElement.textContent.split(' - ')[0]} - الموسم ${seasonNumber} - حلقة ${episode.episodeNumber}`;
-                             playEpisode(episode.servers, doc.id);
-                        };
-                        episodesElement.appendChild(button);
+                             playEpisode(episode.servers, episode.id);
+                        }
                     });
                 });
         }
@@ -268,29 +275,6 @@
                 const episodesElement = document.getElementById(`episodes-grid-${season.seasonNumber}`);
                 renderEpisodes(seriesId, season.seasonNumber, episodesElement);
             });
-
-             // 🔥🔥 تشغيل أول حلقة في أول موسم بشكل تلقائي (مهم جداً)
-             if (seasons.length > 0) {
-                 const firstSeasonNumber = seasons[0].seasonNumber;
-                 db.collection(`series/${seriesId}/seasons/${firstSeasonNumber}/episodes`).orderBy('episodeNumber', 'asc').limit(1).get()
-                     .then(snapshot => {
-                         if (!snapshot.empty) {
-                             const firstEpisode = snapshot.docs[0].data();
-                             const firstEpisodeId = snapshot.docs[0].id;
-
-                             seriesTitleElement.textContent = `${seriesTitleElement.textContent.split(' - ')[0]} - الموسم ${firstSeasonNumber} - حلقة ${firstEpisode.episodeNumber}`;
-                             
-                             playEpisode(firstEpisode.servers, firstEpisodeId);
-
-                             setTimeout(() => {
-                                 const firstButton = document.querySelector(`#episodes-grid-${firstSeasonNumber} .episode-button`);
-                                 if (firstButton) {
-                                     firstButton.classList.add('current-episode');
-                                 }
-                             }, 1000);
-                         }
-                     });
-             }
         }
 
         function fetchSeriesData() {
@@ -307,11 +291,10 @@
                     if (doc.exists) {
                         const data = doc.data();
                         
-                        // عرض التفاصيل
                         seriesTitleElement.textContent = data.title;
                         document.getElementById('detail-year').textContent = data.releaseYear || 'N/A';
                         document.getElementById('detail-cast').textContent = data.cast || 'N/A';
-                        document.getElementById('detail-description').textContent = data.description || 'لم تتم إضافة وصف.';
+                        document.getElementById('detail-description').textContent = data.description || 'لم يتم إضافة وصف.';
                         setStarRating(data.rating || 0);
 
                         return db.collection(`series/${seriesId}/seasons`).orderBy('seasonNumber', 'asc').get();
