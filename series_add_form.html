@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إضافة / تعديل مسلسل</title>
     <style>
-        /* 🔥🔥 الـ CSS الأساسي (نفسه لتوحيد المظهر) 🔥🔥 */
+        /* 🔥🔥 الـ CSS الأساسي (للتصميم الموحد) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
@@ -14,55 +14,39 @@
         }
         body {
             font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
+            background: radial-gradient(circle at top, #141414, #000);
             color: var(--text-color);
             padding: 20px;
+            margin: 0;
         }
         .container {
             background-color: var(--card-color);
-            padding: 30px;
-            border-radius: 8px;
-            max-width: 700px;
-            margin: 20px auto;
+            padding: 30px; border-radius: 12px; max-width: 700px; margin: 20px auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
-        h1 {
-            color: var(--accent-color); /* لون أحمر للمسلسلات */
-            margin-bottom: 20px;
-            text-align: center;
+        h1 { color: var(--accent-color); margin-bottom: 20px; text-align: center; }
+        input[type="text"], input[type="number"], textarea, select { /* 🔥 تمت إضافة select هنا */
+            width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #333;
+            background-color: #333; color: var(--text-color); font-size: 16px; box-sizing: border-box; resize: vertical;
         }
-        input[type="text"], input[type="number"], textarea { 
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            border: 1px solid #333;
-            background-color: #333;
-            color: var(--text-color);
-            font-size: 16px;
-            box-sizing: border-box;
-            resize: vertical;
+        /* 🔥 تصميم حقل التصنيف */
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="%23f5f5f5" d="M4.5 7.5L10 13l5.5-5.5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: left 10px center;
+            padding-left: 30px;
         }
         button {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            background-color: var(--accent-color);
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            width: 100%; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 5px;
+            background-color: var(--accent-color); color: white; transition: background-color 0.2s;
         }
         button:hover {
-            background-color: #f6121d;
+            background-color: #b00710;
         }
         .back-btn {
-            display: block;
-            margin-bottom: 20px;
-            text-align: right;
-            color: #007bff;
-            text-decoration: none;
+            display: block; margin-bottom: 20px; text-align: right; color: #007bff; text-decoration: none;
         }
         #message {
             color: #ff9a9a;
@@ -90,6 +74,18 @@
 
             <input type="number" id="rating" placeholder="التقييم (من 1 إلى 10)" min="1" max="10" step="0.1" required>
 
+            <hr style="border-color: #555; margin: 20px 0;">
+            <label for="category" style="display: block; margin-bottom: 5px; text-align: right;">تصنيف المسلسل:</label>
+            <select id="category" required>
+                <option value="" disabled selected>اختر التصنيف</option>
+                <option value="Action">أكشن</option>
+                <option value="Drama">دراما</option>
+                <option value="Comedy">كوميديا</option>
+                <option value="Horror">رعب</option>
+                <option value="Sci-Fi">خيال علمي</option>
+                <option value="Animation">رسوم متحركة</option>
+                <option value="Other">أخرى</option>
+            </select>
             <div id="message"></div>
             
             <button type="submit" id="submit-btn">إضافة المسلسل</button>
@@ -101,8 +97,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
-        // ================ (1) إعدادات Firebase ================
-        // (نفس الكونفج والـ UID مالتك)
+        // ===============================================
+        //  إعدادات Firebase والـ UID
+        // ===============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -122,7 +119,11 @@
         const urlParams = new URLSearchParams(window.location.search);
         const seriesId = urlParams.get('seriesId'); 
 
-        // ================ (2) دالة جلب بيانات التعديل (لتعبئة الحقول) ================
+        // ===============================================
+        //  دوال جلب وتحميل البيانات
+        // ===============================================
+
+        // 🔥 تعبئة الفورم في وضع التعديل (Edit Mode)
         if (seriesId) {
             document.getElementById('form-title').textContent = 'تعديل مسلسل موجود';
             document.getElementById('submit-btn').textContent = 'حفظ التعديلات';
@@ -137,6 +138,7 @@
                         document.getElementById('cast').value = data.cast || '';
                         document.getElementById('description').value = data.description || '';
                         document.getElementById('rating').value = data.rating || 5; 
+                        document.getElementById('category').value = data.category || ''; // 🔥 تعبئة التصنيف
                     } else {
                         message.textContent = 'المسلسل غير موجود.';
                     }
@@ -146,7 +148,7 @@
                 });
         }
 
-        // ================ (3) دالة الإرسال ================
+        // 🔥 إرسال البيانات
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             message.textContent = 'جاري الإرسال...';
@@ -157,6 +159,7 @@
             const cast = document.getElementById('cast').value;
             const description = document.getElementById('description').value;
             const rating = parseFloat(document.getElementById('rating').value);
+            const category = document.getElementById('category').value; // 🔥 سحب قيمة التصنيف
             
             const seriesData = {
                 title: title,
@@ -165,16 +168,15 @@
                 cast: cast,                 
                 description: description,   
                 rating: rating,
+                category: category, // 🔥 تخزين التصنيف
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             let savePromise;
 
             if (seriesId) {
-                // وضع التعديل (تحديث)
                 savePromise = db.collection('series').doc(seriesId).update(seriesData);
             } else {
-                // وضع الإضافة (جديد)
                 savePromise = db.collection('series').add(seriesData);
             }
 
@@ -183,17 +185,16 @@
                 message.style.color = 'lightgreen';
                 
                 setTimeout(() => {
-                     // بعد الإضافة/التعديل يرجع لقائمة المسلسلات
                      window.location.href = './series_list.html';
                 }, 1500);
 
             }).catch(error => {
                 message.textContent = 'فشل الإرسال. تأكد من صلاحياتك.';
-                message.style.color = '#ff9a9a';
+                message.style.color = 'var(--accent-color)';
             });
         });
 
-        // ================ (4) الحارس الأمني (الأدمن) ================
+        // 🔥 حارس الأمان (مهم جداً)
         auth.onAuthStateChanged(user => {
             if (!user || user.uid !== ADMIN_UID) {
                 alert('غير مصرح لك بدخول هذه الصفحة.');
