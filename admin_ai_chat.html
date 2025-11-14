@@ -129,7 +129,7 @@
 
         <div id="input-area">
             <input type="text" id="prompt-input" placeholder="أدخل أمر إضافة المسلسل/الفيلم...">
-            <button id="submit-btn" onclick="sendMessage()">إرسال</button>
+            <button id="submit-btn">إرسال</button> 
         </div>
         
         <p style="font-size: 0.9em; text-align: center; margin-top: 15px;">* بعد الإرسال، انسخ الـ JSON مباشرةً من الشاشة وألصقه في صفحة الإضافة اليدوية.</p>
@@ -140,9 +140,9 @@
         const promptInput = document.getElementById('prompt-input');
         const apiKeyInput = document.getElementById('api-key-input');
 
-        // 🔥🔥🔥 دالة الاتصال بـ Gemini API 🔥🔥🔥
+        // 🔥🔥 دالة الاتصال بـ Gemini API 🔥🔥
         async function callGeminiAPI(prompt) {
-            const apiKey = apiKeyInput.value.trim(); // سيقرأ المفتاح الذي قمنا بلصقه
+            const apiKey = apiKeyInput.value.trim();
             if (!apiKey) {
                 appendMessage('AI', 'الرجاء لصق مفتاح API Key أولاً!', 'ai-response');
                 return null;
@@ -174,7 +174,6 @@
                 });
 
                 if (!response.ok) {
-                    // إذا كان هناك خطأ في المفتاح أو الخدمة
                     const errorData = await response.json();
                     const errorMessage = errorData.error?.message || `HTTP Error: ${response.status}`;
                     throw new Error(errorMessage);
@@ -228,7 +227,7 @@
         }
 
 
-        // 🔥🔥 دالة الإرسال الرئيسية
+        // 🔥🔥 دالة الإرسال الرئيسية (التي كانت مفقودة)
         function sendMessage() {
             const prompt = promptInput.value.trim();
             if (prompt === '') return;
