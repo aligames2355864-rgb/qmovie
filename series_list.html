@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة المسلسلات</title>
     <style>
+        /* 🔥🔥 الـ CSS الأساسي (للتصميم الموحد) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
@@ -33,7 +34,7 @@
             border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; text-align: right; 
         }
         
-        /* 🔥 التنقل بين الأفلام والمسلسلات */
+        /* 🔥🔥 التنقل بين الأفلام والمسلسلات */
         .admin-nav { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
         .admin-nav-btn {
             padding: 12px 25px; font-size: 1.1em; font-weight: bold; border: none; border-radius: 8px; text-decoration: none;
@@ -44,11 +45,21 @@
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
         }
-        /* زر إضافة مسلسل جديد */
+        
+        /* 🔥🔥 أزرار الإضافة المزدوجة (المطلوبة) */
+        .add-actions-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+        }
         .add-action-btn {
             padding: 12px 20px; font-weight: bold; border-radius: 8px;
-            background-color: #4CAF50; color: white; text-decoration: none; display: block; width: 100%; margin-bottom: 15px;
+            color: white; text-decoration: none; display: block; width: 50%;
+            text-align: center;
         }
+        .manual-add-btn { background-color: #007bff; }
+        .ai-add-btn { background-color: #4CAF50; } /* لون أخضر للـ AI */
         
         /* تصميم قائمة المسلسلات */
         .series-list-item {
@@ -76,7 +87,10 @@
             <a href="series_list.html" class="admin-nav-btn active" style="background-color: var(--accent-color);">إدارة المسلسلات</a>
         </div>
         
-        <a href="series_add_form.html" class="add-action-btn">📺 إضافة مسلسل جديد</a>
+        <div class="add-actions-group">
+            <a href="series_add_form.html" class="add-action-btn manual-add-btn">📺 إضافة يدوية (Form)</a>
+            <a href="series_add_form_AI.html" class="add-action-btn ai-add-btn">🤖 إضافة بواسطة AI/JSON</a>
+        </div>
         
         <h2>قائمة المسلسلات الحالية</h2>
         <div id="admin-series-list">
@@ -138,7 +152,6 @@
                 const item = document.createElement('div');
                 item.className = 'series-list-item';
                 
-                // 🔥🔥 تعديل: إضافة زر تعديل المسلسل الرئيسي
                 item.innerHTML = `
                     <span class="title">${series.title} (${series.releaseYear || 'N/A'})</span>
                     <div class="series-actions">
