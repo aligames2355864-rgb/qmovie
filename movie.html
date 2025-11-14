@@ -47,9 +47,12 @@
             padding: 10px 25px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; transition: 0.3s;
             background-color: #333; color: var(--text-color);
         }
-        .server-btn.active { background-color: #007bff; box-shadow: 0 0 10px #007bff; }
         .server-btn:hover { background-color: #555; }
         
+        /* تخصيص ألوان الأزرار */
+        .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; } /* 🔥 BunnyStream (أخضر) */
+        .server-btn.dood-btn.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); } /* 🔥 UQLOAD (أحمر) */
+
         /* 🔥🔥 تفاصيل الفيلم (الوصف والتقييم) */
         #details-container { margin-bottom: 30px; text-align: right; }
         .rating-box { display: flex; align-items: center; margin-bottom: 10px; }
@@ -75,7 +78,6 @@
                     src="" 
                     frameborder="0" 
                     marginwidth="0" 
-                    marginheight="0" 
                     scrolling="no" 
                     allowfullscreen>
                 </iframe>
@@ -135,15 +137,14 @@
             filledStars.style.width = `${widthPercentage}%`;
         }
         
-        // 🔥 دالة عرض الفيلم (تم تبسيطها للمشغلات المتعددة)
+        // 🔥 دالة عرض الفيلم (تم تبسيطها للمشغلات الثنائية)
         function displayMovie(movie) {
             movieTitleElement.textContent = movie.title || 'فيلم بدون عنوان';
             
-            // 🔥🔥 نستخدم مصفوفة Servers
             const servers = movie.servers || {};
 
-            // ترتيب المشغلات (الأولوية لـ PlayerJS)
-            const serverOrder = ['playerjs', 'wistia', 'dood']; 
+            // ترتيب المشغلات (الأولوية لـ BunnyStream)
+            const serverOrder = ['bunnystream', 'dood']; 
             
             const availableServers = serverOrder
                 .filter(name => servers[name])
@@ -151,7 +152,7 @@
 
             if (availableServers.length === 0) {
                  player.src = '';
-                 // يمكن عرض رسالة خطأ هنا
+                 alert('عفواً، لا توجد روابط مشاهدة.');
                  return;
             }
             
@@ -165,14 +166,13 @@
                 
                 let buttonText = server.name.toUpperCase();
                 
-                // تخصيص أسماء الأزرار
-                if (server.name === 'playerjs') {
-                    buttonText = 'المشغل الرئيسي';
-                    button.classList.add('active'); // تفعيل الزر الأول
-                } else if (server.name === 'wistia') {
-                    buttonText = 'WISTIA (جودة عالية)';
+                // تخصيص أسماء وألوان الأزرار
+                if (server.name === 'bunnystream') {
+                    buttonText = 'BUNNYSTREAM (احترافي)'; 
+                    button.classList.add('bunnystream-btn'); 
                 } else if (server.name === 'dood') {
-                    buttonText = 'UPSTREAM (مجاني/إعلانات)';
+                    buttonText = 'UQLOAD (مجاني/إعلانات)';
+                    button.classList.add('dood-btn'); 
                 }
 
                 button.textContent = buttonText;
