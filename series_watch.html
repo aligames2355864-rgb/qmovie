@@ -156,8 +156,10 @@
         const seriesTitleElement = document.getElementById('series-title');
         const player = document.getElementById('movie-player');
         const buttonsContainer = document.getElementById('server-buttons');
+        const seasonsContainer = document.getElementById('seasons-container'); // 🔥 تم تعريف هذا العنصر
         const detailRatingNumber = document.getElementById('detail-rating-number');
         const filledStars = document.getElementById('filled-stars');
+
 
         // 🔥 دالة لعرض التقييم النجمي
         function setStarRating(rating) {
@@ -170,7 +172,6 @@
         function playEpisode(episodeServers, episodeId) {
             buttonsContainer.innerHTML = ''; 
 
-            // ترتيب المشغلات (الأولوية لـ BunnyStream)
             const serverOrder = ['bunnystream', 'dood']; 
             
             const availableServers = serverOrder
@@ -252,8 +253,8 @@
         }
         
         function renderSeasons(seriesId, seasons) {
-            seasonsContainer.innerHTML = '';
-             seasons.forEach(season => {
+            seasonsContainer.innerHTML = ''; 
+            seasons.forEach(season => {
                 const section = document.createElement('div');
                 section.className = 'season-section';
                 section.innerHTML = `
@@ -268,7 +269,7 @@
                 renderEpisodes(seriesId, season.seasonNumber, episodesElement);
             });
 
-             // 🔥🔥 تشغيل أول حلقة في أول موسم بشكل تلقائي
+             // 🔥🔥 تشغيل أول حلقة في أول موسم بشكل تلقائي (مهم جداً)
              if (seasons.length > 0) {
                  const firstSeasonNumber = seasons[0].seasonNumber;
                  db.collection(`series/${seriesId}/seasons/${firstSeasonNumber}/episodes`).orderBy('episodeNumber', 'asc').limit(1).get()
@@ -310,7 +311,7 @@
                         seriesTitleElement.textContent = data.title;
                         document.getElementById('detail-year').textContent = data.releaseYear || 'N/A';
                         document.getElementById('detail-cast').textContent = data.cast || 'N/A';
-                        document.getElementById('detail-description').textContent = data.description || 'لم يتم إضافة وصف.';
+                        document.getElementById('detail-description').textContent = data.description || 'لم تتم إضافة وصف.';
                         setStarRating(data.rating || 0);
 
                         return db.collection(`series/${seriesId}/seasons`).orderBy('seasonNumber', 'asc').get();
