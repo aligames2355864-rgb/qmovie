@@ -3,255 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحكم AI: إضافة مسلسلات</title>
+    <title>إضافة مسلسل بواسطة AI</title>
     <style>
-        /* 🔥🔥 الـ CSS الأساسي 🔥🔥 */
+        /* 🔥🔥 الـ CSS الأساسي (موحد مع باقي الموقع) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
-            --text-color: #e0e0e0; 
+            --text-color: #f5f5f5; 
             --accent-color: #e50914; 
             --primary-color: #007bff;
         }
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background: radial-gradient(circle at top, #141414, #000);
             color: var(--text-color);
-            margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0;
         }
         .container {
             background-color: var(--card-color);
-            padding: 20px;
-            border-radius: 12px;
-            max-width: 900px;
-            width: 100%;
+            padding: 30px; border-radius: 12px; max-width: 800px; margin: 20px auto;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
         }
         h1 { color: var(--accent-color); margin-bottom: 10px; text-align: center; }
+        h2 { color: var(--primary-color); font-size: 1.2em; margin-bottom: 20px; text-align: center; }
         
-        /* 🔥 منطقة الإعدادات والأمان */
-        #settings-area {
-            background-color: #333;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: right;
+        textarea { 
+            width: 100%; height: 350px; padding: 15px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #333;
+            background-color: #333; color: lightgreen; font-size: 14px; box-sizing: border-box; resize: vertical;
         }
-        #api-key-input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: none;
-            background-color: #1a1a1a;
-            color: lightgreen;
+        button {
+            width: 100%; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 5px;
+            background-color: var(--accent-color); color: white; cursor: pointer; transition: background-color 0.2s;
         }
-
-        /* 🔥 منطقة الدردشة والنتائج */
-        #chat-window {
-            height: 400px;
-            background-color: #111;
-            border: 1px solid #444;
-            border-radius: 8px;
-            overflow-y: scroll;
-            padding: 15px;
-            margin-bottom: 15px;
-            text-align: right;
-            white-space: pre-wrap;
-        }
-        #chat-window p {
-            margin: 10px 0;
-            padding: 8px;
-            border-radius: 5px;
-        }
-        .user-message {
-            background-color: #007bff;
-            align-self: flex-end;
-            text-align: right;
-        }
-        .ai-response {
-            background-color: var(--accent-color);
-            color: #fff;
-            align-self: flex-start;
-            text-align: right;
-        }
-        .ai-json {
-             background-color: #0056b3;
-             padding: 15px;
-             font-family: monospace;
-             font-size: 0.9em;
-             cursor: pointer;
-             margin-top: 10px;
-        }
-        .ai-json:hover {
-            opacity: 0.9;
-        }
-
-        /* 🔥 منطقة الإدخال */
-        #input-area {
-            display: flex;
-            gap: 10px;
-        }
-        #prompt-input {
-            flex-grow: 1;
-            padding: 12px;
-            border-radius: 5px;
-            border: none;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--text-color);
-        }
-        #submit-btn {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+        button:hover { background-color: #b00710; }
+        .back-btn { display: block; margin-bottom: 20px; text-align: right; color: var(--primary-color); text-decoration: none; }
+        #message { color: #ff9a9a; text-align: center; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
+
+    <a href="series_list.html" class="back-btn">&larr; العودة لقائمة المسلسلات</a>
+    
     <div class="container">
-        <h1>🤖 لوحة تحكم Gemini AI</h1>
-        
-        <div id="settings-area">
-            <p style="color: yellow;">⚠️ **أمان!** المفتاح موجود الآن في الحقل أدناه. لا تشارك هذه الصفحة.</p>
-            <input type="text" id="api-key-input" value="AIzaSyDTBvYaNGsNuQlaFjjtKlG9rlIbUvVuMJs" placeholder="GEMINI API KEY">
-        </div>
+        <h1>🤖 إضافة مسلسل بواسطة AI/JSON</h1>
+        <h2>الصق هنا البيانات الأساسية للمسلسل فقط</h2>
 
-        <div id="chat-window">
-            <p style="color: #ccc; text-align: center;">ابدأ بإرسال أمر لإضافة مسلسل أو فيلم (مثال: أضف مسلسل The Last of Us مع المواسم 1 و 2).</p>
-        </div>
+        <form id="ai-form">
+            <textarea id="jsonInput" placeholder="الصق هنا كود JSON الذي تم إنشاؤه بواسطة Gemini (فقط: title, description, posterUrl, rating, etc.)..." required></textarea>
 
-        <div id="input-area">
-            <input type="text" id="prompt-input" placeholder="أدخل أمر إضافة المسلسل/الفيلم...">
-            <button id="submit-btn">إرسال</button> 
-        </div>
-        
-        <p style="font-size: 0.9em; text-align: center; margin-top: 15px;">* بعد الإرسال، انسخ الـ JSON مباشرةً من الشاشة وألصقه في صفحة الإضافة اليدوية.</p>
+            <div id="message"></div>
+            
+            <button type="submit" id="submit-btn">إضافة المسلسل الرئيسي</button>
+        </form>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
     <script>
-        const chatWindow = document.getElementById('chat-window');
-        const promptInput = document.getElementById('prompt-input');
-        const apiKeyInput = document.getElementById('api-key-input');
+        // ===============================================
+        //  إعدادات Firebase (مفتاحك مثبت)
+        // ===============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
+            authDomain: "qmove1.firebaseapp.com",
+            projectId: "qmove1",
+            storageBucket: "qmove1.appspot.com",
+            messagingSenderId: "166464805371",
+            appId: "1:166464805371:web:d65b0cb8b141e4b894935e"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
-        // 🔥🔥 دالة الاتصال بـ Gemini API 🔥🔥
-        async function callGeminiAPI(prompt) {
-            const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) {
-                appendMessage('AI', 'الرجاء لصق مفتاح API Key أولاً!', 'ai-response');
-                return null;
-            }
+        const form = document.getElementById('ai-form');
+        const jsonInput = document.getElementById('jsonInput');
+        const message = document.getElementById('message');
 
-            const SYSTEM_INSTRUCTION = `You are a movie database helper. Your task is to analyze the user's request (for a movie or series) and output ONLY a clean, valid JSON object. 
+        // 🔥 دالة الإرسال لـ Firestore (المبسطة)
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            message.textContent = 'جاري التحليل والرفع...';
             
-            Structure MUST include: "title", "description", "posterUrl" (placeholder), "releaseYear", "cast", "rating" (numeric out of 10), and "category". 
-            
-            If the user asks for EPISODES/SEASONS, you MUST include a "seasons" array, where each season has an "episodes" array, and each episode includes "episodeNumber", "title", "bunnyStreamLink" (placeholder), and "uqloadLink" (placeholder).
-            
-            DO NOT include any text before or after the JSON.`;
-
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-            
-            const typingMessage = appendMessage('AI', 'الذكاء الاصطناعي يكتب الآن...', 'ai-response');
-
             try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                        config: {
-                            systemInstruction: SYSTEM_INSTRUCTION,
-                            responseMimeType: "application/json",
-                        }
-                    })
-                });
+                const seriesData = JSON.parse(jsonInput.value.trim());
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    const errorMessage = errorData.error?.message || `HTTP Error: ${response.status}`;
-                    throw new Error(errorMessage);
+                if (!seriesData.title || !seriesData.posterUrl) {
+                    message.textContent = 'خطأ: ملف JSON ناقص (Title أو PosterUrl).';
+                    return;
                 }
-
-                const data = await response.json();
-                const jsonText = data.candidates[0]?.content?.parts[0]?.text.trim();
                 
-                if (typingMessage && typingMessage.parentNode) {
-                    typingMessage.parentNode.removeChild(typingMessage);
-                }
+                const finalData = {
+                    title: seriesData.title,
+                    posterUrl: seriesData.posterUrl,
+                    description: seriesData.description || "",
+                    releaseYear: seriesData.releaseYear || "",
+                    cast: seriesData.cast || "",
+                    rating: parseFloat(seriesData.rating) || 5.0,
+                    category: seriesData.category || "General",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
 
-                if (jsonText) {
-                    appendJSONResponse(jsonText);
-                } else {
-                    appendMessage('AI', 'لم يتم الحصول على بيانات JSON منظمة. حاول أن تكون أكثر تحديداً في طلبك.', 'ai-response');
-                }
+                db.collection('series').add(finalData)
+                    .then((docRef) => {
+                        message.textContent = `✅ تم إضافة المسلسل بنجاح! ID: ${docRef.id}`;
+                        message.style.color = 'lightgreen';
+                        form.reset();
+                        
+                        alert(`تم إضافة المسلسل. الآن، يرجى الذهاب لـ "إدارة المواسم" لإضافة الحلقات يدوياً.`);
+
+                        setTimeout(() => {
+                             window.location.href = './series_list.html';
+                        }, 2500);
+                    })
+                    .catch(error => {
+                        message.textContent = '❌ فشل الخزن في الداتابيس. تأكد من قواعد الأمان.';
+                        message.style.color = 'var(--accent-color)';
+                    });
 
             } catch (error) {
-                 if (typingMessage && typingMessage.parentNode) {
-                    typingMessage.parentNode.removeChild(typingMessage);
-                }
-                appendMessage('AI', `❌ خطأ في الاتصال: ${error.message}. يرجى المحاولة مرة أخرى أو التأكد من أن المفتاح يعمل.`, 'ai-response');
-                console.error("Gemini API Error:", error);
-            }
-        }
-
-        // دالة عرض الرسائل في الواجهة
-        function appendMessage(sender, text, className) {
-            const messageElement = document.createElement('p');
-            messageElement.className = className;
-            messageElement.textContent = `${sender}: ${text}`;
-            chatWindow.appendChild(messageElement);
-            chatWindow.scrollTop = chatWindow.scrollHeight; // النزول للأسفل
-            return messageElement;
-        }
-
-        // دالة عرض كود JSON القابل للنسخ
-        function appendJSONResponse(jsonText) {
-            appendMessage('AI', 'تم تحليل البيانات بنجاح. اضغط على الكود لنسخه:', 'ai-response');
-            
-            const jsonDiv = document.createElement('div');
-            jsonDiv.className = 'ai-json';
-            jsonDiv.textContent = jsonText;
-            jsonDiv.onclick = () => {
-                navigator.clipboard.writeText(jsonText);
-                alert('تم نسخ JSON. الآن ألصقه في صفحة الإضافة اليدوية.');
-            };
-            chatWindow.appendChild(jsonDiv);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
-
-
-        // 🔥🔥 دالة الإرسال الرئيسية (التي كانت مفقودة)
-        function sendMessage() {
-            const prompt = promptInput.value.trim();
-            if (prompt === '') return;
-
-            appendMessage('أنا', prompt, 'user-message');
-            callGeminiAPI(prompt);
-            promptInput.value = '';
-        }
-
-        // ربط زر الإرسال و زر Enter
-        document.getElementById('submit-btn').addEventListener('click', sendMessage);
-        promptInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
+                message.textContent = '❌ خطأ في تحليل JSON. تأكد أن الكود يبدأ وينتهي بـ { } وليس فيه أخطاء إملائية.';
             }
         });
-        
-        // ربط القائمة الجانبية بالصفحة الرئيسية
-        const backButton = document.createElement('a');
-        backButton.href = 'index.html';
-        backButton.className = 'back-btn';
-        backButton.textContent = '→ العودة للرئيسية';
-        document.body.prepend(backButton);
 
+        // 🔥 حارس الأمان (مهم جداً)
+        auth.onAuthStateChanged(user => {
+            if (!user || user.uid !== ADMIN_UID) {
+                window.location.href = './login.html';
+            }
+        });
     </script>
 </body>
 </html>
