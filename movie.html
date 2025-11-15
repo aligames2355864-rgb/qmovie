@@ -15,18 +15,40 @@
         }
         body {
             font-family: Arial, sans-serif;
-            background: radial-gradient(circle at top, #141414, #000);
+            background-color: var(--bg-color);
             color: var(--text-color);
             padding: 0;
             margin: 0;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
+            position: relative; /* مهم للخلفية */
         }
         body.loaded { opacity: 1; }
+
+        /* 🔥🔥 الخلفية السينمائية (تأثير الضباب) 🔥🔥 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* يجعله خلف المحتوى */
+            background-size: cover;
+            background-position: center;
+            filter: blur(20px) brightness(0.6); /* ضباب وظلام */
+            transform: scale(1.1); /* لمنع حواف الضباب من الظهور */
+            transition: background-image 1s;
+        }
         
         header {
             display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; 
-            background-color: var(--card-color); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            background-color: rgba(26, 26, 26, 0.7); /* خلفية شبه شفافة */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px); /* تأثير الزجاج */
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         .back-btn { font-size: 1.5em; color: #007bff; text-decoration: none; transition: color 0.3s; }
         .back-btn:hover { color: var(--accent-color); }
@@ -37,24 +59,31 @@
         #player-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
         #player-container {
             width: 100%; max-width: 900px; position: relative; padding-bottom: 500px; height: 0;
-            background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+            background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); /* ظل عميق */
         }
         #movie-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* 🔥🔥 أزرار السيرفرات */
+        /* 🔥🔥 أزرار السيرفرات والمشغل */
         #server-buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 20px; }
         .server-btn {
             padding: 10px 25px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; transition: 0.3s;
             background-color: #333; color: var(--text-color);
         }
-        .server-btn:hover { background-color: #555; }
+        .server-btn.active { background-color: #007bff; box-shadow: 0 0 10px #007bff; }
+        .server-btn:hover { transform: translateY(-2px); }
         
         /* تخصيص ألوان الأزرار */
-        .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; } /* 🔥 BunnyStream (أخضر) */
-        .server-btn.dood-btn.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); } /* 🔥 UQLOAD (أحمر) */
+        .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; } 
+        .server-btn.dood-btn.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
 
-        /* 🔥🔥 تفاصيل الفيلم (الوصف والتقييم) */
-        #details-container { margin-bottom: 30px; text-align: right; }
+        /* 🔥🔥 تفاصيل الفيلم (لتكون مقروءة على الخلفية الداكنة) */
+        #details-container { 
+            margin-bottom: 30px; 
+            text-align: right; 
+            background-color: rgba(26, 26, 26, 0.85); /* خلفية شبه شفافة للمحتوى */
+            padding: 30px; 
+            border-radius: 12px;
+        }
         .rating-box { display: flex; align-items: center; margin-bottom: 10px; }
         .rating-text { font-size: 1.2em; font-weight: bold; color: gold; margin-left: 10px; }
         .meta-info { display: flex; flex-wrap: wrap; gap: 30px; border-bottom: 1px solid #444; padding-bottom: 15px; margin-bottom: 15px; }
@@ -137,13 +166,21 @@
             filledStars.style.width = `${widthPercentage}%`;
         }
         
-        // 🔥 دالة عرض الفيلم (تم تبسيطها للمشغلات الثنائية)
+        // 🔥 دالة عرض الفيلم (مع الأزرار والمشغل)
         function displayMovie(movie) {
             movieTitleElement.textContent = movie.title || 'فيلم بدون عنوان';
             
-            const servers = movie.servers || {};
+            // 🔥🔥 الخطوة الجديدة: تعيين صورة البوستر كخلفية للصفحة
+            const posterUrl = movie.posterUrl;
+            document.body.style.setProperty('--poster-url', `url('${posterUrl}')`);
+            document.body.style.backgroundImage = `var(--poster-url)`;
+            
+            // 🔥 تطبيق الخلفية على الـ pseudo-element
+            document.body.style.setProperty('--poster-url', `url('${posterUrl}')`);
+            document.querySelector('body::before').style.backgroundImage = `var(--poster-url)`;
 
-            // ترتيب المشغلات (الأولوية لـ BunnyStream)
+
+            const servers = movie.servers || {};
             const serverOrder = ['bunnystream', 'dood']; 
             
             const availableServers = serverOrder
@@ -156,7 +193,6 @@
                  return;
             }
             
-            // تشغيل المشغل الأول افتراضياً
             player.src = availableServers[0].url;
             
             // عرض الأزرار
@@ -166,7 +202,6 @@
                 
                 let buttonText = server.name.toUpperCase();
                 
-                // تخصيص أسماء وألوان الأزرار
                 if (server.name === 'bunnystream') {
                     buttonText = 'BUNNYSTREAM (احترافي)'; 
                     button.classList.add('bunnystream-btn'); 
