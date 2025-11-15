@@ -59,18 +59,17 @@
         #player-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
         #player-container {
             width: 100%; max-width: 900px; position: relative; padding-bottom: 500px; height: 0;
-            background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9); /* ظل عميق */
+            background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
         }
         #movie-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* 🔥🔥 أزرار السيرفرات والمشغل */
+        /* 🔥🔥 أزرار السيرفرات */
         #server-buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 20px; }
         .server-btn {
             padding: 10px 25px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; transition: 0.3s;
             background-color: #333; color: var(--text-color);
         }
-        .server-btn.active { background-color: #007bff; box-shadow: 0 0 10px #007bff; }
-        .server-btn:hover { transform: translateY(-2px); }
+        .server-btn:hover { background-color: #555; }
         
         /* تخصيص ألوان الأزرار */
         .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; } 
@@ -137,7 +136,7 @@
 
     <script>
         // ===============================================
-        //  إعدادات Firebase والـ UID
+        //  إعدادات Firebase والـ UID (المفتاح الآن صحيح)
         // ===============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
@@ -170,12 +169,8 @@
         function displayMovie(movie) {
             movieTitleElement.textContent = movie.title || 'فيلم بدون عنوان';
             
-            // 🔥🔥 الخطوة الجديدة: تعيين صورة البوستر كخلفية للصفحة
+            // 🔥🔥 تعيين صورة البوستر كخلفية للصفحة (الخلفية السينمائية)
             const posterUrl = movie.posterUrl;
-            document.body.style.setProperty('--poster-url', `url('${posterUrl}')`);
-            document.body.style.backgroundImage = `var(--poster-url)`;
-            
-            // 🔥 تطبيق الخلفية على الـ pseudo-element
             document.body.style.setProperty('--poster-url', `url('${posterUrl}')`);
             document.querySelector('body::before').style.backgroundImage = `var(--poster-url)`;
 
