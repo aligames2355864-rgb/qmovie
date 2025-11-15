@@ -33,19 +33,19 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* يجعله خلف المحتوى */
+            z-index: -1; 
             background-size: cover;
             background-position: center;
-            filter: blur(20px) brightness(0.6); /* ضباب وظلام */
-            transform: scale(1.1); /* لمنع حواف الضباب من الظهور */
+            filter: blur(20px) brightness(0.6); 
+            transform: scale(1.1); 
             transition: background-image 1s;
         }
         
         header {
             display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; 
-            background-color: rgba(26, 26, 26, 0.7); /* خلفية شبه شفافة */
+            background-color: rgba(26, 26, 26, 0.7); 
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px); /* تأثير الزجاج */
+            backdrop-filter: blur(5px); 
             position: sticky;
             top: 0;
             z-index: 10;
@@ -69,7 +69,6 @@
             padding: 10px 25px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; transition: 0.3s;
             background-color: #333; color: var(--text-color);
         }
-        .server-btn:hover { background-color: #555; }
         
         /* تخصيص ألوان الأزرار */
         .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; } 
@@ -79,7 +78,7 @@
         #details-container { 
             margin-bottom: 30px; 
             text-align: right; 
-            background-color: rgba(26, 26, 26, 0.85); /* خلفية شبه شفافة للمحتوى */
+            background-color: rgba(26, 26, 26, 0.85); 
             padding: 30px; 
             border-radius: 12px;
         }
@@ -158,6 +157,17 @@
         const detailRatingNumber = document.getElementById('detail-rating-number');
         const filledStars = document.getElementById('filled-stars');
 
+        // 🔥 دالة لحقن الخلفية السينمائية
+        function setCinematicBackground(posterUrl) {
+            const styleTag = document.createElement('style');
+            styleTag.textContent = `
+                body::before {
+                    background-image: url('${posterUrl}');
+                }
+            `;
+            document.head.appendChild(styleTag);
+        }
+
         // 🔥 دالة لعرض التقييم النجمي
         function setStarRating(rating) {
             const widthPercentage = (rating / 10) * 100;
@@ -165,16 +175,14 @@
             filledStars.style.width = `${widthPercentage}%`;
         }
         
-        // 🔥 دالة عرض الفيلم (مع الأزرار والمشغل)
+        // 🔥 دالة عرض الفيلم
         function displayMovie(movie) {
+            
+            // 🔥🔥 الخطوة الجديدة: تعيين صورة البوستر كخلفية للصفحة (تم حل مشكلة الـ Null)
+            setCinematicBackground(movie.posterUrl);
+
             movieTitleElement.textContent = movie.title || 'فيلم بدون عنوان';
             
-            // 🔥🔥 تعيين صورة البوستر كخلفية للصفحة (الخلفية السينمائية)
-            const posterUrl = movie.posterUrl;
-            document.body.style.setProperty('--poster-url', `url('${posterUrl}')`);
-            document.querySelector('body::before').style.backgroundImage = `var(--poster-url)`;
-
-
             const servers = movie.servers || {};
             const serverOrder = ['bunnystream', 'dood']; 
             
