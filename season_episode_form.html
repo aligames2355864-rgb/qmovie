@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+    <meta charset="UTF-8">
+    <title>إضافة حلقة جديدة</title>
     <style>
         :root {
             --bg-color: #0d0d0d; 
@@ -24,13 +26,13 @@
         h1 { color: var(--accent-color); margin-bottom: 20px; text-align: center; }
         h2 { color: var(--text-color); font-size: 1.2em; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
         
-        input[type="text"], input[type="number"], textarea { 
+        input[type="text"], input[type="number"], input[type="url"], textarea { 
             width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #333;
             background-color: #333; color: var(--text-color); font-size: 16px; box-sizing: border-box; resize: vertical;
         }
         button {
             width: 100%; padding: 15px; font-size: 18px; font-weight: bold; border: none; border-radius: 5px;
-            background-color: var(--primary-color); color: white; transition: background-color 0.2s;
+            background-color: var(--primary-color); color: white; transition: background-color 0.2s; cursor: pointer;
         }
         button:hover { background-color: #0056b3; }
         .back-btn { display: block; margin-bottom: 20px; text-align: right; color: var(--primary-color); text-decoration: none; }
@@ -53,9 +55,10 @@
             <input type="text" id="title" placeholder="عنوان الحلقة (مثال: نهاية العالم)" required>
             <textarea id="description" placeholder="وصف موجز للحلقة (اختياري)" rows="3"></textarea>
 
-            <h2 style="margin-top: 30px;">روابط المشغل (Embed)</h2>
-            <input type="text" id="bunnystream" placeholder="1. BunnyStream Link (احترافي/نظيف)">
+            <h2 style="margin-top: 30px;">روابط المشغل (Embed) والترجمة</h2>
+            <input type="text" id="bunnystream" placeholder="1. رابط الحلقة (مباشر mp4 أو BunnyStream)">
             <input type="text" id="dood" placeholder="2. UQLOAD Link (مجاني/إعلانات)">
+            <input type="url" id="subtitle_url" placeholder="3. رابط ملف الترجمة (VTT) - اختياري">
 
             <div id="message"></div>
             
@@ -68,9 +71,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
-        // ===============================================
-        //  إعدادات Firebase والـ UID
-        // ===============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -95,19 +95,12 @@
 
         document.getElementById('back-link').href = `season_episode_manager.html?seriesId=${seriesId}`;
 
-
-        // ===============================================
-        //  دوآل جلب وتحميل البيانات
-        // ===============================================
-
-        // 🔥 جلب اسم المسلسل وعرضه في الهيدر
         db.collection('series').doc(seriesId).get().then(doc => {
             if (doc.exists) {
                 document.getElementById('series-info').textContent = `مسلسل: ${doc.data().title} | الموسم ${seasonNum}`;
             }
         });
         
-        // 🔥 تعبئة الفورم في وضع التعديل (Edit Mode)
         if (episodeId) {
             document.getElementById('form-title').textContent = 'تعديل الحلقة';
             document.getElementById('submit-btn').textContent = 'حفظ التعديلات';
@@ -117,15 +110,16 @@
                     if (doc.exists) {
                         const data = doc.data();
                         
-                        // 🔥🔥🔥 ملاحظة: الـ episodeNumber يجب أن يكون رقمي هنا
                         document.getElementById('episodeNumber').value = data.episodeNumber || ''; 
-                        
                         document.getElementById('title').value = data.title || '';
                         document.getElementById('description').value = data.description || '';
                         
                         const servers = data.servers || {};
                         document.getElementById('bunnystream').value = servers.bunnystream || '';
                         document.getElementById('dood').value = servers.dood || '';
+                        
+                        // 🔥 سحب رابط الترجمة في حالة التعديل 🔥
+                        document.getElementById('subtitle_url').value = data.subtitle_url || '';
 
                         document.getElementById('episodeNumber').disabled = true; 
                     } else {
@@ -137,7 +131,6 @@
                 });
         }
         
-        // 🔥 إرسال البيانات
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             message.textContent = 'جاري الإرسال...';
@@ -148,11 +141,10 @@
 
             const bunnystreamLink = document.getElementById('bunnystream').value.trim();
             const doodLink = document.getElementById('dood').value.trim();
+            const subtitleUrl = document.getElementById('subtitle_url').value.trim(); // 🔥 استخراج رابط الترجمة 🔥
             
-            // 🔥🔥🔥 الإصلاح: تحويل رقم الحلقة إلى integer قبل الخزن 🔥🔥🔥
             const episodeNumberNumeric = parseInt(episodeNumberInput); 
             
-            // التأكد من أن التحويل تم بنجاح
             if (isNaN(episodeNumberNumeric)) {
                  message.textContent = 'خطأ: رقم الحلقة غير صالح.';
                  message.style.color = 'var(--accent-color)';
@@ -160,21 +152,20 @@
             }
 
             const episodeData = {
-                episodeNumber: episodeNumberNumeric, // 🔥 يخزن كـ Number
+                episodeNumber: episodeNumberNumeric, 
                 title: title,
                 description: description,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                servers: { bunnystream: bunnystreamLink, dood: doodLink }
+                servers: { bunnystream: bunnystreamLink, dood: doodLink },
+                subtitle_url: subtitleUrl // 🔥 خزن رابط الترجمة بقاعدة البيانات 🔥
             };
 
             const collectionPath = `series/${seriesId}/seasons/${seasonNum}/episodes`;
             let savePromise;
 
             if (episodeId) {
-                // وضع التعديل
                 savePromise = db.collection(collectionPath).doc(episodeId).update(episodeData);
             } else {
-                // وضع الإضافة: نستخدم رقم الحلقة (النص) كـ ID (حتى لو خرب الترتيب النصي، الأفضل نستخدم ID فريد)
                 savePromise = db.collection(collectionPath).doc(episodeNumberInput).set(episodeData);
             }
 
@@ -193,7 +184,6 @@
             });
         });
 
-        // 🔥 حارس الأمان (مهم جداً)
         auth.onAuthStateChanged(user => {
             if (!user || user.uid !== ADMIN_UID) {
                 window.location.href = './login.html';
