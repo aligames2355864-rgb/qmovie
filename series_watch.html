@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مشاهدة المسلسل</title>
     <style>
-        /* 🔥🔥 الـ CSS الموحد (مريح للعين وجذاب) 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
@@ -32,16 +31,13 @@
         .back-btn:hover { color: var(--accent-color); }
         #logout-btn { padding: 8px 12px; background-color: var(--accent-color); color: white; border-radius: 5px; cursor: pointer; border: none; }
 
-        /* 🔥🔥 منطقة المشغل (Player) */
         main { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
         #player-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
         #player-container {
-            width: 100%; max-width: 900px; position: relative; padding-bottom: 500px; height: 0;
+            width: 100%; max-width: 900px; position: relative; padding-bottom: 56.25%; height: 0; /* تم تعديل الأبعاد لتلائم 16:9 */
             background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
         }
-        #movie-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* 🔥🔥 أزرار السيرفرات والحلقات */
         #server-buttons { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 20px; }
         .server-btn {
             padding: 10px 25px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; transition: 0.3s;
@@ -49,37 +45,25 @@
         }
         .server-btn.active { background-color: #007bff; box-shadow: 0 0 10px #007bff; }
         .server-btn:hover { background-color: #555; }
-        
-        /* تخصيص ألوان الأزرار */
         .server-btn.bunnystream-btn.active { background-color: #4CAF50; box-shadow: 0 0 10px #4CAF50; } 
         .server-btn.dood-btn.active { background-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); }
 
-        /* 🔥🔥 قائمة المواسم والحلقات */
         .season-section {
             background-color: var(--card-color); padding: 20px; border-radius: 12px; margin-top: 25px;
             text-align: right;
         }
-        .season-header {
-            font-size: 1.6em; color: var(--accent-color); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;
-        }
-        .episode-button-grid {
-            display: flex; flex-wrap: wrap; gap: 10px;
-        }
-        .episode-button { /* 🔥 الآن هي أزرار تشغيل نقية */
+        .season-header { font-size: 1.6em; color: var(--accent-color); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .episode-button-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+        .episode-button { 
             padding: 8px 15px; background-color: #2a2a2a; color: var(--text-color); border-radius: 5px;
-            text-decoration: none; transition: 0.2s; border: 1px solid #444;
-            transition: all 0.3s; cursor: pointer;
+            text-decoration: none; transition: 0.2s; border: 1px solid #444; cursor: pointer;
         }
-        .episode-button:hover {
-            transform: scale(1.05);
-            background-color: #444;
-        }
+        .episode-button:hover { transform: scale(1.05); background-color: #444; }
         .episode-button.current-episode {
             background-color: var(--primary-color); border-color: var(--primary-color); font-weight: bold;
             box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
         }
 
-        /* 🔥🔥 تفاصيل المسلسل (الوصف والتقييم) */
         #details-container { margin-bottom: 30px; text-align: right; }
         .rating-box { display: flex; align-items: center; margin-bottom: 10px; }
         .rating-text { font-size: 1.2em; font-weight: bold; color: gold; margin-left: 10px; }
@@ -99,16 +83,7 @@
 
     <main>
         <div id="player-wrapper">
-            <div id="player-container">
-                <iframe 
-                    id="movie-player" 
-                    src="" 
-                    frameborder="0" 
-                    marginwidth="0" 
-                    scrolling="no" 
-                    allowfullscreen>
-                </iframe>
-            </div>
+            <div id="player-container"></div>
         </div>
         
         <div id="server-buttons"></div>
@@ -129,7 +104,6 @@
         <div id="seasons-container">
             <p id="loading-indicator" style="text-align: center;">جاري جلب المواسم والحلقات...</p>
         </div>
-        
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -137,9 +111,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
-        // ===============================================
-        //  إعدادات Firebase والـ UID
-        // ===============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -155,21 +126,19 @@
         const ADMIN_UID = 'rHIJXeazJiMsgAc1HDRO3vzFFV02'; 
 
         const seriesTitleElement = document.getElementById('series-title');
-        const player = document.getElementById('movie-player');
         const buttonsContainer = document.getElementById('server-buttons');
         const seasonsContainer = document.getElementById('seasons-container'); 
         const detailRatingNumber = document.getElementById('detail-rating-number');
         const filledStars = document.getElementById('filled-stars');
 
-        // 🔥 دالة لعرض التقييم النجمي
         function setStarRating(rating) {
             const widthPercentage = (rating / 10) * 100;
             detailRatingNumber.textContent = rating ? rating.toFixed(1) : 'N/A';
             filledStars.style.width = `${widthPercentage}%`;
         }
         
-        // 🔥 دالة عرض الحلقة في المشغل (مع الأزرار الجديدة)
-        function playEpisode(episodeServers, episodeId) {
+        // 🔥 دالة عرض الحلقة والمشغل مع الترجمة 🔥
+        function playEpisode(episodeServers, subtitleUrl) {
             buttonsContainer.innerHTML = ''; 
 
             const serverOrder = ['bunnystream', 'dood']; 
@@ -178,14 +147,34 @@
                 .filter(name => episodeServers[name])
                 .map(name => ({ name, url: episodeServers[name] }));
 
+            const container = document.getElementById('player-container');
+
             if (availableServers.length === 0) {
-                 player.src = '';
-                 alert('عفواً، لا توجد روابط مشاهدة لهذه الحلقة.');
+                 container.innerHTML = '<div style="color:white; text-align:center; padding-top:20%; font-size:1.5em;">عفواً، لا توجد روابط مشاهدة لهذه الحلقة.</div>';
                  return;
             }
             
+            // 🔥 دالة ذكية تحدد نوع المشغل حسب وجود الترجمة أو نوع الرابط
+            function renderPlayer(url) {
+                if (subtitleUrl || url.includes('.mp4')) {
+                    // إذا كان هناك ترجمة أو رابط مباشر، استخدم Video Tag
+                    container.innerHTML = `
+                        <video controls autoplay style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background-color: #000;">
+                            <source src="${url}" type="video/mp4">
+                            ${subtitleUrl ? `<track label="العربية" kind="subtitles" srclang="ar" src="${subtitleUrl}" default>` : ''}
+                            متصفحك لا يدعم تشغيل الفيديو.
+                        </video>
+                    `;
+                } else {
+                    // خلاف ذلك، استخدم Iframe الافتراضي
+                    container.innerHTML = `
+                        <iframe src="${url}" frameborder="0" marginwidth="0" scrolling="no" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"></iframe>
+                    `;
+                }
+            }
+
             // تشغيل المشغل الأول افتراضياً
-            player.src = availableServers[0].url;
+            renderPlayer(availableServers[0].url);
             
             // عرض الأزرار
             availableServers.forEach((server, index) => {
@@ -194,12 +183,11 @@
                 
                 let buttonText = server.name.toUpperCase();
                 
-                // تخصيص أسماء وألوان الأزرار
                 if (server.name === 'bunnystream') {
-                    buttonText = 'BUNNYSTREAM (احترافي)'; 
+                    buttonText = 'المشغل الرئيسي (يدعم الترجمة)'; 
                     button.classList.add('bunnystream-btn'); 
                 } else if (server.name === 'dood') {
-                    buttonText = 'UQLOAD (مجاني/إعلانات)';
+                    buttonText = 'UQLOAD (سيرفر احتياطي)';
                     button.classList.add('dood-btn'); 
                 }
 
@@ -210,7 +198,7 @@
                 }
 
                 button.onclick = () => {
-                    player.src = server.url;
+                    renderPlayer(server.url);
                     document.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
                 };
@@ -218,11 +206,6 @@
                 buttonsContainer.appendChild(button);
             });
         }
-
-
-        // ===============================================
-        //  دوآل جلب وعرض البيانات (المواسم والحلقات)
-        // ===============================================
 
         function renderEpisodes(seriesId, seasonNumber, episodesElement) {
             db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).get()
@@ -233,25 +216,23 @@
                          return;
                     }
                     
-                    // 🔥🔥 الفرز الرقمي (يعالج مشكلة الترتيب)
                     let episodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     episodes.sort((a, b) => parseInt(a.episodeNumber) - parseInt(b.episodeNumber)); 
 
-
                     episodes.forEach(episode => {
-                        // 🔥🔥 التعديل: هنا هو زر التشغيل النقّي (بدون تعديل/حذف) 🔥🔥
                         const button = document.createElement('a'); 
                         button.className = 'episode-button';
                         button.textContent = `حلقة ${episode.episodeNumber}: ${episode.title}`;
                         
-                        // ربط الزر بوظيفة التشغيل
                         button.onclick = (e) => {
                              e.preventDefault();
                              document.querySelectorAll('.episode-button').forEach(btn => btn.classList.remove('current-episode'));
                              button.classList.add('current-episode');
 
                              seriesTitleElement.textContent = `${seriesTitleElement.textContent.split(' - ')[0]} - الموسم ${seasonNumber} - حلقة ${episode.episodeNumber}`;
-                             playEpisode(episode.servers, episode.id);
+                             
+                             // 🔥 تمرير رابط الترجمة لدالة التشغيل
+                             playEpisode(episode.servers, episode.subtitle_url);
                         };
                         episodesElement.appendChild(button);
                     });
@@ -275,7 +256,6 @@
                 renderEpisodes(seriesId, season.seasonNumber, episodesElement);
             });
 
-             // 🔥🔥 تشغيل أول حلقة في أول موسم بشكل تلقائي
              if (seasons.length > 0) {
                  const firstSeasonNumber = seasons[0].seasonNumber;
                  db.collection(`series/${seriesId}/seasons/${firstSeasonNumber}/episodes`).orderBy('episodeNumber', 'asc').limit(1).get()
@@ -286,10 +266,10 @@
 
                              seriesTitleElement.textContent = `${seriesTitleElement.textContent.split(' - ')[0]} - الموسم ${firstSeasonNumber} - حلقة ${firstEpisode.episodeNumber}`;
                              
-                             playEpisode(firstEpisode.servers, firstEpisodeId);
+                             // 🔥 تمرير رابط الترجمة للحلقة الأولى
+                             playEpisode(firstEpisode.servers, firstEpisode.subtitle_url);
 
                              setTimeout(() => {
-                                 // تفعيل زر الحلقة الأولى بعد التشغيل التلقائي
                                  const firstButton = document.querySelector(`#episodes-grid-${firstSeasonNumber} .episode-button`);
                                  if (firstButton) {
                                      firstButton.classList.add('current-episode');
@@ -335,9 +315,6 @@
                 });
         }
 
-        // ===============================================
-        //  نقطة البداية والحارس الأمني
-        // ===============================================
         auth.onAuthStateChanged(user => {
             if (user) {
                 fetchSeriesData();
@@ -350,7 +327,6 @@
                 window.location.href = './login.html';
             }
         });
-
     </script>
 </body>
 </html>
