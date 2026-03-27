@@ -223,6 +223,8 @@
                     <div class="season-header">
                         <span>الموسم ${season.seasonNumber}</span>
                         <div class="season-actions">
+                            <button onclick="bulkAddEpisodes('${seriesId}', '${season.seasonNumber}')" style="background-color: #ff9800; color: white;">+ إضافة حلقات دفعة واحدة</button>
+                            
                             <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${season.seasonNumber}" class="add-episode-btn">+ إضافة حلقة</a>
                             <button class="delete-season-btn" onclick="deleteSeason('${seriesId}', '${season.seasonNumber}')">حذف الموسم</button>
                         </div>
@@ -236,6 +238,71 @@
                 // تحميل حلقات هذا الموسم
                 renderEpisodes(seriesId, season.seasonNumber);
             });
+        }
+
+        // 🔥🔥 دالة إضافة حلقات دفعة واحدة (جديدة)
+        async function bulkAddEpisodes(seriesId, seasonNumber) {
+            // 1. سؤال المستخدم عن عدد الحلقات
+            const countStr = prompt("كم عدد الحلقات التي تريد إضافتها دفعة واحدة؟ (مثال: 25)");
+            if (!countStr) return; // إذا ألغى المستخدم العملية
+
+            const count = parseInt(countStr);
+            if (isNaN(count) || count <= 0) {
+                alert("الرجاء إدخال رقم صحيح أكبر من الصفر.");
+                return;
+            }
+
+            const confirmMsg = `هل أنت متأكد أنك تريد إنشاء ${count} حلقة فارغة للموسم ${seasonNumber}؟`;
+            if (!confirm(confirmMsg)) return;
+
+            errorMessageElement.textContent = "جاري إنشاء الحلقات، يرجى الانتظار...";
+
+            try {
+                // 2. البحث عن آخر رقم حلقة موجود لتجنب التكرار
+                const snapshot = await db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).get();
+                let startNumber = 1;
+                
+                if (!snapshot.empty) {
+                    let maxNum = 0;
+                    snapshot.docs.forEach(doc => {
+                        const epNum = parseInt(doc.data().episodeNumber);
+                        if (!isNaN(epNum) && epNum > maxNum) maxNum = epNum;
+                    });
+                    startNumber = maxNum + 1; // نبدأ الترقيم بعد آخر حلقة
+                }
+
+                // 3. استخدام Batch لإضافة كل الحلقات في طلب واحد سريع
+                const batch = db.batch();
+                
+                for (let i = 0; i < count; i++) {
+                    const currentEpNum = startNumber + i;
+                    // تحديد مسار الحلقة (رقم الحلقة هو معرف المستند)
+                    const docRef = db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).doc(currentEpNum.toString());
+                    
+                    // تجهيز البيانات الافتراضية للحلقة
+                    batch.set(docRef, {
+                        episodeNumber: currentEpNum,
+                        title: `الحلقة ${currentEpNum}`,
+                        description: "",
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        servers: { bunnystream: "", dood: "" },
+                        subtitle_url: ""
+                    });
+                }
+
+                // 4. تنفيذ العملية في قاعدة البيانات
+                await batch.commit();
+                
+                errorMessageElement.textContent = "";
+                alert(`تمت إضافة ${count} حلقة بنجاح! يمكنك الآن الضغط على "تعديل" لإضافة الروابط.`);
+                
+                // 5. تحديث الواجهة لعرض الحلقات الجديدة
+                fetchSeasons(seriesId); 
+
+            } catch (error) {
+                console.error("خطأ أثناء الإضافة:", error);
+                errorMessageElement.textContent = `حدث خطأ: ${error.message}`;
+            }
         }
 
         // 🔥 جلب كل المواسم لسلسلة معينة
