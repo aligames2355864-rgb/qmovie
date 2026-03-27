@@ -55,14 +55,14 @@
         .episodes-list { list-style: none; padding-right: 0; margin-top: 10px; }
         .episodes-list > li { 
             background-color: #333; margin-bottom: 8px; padding: 10px; border-radius: 5px;
-            display: block; /* تم التعديل لدعم التعديل السريع */
+            display: block; 
         }
         .episode-actions button, .episode-actions a { 
             padding: 5px 10px; font-size: 0.9em; margin-left: 5px; cursor: pointer;
             border-radius: 4px; color: white; border: none; text-decoration: none;
         }
-        .episode-actions .quick-edit-btn { background-color: #ff9800; } /* لون زر التعديل السريع */
-        .episode-actions .edit-btn { background-color: #555; } /* زر الإعدادات المتقدمة */
+        .episode-actions .quick-edit-btn { background-color: #ff9800; } 
+        .episode-actions .edit-btn { background-color: #555; } 
         .episode-actions .delete-btn { background-color: var(--accent-color); }
         
         /* تصميم حقول التعديل السريع */
@@ -159,19 +159,21 @@
             });
         }
 
-        // 🔥🔥🔥 دوآل التعديل السريع (الجديدة) 🔥🔥🔥
+        // 🔥🔥🔥 دوآل التعديل السريع (الجديدة والمُصلحة) 🔥🔥🔥
         
-        // إظهار وإخفاء لوحة التعديل السريع
-        function toggleQuickEdit(episodeId) {
-            const panel = document.getElementById(`quick-edit-${episodeId}`);
-            panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
+        // إظهار وإخفاء لوحة التعديل السريع (تم إضافة seasonNumber لمنع التضارب)
+        function toggleQuickEdit(seasonNumber, episodeId) {
+            const panel = document.getElementById(`quick-edit-${seasonNumber}-${episodeId}`);
+            if(panel) {
+                panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
+            }
         }
 
         // حفظ الروابط السريعة في قاعدة البيانات مباشرة
         function saveQuickLinks(seriesId, seasonNumber, episodeId) {
-            const bunnyLink = document.getElementById(`bunny-${episodeId}`).value.trim();
-            const doodLink = document.getElementById(`dood-${episodeId}`).value.trim();
-            const statusSpan = document.getElementById(`status-${episodeId}`);
+            const bunnyLink = document.getElementById(`bunny-${seasonNumber}-${episodeId}`).value.trim();
+            const doodLink = document.getElementById(`dood-${seasonNumber}-${episodeId}`).value.trim();
+            const statusSpan = document.getElementById(`status-${seasonNumber}-${episodeId}`);
             
             statusSpan.textContent = "جاري الحفظ...";
             statusSpan.style.color = "#ff9800"; // برتقالي
@@ -182,13 +184,19 @@
             }).then(() => {
                 statusSpan.textContent = "تم الحفظ بنجاح ✓";
                 statusSpan.style.color = "#4CAF50"; // أخضر
-                // إخفاء رسالة النجاح بعد ثانيتين لتنظيف الشاشة
                 setTimeout(() => { statusSpan.textContent = ""; }, 2000);
             }).catch(error => {
                 statusSpan.textContent = "حدث خطأ!";
                 statusSpan.style.color = "#e50914"; // أحمر
                 console.error(error);
             });
+        }
+
+        // حفظ الروابط عند الضغط على زر Enter في الكيبورد
+        function handleEnter(event, seriesId, seasonNumber, episodeId) {
+            if (event.key === 'Enter') {
+                saveQuickLinks(seriesId, seasonNumber, episodeId);
+            }
         }
 
 
@@ -215,28 +223,29 @@
                     episodes.forEach(episode => {
                         const li = document.createElement('li');
                         
-                        // استخراج الروابط الحالية إن وجدت
-                        const bunnyUrl = episode.servers && episode.servers.bunnystream ? episode.servers.bunnystream : '';
-                        const doodUrl = episode.servers && episode.servers.dood ? episode.servers.dood : '';
+                        // استخراج الروابط الحالية بأمان تام
+                        const bunnyUrl = (episode.servers && episode.servers.bunnystream) ? episode.servers.bunnystream : '';
+                        const doodUrl = (episode.servers && episode.servers.dood) ? episode.servers.dood : '';
 
+                        // 🔥 تم تحديث المعرفات (IDs) لتشمل رقم الموسم لكي لا تتضارب الحلقات 🔥
                         li.innerHTML = `
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span>الحلقة ${episode.episodeNumber}: ${episode.title}</span>
                                 <div class="episode-actions">
-                                    <button class="quick-edit-btn" onclick="toggleQuickEdit('${episode.id}')">تعديل سريع للروابط</button>
+                                    <button class="quick-edit-btn" onclick="toggleQuickEdit('${seasonNumber}', '${episode.id}')">تعديل سريع للروابط</button>
                                     
                                     <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${seasonNumber}&episodeId=${episode.id}" class="edit-btn">إعدادات متقدمة</a>
                                     <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${episode.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
                                 </div>
                             </div>
 
-                            <div id="quick-edit-${episode.id}" class="quick-edit-panel">
+                            <div id="quick-edit-${seasonNumber}-${episode.id}" class="quick-edit-panel">
                                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                    <input type="text" id="bunny-${episode.id}" placeholder="رابط Bunnystream هنا..." value="${bunnyUrl}">
-                                    <input type="text" id="dood-${episode.id}" placeholder="رابط Dood هنا..." value="${doodUrl}">
+                                    <input type="text" id="bunny-${seasonNumber}-${episode.id}" placeholder="رابط Bunnystream هنا..." value="${bunnyUrl}" onkeypress="handleEnter(event, '${seriesId}', '${seasonNumber}', '${episode.id}')">
+                                    <input type="text" id="dood-${seasonNumber}-${episode.id}" placeholder="رابط Dood هنا..." value="${doodUrl}" onkeypress="handleEnter(event, '${seriesId}', '${seasonNumber}', '${episode.id}')">
                                 </div>
                                 <button onclick="saveQuickLinks('${seriesId}', '${seasonNumber}', '${episode.id}')" style="background-color: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">حفظ الروابط</button>
-                                <span id="status-${episode.id}" style="margin-right: 15px; font-weight: bold;"></span>
+                                <span id="status-${seasonNumber}-${episode.id}" style="margin-right: 15px; font-weight: bold;"></span>
                             </div>
                         `;
                         episodesListElement.appendChild(li);
