@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة المواسم والحلقات</title>
     <style>
-        /* 🔥🔥 الـ CSS الأساسي (للوحة التحكم) 🔥🔥 */
+        /* 🔥🔥 الـ CSS الأساسي 🔥🔥 */
         :root {
             --bg-color: #0d0d0d; 
             --card-color: #1a1a1a; 
@@ -27,7 +27,6 @@
         }
         h1 { color: var(--accent-color); margin-bottom: 5px; text-align: center; }
         h2 { color: var(--text-color); font-size: 1.5em; margin-top: 20px; border-bottom: 1px solid #333; padding-bottom: 5px; text-align: right; }
-        h3 { font-size: 1.2em; color: #ccc; margin: 15px 0 10px; text-align: right; }
         
         /* زر العودة */
         .back-btn { display: block; margin-bottom: 20px; text-align: right; color: var(--primary-color); text-decoration: none; }
@@ -56,14 +55,23 @@
         .episodes-list { list-style: none; padding-right: 0; margin-top: 10px; }
         .episodes-list > li { 
             background-color: #333; margin-bottom: 8px; padding: 10px; border-radius: 5px;
-            display: flex; justify-content: space-between; align-items: center;
+            display: block; /* تم التعديل لدعم التعديل السريع */
         }
         .episode-actions button, .episode-actions a { 
             padding: 5px 10px; font-size: 0.9em; margin-left: 5px; cursor: pointer;
             border-radius: 4px; color: white; border: none; text-decoration: none;
         }
-        .episode-actions .edit-btn { background-color: #007bff; }
+        .episode-actions .quick-edit-btn { background-color: #ff9800; } /* لون زر التعديل السريع */
+        .episode-actions .edit-btn { background-color: #555; } /* زر الإعدادات المتقدمة */
         .episode-actions .delete-btn { background-color: var(--accent-color); }
+        
+        /* تصميم حقول التعديل السريع */
+        .quick-edit-panel {
+            display: none; background: #1a1a1a; padding: 15px; border-radius: 8px; margin-top: 10px; border: 1px dashed #555;
+        }
+        .quick-edit-panel input {
+            flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #444; background: #000; color: white; font-family: inherit;
+        }
     </style>
 </head>
 <body>
@@ -95,7 +103,7 @@
 
     <script>
         // ===============================================
-        //  إعدادات Firebase والـ UID
+        //  إعدادات Firebase 
         // ===============================================
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
@@ -123,38 +131,22 @@
         //  دوآل الإضافة والتعديل والحذف
         // ===============================================
         
-        // 🔥🔥 حذف حلقة
         function deleteEpisode(seriesId, seasonNumber, episodeId, episodeTitle) {
             if (confirm(`تأكيد حذف الحلقة ${episodeTitle}؟`)) {
                 db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).doc(episodeId).delete()
-                    .then(() => {
-                        alert(`تم حذف الحلقة ${episodeTitle}.`);
-                        fetchSeasons(seriesId);
-                    })
-                    .catch(error => {
-                        errorMessageElement.textContent = `فشل الحذف: ${error.message}`;
-                    });
+                    .then(() => { fetchSeasons(seriesId); })
+                    .catch(error => { errorMessageElement.textContent = `فشل الحذف: ${error.message}`; });
             }
         }
         
-        // 🔥🔥 حذف موسم 
         function deleteSeason(seriesId, seasonNumber) {
             if (confirm(`تحذير! هل أنت متأكد من حذف الموسم ${seasonNumber}؟ يجب أن تحذف جميع الحلقات يدوياً أولاً!`)) {
-                
-                alert('تنبيه: سأحذف الموسم، لكن يجب التأكد من أنك حذفت كل الحلقات يدويًا لتجنب الأخطاء!');
-
                 db.collection(`series/${seriesId}/seasons`).doc(seasonNumber).delete()
-                    .then(() => {
-                        alert(`تم حذف الموسم ${seasonNumber}.`);
-                        fetchSeasons(seriesId);
-                    })
-                    .catch(error => {
-                        errorMessageElement.textContent = `فشل الحذف: ${error.message}`;
-                    });
+                    .then(() => { fetchSeasons(seriesId); })
+                    .catch(error => { errorMessageElement.textContent = `فشل الحذف: ${error.message}`; });
             }
         }
 
-        // 🔥🔥 إضافة موسم جديد 
         function promptAddSeason() {
             const seasonNumber = (prompt("أدخل رقم الموسم الجديد (مثال: 1, 2):") || '').trim();
             if (!seasonNumber) return;
@@ -162,13 +154,43 @@
             db.collection(`series/${seriesId}/seasons`).doc(seasonNumber).set({
                 seasonNumber: seasonNumber,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                alert(`تم إنشاء الموسم ${seasonNumber}. يمكنك الآن إضافة حلقات.`);
-                fetchSeasons(seriesId);
-            }).catch(error => {
+            }).then(() => { fetchSeasons(seriesId); }).catch(error => {
                 alert("فشل إنشاء الموسم. تأكد أنك لم تكرر رقم الموسم.");
             });
         }
+
+        // 🔥🔥🔥 دوآل التعديل السريع (الجديدة) 🔥🔥🔥
+        
+        // إظهار وإخفاء لوحة التعديل السريع
+        function toggleQuickEdit(episodeId) {
+            const panel = document.getElementById(`quick-edit-${episodeId}`);
+            panel.style.display = (panel.style.display === 'none' || panel.style.display === '') ? 'block' : 'none';
+        }
+
+        // حفظ الروابط السريعة في قاعدة البيانات مباشرة
+        function saveQuickLinks(seriesId, seasonNumber, episodeId) {
+            const bunnyLink = document.getElementById(`bunny-${episodeId}`).value.trim();
+            const doodLink = document.getElementById(`dood-${episodeId}`).value.trim();
+            const statusSpan = document.getElementById(`status-${episodeId}`);
+            
+            statusSpan.textContent = "جاري الحفظ...";
+            statusSpan.style.color = "#ff9800"; // برتقالي
+            
+            db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).doc(episodeId).update({
+                "servers.bunnystream": bunnyLink,
+                "servers.dood": doodLink
+            }).then(() => {
+                statusSpan.textContent = "تم الحفظ بنجاح ✓";
+                statusSpan.style.color = "#4CAF50"; // أخضر
+                // إخفاء رسالة النجاح بعد ثانيتين لتنظيف الشاشة
+                setTimeout(() => { statusSpan.textContent = ""; }, 2000);
+            }).catch(error => {
+                statusSpan.textContent = "حدث خطأ!";
+                statusSpan.style.color = "#e50914"; // أحمر
+                console.error(error);
+            });
+        }
+
 
         // ===============================================
         //  دوآل العرض (Rendering)
@@ -187,18 +209,34 @@
                          return;
                     }
                     
-                    // 🔥🔥 الفرز الرقمي (لحل مشكلة الـ 10 قبل الـ 1)
                     let episodes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    episodes.sort((a, b) => parseInt(a.episodeNumber) - parseInt(b.episodeNumber)); // تم الإصلاح
-
+                    episodes.sort((a, b) => parseInt(a.episodeNumber) - parseInt(b.episodeNumber)); 
 
                     episodes.forEach(episode => {
                         const li = document.createElement('li');
+                        
+                        // استخراج الروابط الحالية إن وجدت
+                        const bunnyUrl = episode.servers && episode.servers.bunnystream ? episode.servers.bunnystream : '';
+                        const doodUrl = episode.servers && episode.servers.dood ? episode.servers.dood : '';
+
                         li.innerHTML = `
-                            <span>الحلقة ${episode.episodeNumber}: ${episode.title}</span>
-                            <div class="episode-actions">
-                                <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${seasonNumber}&episodeId=${episode.id}" class="edit-btn">تعديل</a>
-                                <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${episode.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>الحلقة ${episode.episodeNumber}: ${episode.title}</span>
+                                <div class="episode-actions">
+                                    <button class="quick-edit-btn" onclick="toggleQuickEdit('${episode.id}')">تعديل سريع للروابط</button>
+                                    
+                                    <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${seasonNumber}&episodeId=${episode.id}" class="edit-btn">إعدادات متقدمة</a>
+                                    <button class="delete-btn" onclick="deleteEpisode('${seriesId}', '${seasonNumber}', '${episode.id}', 'الحلقة ${episode.episodeNumber}')">حذف</button>
+                                </div>
+                            </div>
+
+                            <div id="quick-edit-${episode.id}" class="quick-edit-panel">
+                                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                    <input type="text" id="bunny-${episode.id}" placeholder="رابط Bunnystream هنا..." value="${bunnyUrl}">
+                                    <input type="text" id="dood-${episode.id}" placeholder="رابط Dood هنا..." value="${doodUrl}">
+                                </div>
+                                <button onclick="saveQuickLinks('${seriesId}', '${seasonNumber}', '${episode.id}')" style="background-color: #4CAF50; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">حفظ الروابط</button>
+                                <span id="status-${episode.id}" style="margin-right: 15px; font-weight: bold;"></span>
                             </div>
                         `;
                         episodesListElement.appendChild(li);
@@ -224,7 +262,6 @@
                         <span>الموسم ${season.seasonNumber}</span>
                         <div class="season-actions">
                             <button onclick="bulkAddEpisodes('${seriesId}', '${season.seasonNumber}')" style="background-color: #ff9800; color: white;">+ إضافة حلقات دفعة واحدة</button>
-                            
                             <a href="season_episode_form.html?seriesId=${seriesId}&seasonNum=${season.seasonNumber}" class="add-episode-btn">+ إضافة حلقة</a>
                             <button class="delete-season-btn" onclick="deleteSeason('${seriesId}', '${season.seasonNumber}')">حذف الموسم</button>
                         </div>
@@ -234,17 +271,14 @@
                     </ul>
                 `;
                 seasonsListElement.appendChild(li);
-                
-                // تحميل حلقات هذا الموسم
                 renderEpisodes(seriesId, season.seasonNumber);
             });
         }
 
-        // 🔥🔥 دالة إضافة حلقات دفعة واحدة (جديدة)
+        // 🔥 دالة إضافة حلقات دفعة واحدة
         async function bulkAddEpisodes(seriesId, seasonNumber) {
-            // 1. سؤال المستخدم عن عدد الحلقات
             const countStr = prompt("كم عدد الحلقات التي تريد إضافتها دفعة واحدة؟ (مثال: 25)");
-            if (!countStr) return; // إذا ألغى المستخدم العملية
+            if (!countStr) return; 
 
             const count = parseInt(countStr);
             if (isNaN(count) || count <= 0) {
@@ -252,13 +286,11 @@
                 return;
             }
 
-            const confirmMsg = `هل أنت متأكد أنك تريد إنشاء ${count} حلقة فارغة للموسم ${seasonNumber}؟`;
-            if (!confirm(confirmMsg)) return;
+            if (!confirm(`هل أنت متأكد أنك تريد إنشاء ${count} حلقة فارغة للموسم ${seasonNumber}؟`)) return;
 
             errorMessageElement.textContent = "جاري إنشاء الحلقات، يرجى الانتظار...";
 
             try {
-                // 2. البحث عن آخر رقم حلقة موجود لتجنب التكرار
                 const snapshot = await db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).get();
                 let startNumber = 1;
                 
@@ -268,18 +300,15 @@
                         const epNum = parseInt(doc.data().episodeNumber);
                         if (!isNaN(epNum) && epNum > maxNum) maxNum = epNum;
                     });
-                    startNumber = maxNum + 1; // نبدأ الترقيم بعد آخر حلقة
+                    startNumber = maxNum + 1; 
                 }
 
-                // 3. استخدام Batch لإضافة كل الحلقات في طلب واحد سريع
                 const batch = db.batch();
                 
                 for (let i = 0; i < count; i++) {
                     const currentEpNum = startNumber + i;
-                    // تحديد مسار الحلقة (رقم الحلقة هو معرف المستند)
                     const docRef = db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).doc(currentEpNum.toString());
                     
-                    // تجهيز البيانات الافتراضية للحلقة
                     batch.set(docRef, {
                         episodeNumber: currentEpNum,
                         title: `الحلقة ${currentEpNum}`,
@@ -290,31 +319,23 @@
                     });
                 }
 
-                // 4. تنفيذ العملية في قاعدة البيانات
                 await batch.commit();
-                
                 errorMessageElement.textContent = "";
-                alert(`تمت إضافة ${count} حلقة بنجاح! يمكنك الآن الضغط على "تعديل" لإضافة الروابط.`);
-                
-                // 5. تحديث الواجهة لعرض الحلقات الجديدة
+                alert(`تمت الإضافة بنجاح! يمكنك الآن استخدام "تعديل سريع" لوضع الروابط.`);
                 fetchSeasons(seriesId); 
 
             } catch (error) {
-                console.error("خطأ أثناء الإضافة:", error);
                 errorMessageElement.textContent = `حدث خطأ: ${error.message}`;
             }
         }
 
-        // 🔥 جلب كل المواسم لسلسلة معينة
         function fetchSeasons(seriesId) {
             db.collection(`series/${seriesId}/seasons`).orderBy('seasonNumber', 'asc').get()
                 .then(snapshot => {
                     const seasons = snapshot.docs.map(doc => doc.data());
                     renderSeasons(seriesId, seasons);
                 })
-                .catch(error => {
-                    errorMessageElement.textContent = `خطأ في جلب المواسم: ${error.message}`;
-                });
+                .catch(error => { errorMessageElement.textContent = `خطأ في جلب المواسم: ${error.message}`; });
         }
 
         // ===============================================
@@ -336,7 +357,6 @@
             seriesNameElement.textContent = 'خطأ: لم يتم تحديد المسلسل.';
         }
 
-        // 🔥 حارس الأمان (مهم جداً)
         auth.onAuthStateChanged(user => {
             if (!user || user.uid !== ADMIN_UID) {
                 window.location.href = './login.html';
