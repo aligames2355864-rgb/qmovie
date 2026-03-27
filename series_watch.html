@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -90,30 +91,38 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #222;
             display: flex; flex-direction: column; height: 100%; max-height: 600px;
         }
-        .episodes-section h2 { margin-top: 0; color: white; font-size: 1.4em; margin-bottom: 15px; text-align: center; }
         
-        /* حاوية المواسم مع شريط التمرير */
-        #seasons-container { overflow-y: auto; padding-left: 10px; flex-grow: 1; }
-        /* تخصيص شريط التمرير */
-        #seasons-container::-webkit-scrollbar { width: 8px; }
-        #seasons-container::-webkit-scrollbar-track { background: #111; border-radius: 4px; }
-        #seasons-container::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-        #seasons-container::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
-
-        .season-section { margin-bottom: 20px; }
-        .season-header { 
-            font-size: 1.2em; color: var(--accent-color); margin-bottom: 10px; 
-            background: #222; padding: 10px; border-radius: 6px; text-align: center;
+        /* 🔥 تصميم رأس قائمة الحلقات واختيار الموسم 🔥 */
+        .episodes-header-row {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px;
         }
+        .episodes-header-row h2 { margin: 0; color: white; font-size: 1.4em; }
         
-        .episode-button-grid { display: flex; flex-direction: column; gap: 8px; } /* تحويلها لقائمة عمودية */
+        /* القائمة المنسدلة لاختيار الموسم */
+        #season-selector {
+            background-color: #222; color: white; border: 1px solid #444; 
+            padding: 8px 15px; border-radius: 6px; font-size: 1em; font-family: inherit;
+            cursor: pointer; outline: none; transition: 0.3s;
+        }
+        #season-selector:hover, #season-selector:focus { border-color: var(--primary-color); background-color: #333; }
+
+        /* حاوية الحلقات مع شريط التمرير */
+        #episodes-container { overflow-y: auto; padding-left: 5px; flex-grow: 1; display: flex; flex-direction: column; gap: 8px; }
+        
+        /* تخصيص شريط التمرير */
+        #episodes-container::-webkit-scrollbar { width: 8px; }
+        #episodes-container::-webkit-scrollbar-track { background: #111; border-radius: 4px; }
+        #episodes-container::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        #episodes-container::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
+
         .episode-button { 
             display: flex; justify-content: space-between; align-items: center;
             padding: 12px 15px; background-color: #222; color: var(--text-color); 
             border-radius: 8px; text-decoration: none; transition: all 0.2s; border: 1px solid #333; cursor: pointer;
             font-size: 1em; font-weight: bold;
         }
-        .episode-button:hover { background-color: #333; border-color: #555; padding-right: 20px; } /* حركة جميلة عند التأشير */
+        .episode-button:hover { background-color: #333; border-color: #555; padding-right: 20px; } 
         .episode-button.current-episode {
             background-color: var(--primary-color); border-color: var(--primary-color); color: white;
             box-shadow: 0 0 15px rgba(0, 123, 255, 0.3); pointer-events: none;
@@ -122,9 +131,9 @@
 
         /* 🔥 متجاوب مع شاشات الهواتف 🔥 */
         @media (max-width: 900px) {
-            .content-layout { grid-template-columns: 1fr; /* جعلها عمودية في الهاتف */ gap: 20px; margin-top: 20px; }
+            .content-layout { grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
             #series-title { font-size: 1.5em; }
-            .episodes-section { max-height: 400px; }
+            .episodes-section { max-height: 450px; }
         }
     </style>
 </head>
@@ -160,10 +169,13 @@
                 <p id="detail-description"></p>
             </div>
 
-            <div class="episodes-section">
-                <h2>قائمة الحلقات</h2>
-                <div id="seasons-container">
-                    <p id="loading-indicator" style="text-align: center; color: #888;">جاري جلب المواسم والحلقات...</p>
+            <div class="episodes-section" id="episodes-section-wrapper">
+                <div class="episodes-header-row">
+                    <h2>قائمة الحلقات</h2>
+                    <select id="season-selector" style="display: none;"></select>
+                </div>
+                <div id="episodes-container">
+                    <p style="text-align: center; color: #888; padding-top: 20px;">جاري جلب البيانات...</p>
                 </div>
             </div>
 
@@ -175,7 +187,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
-        // إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0", 
             authDomain: "qmove1.firebaseapp.com",
@@ -191,7 +202,8 @@
 
         const seriesTitleElement = document.getElementById('series-title');
         const buttonsContainer = document.getElementById('server-buttons');
-        const seasonsContainer = document.getElementById('seasons-container'); 
+        const episodesContainer = document.getElementById('episodes-container'); 
+        const seasonSelector = document.getElementById('season-selector');
         const detailRatingNumber = document.getElementById('detail-rating-number');
         const filledStars = document.getElementById('filled-stars');
 
@@ -201,7 +213,6 @@
             filledStars.style.width = `${widthPercentage}%`;
         }
         
-        // دالة تشغيل الحلقة
         function playEpisode(episodeServers, subtitleUrl) {
             buttonsContainer.innerHTML = ''; 
             const serverOrder = ['bunnystream', 'dood']; 
@@ -249,28 +260,26 @@
                 }
 
                 button.textContent = buttonText;
-
-                if (index === 0) {
-                    button.classList.add('active');
-                }
+                if (index === 0) button.classList.add('active');
 
                 button.onclick = () => {
                     renderPlayer(server.url);
                     document.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
                 };
-                
                 buttonsContainer.appendChild(button);
             });
         }
 
-        // دالة عرض الحلقات
-        function renderEpisodes(seriesId, seasonNumber, episodesElement) {
+        // 🔥 دالة عرض الحلقات للموسم المحدد فقط 🔥
+        function renderEpisodes(seriesId, seasonNumber) {
+            episodesContainer.innerHTML = '<p style="text-align: center; color: #888; padding-top: 20px;">جاري جلب الحلقات...</p>';
+
             db.collection(`series/${seriesId}/seasons/${seasonNumber}/episodes`).get()
                 .then(snapshot => {
-                    episodesElement.innerHTML = '';
+                    episodesContainer.innerHTML = '';
                     if (snapshot.empty) {
-                         episodesElement.innerHTML = '<span style="color: #666;">لا توجد حلقات في هذا الموسم بعد.</span>';
+                         episodesContainer.innerHTML = '<span style="color: #666; text-align: center; display: block; padding-top: 20px;">لا توجد حلقات في هذا الموسم بعد.</span>';
                          return;
                     }
                     
@@ -280,69 +289,71 @@
                     episodes.forEach(episode => {
                         const button = document.createElement('a'); 
                         button.className = 'episode-button';
-                        // وضع عنوان الحلقة داخل span لترتيبها
                         button.innerHTML = `<span>حلقة ${episode.episodeNumber}: ${episode.title}</span>`;
                         
+                        // التحقق إذا كانت هذه الحلقة هي التي تعمل حالياً
+                        const currentEpisodeInfo = seriesTitleElement.textContent;
+                        if(currentEpisodeInfo.includes(`الموسم ${seasonNumber}`) && currentEpisodeInfo.includes(`حلقة ${episode.episodeNumber}`)) {
+                            button.classList.add('current-episode');
+                        }
+
                         button.onclick = (e) => {
                              e.preventDefault();
                              document.querySelectorAll('.episode-button').forEach(btn => btn.classList.remove('current-episode'));
                              button.classList.add('current-episode');
 
-                             // تحديث العنوان ليظهر رقم الموسم والحلقة، مع إبقاء اسم المسلسل
                              const baseTitle = seriesTitleElement.dataset.baseTitle || seriesTitleElement.textContent.split(' - ')[0];
                              seriesTitleElement.textContent = `${baseTitle} - الموسم ${seasonNumber} - حلقة ${episode.episodeNumber}`;
                              
                              playEpisode(episode.servers, episode.subtitle_url);
                         };
-                        episodesElement.appendChild(button);
+                        episodesContainer.appendChild(button);
                     });
                 });
         }
         
-        // دالة عرض المواسم
-        function renderSeasons(seriesId, seasons) {
-            seasonsContainer.innerHTML = ''; 
+        // 🔥 دالة إعداد قائمة المواسم المنسدلة 🔥
+        function setupSeasonsDropdown(seriesId, seasons) {
+            if (seasons.length === 0) {
+                 episodesContainer.innerHTML = '<p style="text-align: center; color: #888; padding-top: 20px;">لم يتم إضافة مواسم لهذا المسلسل.</p>';
+                 return;
+            }
+
+            // إظهار وملء القائمة المنسدلة
+            seasonSelector.style.display = 'block';
+            seasonSelector.innerHTML = '';
             seasons.forEach(season => {
-                const section = document.createElement('div');
-                section.className = 'season-section';
-                section.innerHTML = `
-                    <div class="season-header">الموسم ${season.seasonNumber}</div>
-                    <div id="episodes-grid-${season.seasonNumber}" class="episode-button-grid">
-                        <span style="color:#666; font-size: 0.9em;">جاري جلب الحلقات...</span>
-                    </div>
-                `;
-                seasonsContainer.appendChild(section);
-                
-                const episodesElement = document.getElementById(`episodes-grid-${season.seasonNumber}`);
-                renderEpisodes(seriesId, season.seasonNumber, episodesElement);
+                const option = document.createElement('option');
+                option.value = season.seasonNumber;
+                option.textContent = `الموسم ${season.seasonNumber}`;
+                seasonSelector.appendChild(option);
             });
 
-             if (seasons.length > 0) {
-                 const firstSeasonNumber = seasons[0].seasonNumber;
-                 db.collection(`series/${seriesId}/seasons/${firstSeasonNumber}/episodes`).orderBy('episodeNumber', 'asc').limit(1).get()
-                     .then(snapshot => {
-                         if (!snapshot.empty) {
-                             const firstEpisode = snapshot.docs[0].data();
-                             
-                             const baseTitle = seriesTitleElement.dataset.baseTitle || seriesTitleElement.textContent;
-                             seriesTitleElement.textContent = `${baseTitle} - الموسم ${firstSeasonNumber} - حلقة ${firstEpisode.episodeNumber}`;
-                             
-                             playEpisode(firstEpisode.servers, firstEpisode.subtitle_url);
+            // عند تغيير الموسم من القائمة المنسدلة
+            seasonSelector.addEventListener('change', (e) => {
+                const selectedSeason = e.target.value;
+                renderEpisodes(seriesId, selectedSeason);
+            });
 
-                             setTimeout(() => {
-                                 const firstButton = document.querySelector(`#episodes-grid-${firstSeasonNumber} .episode-button`);
-                                 if (firstButton) {
-                                     firstButton.classList.add('current-episode');
-                                 }
-                             }, 1000);
-                         }
-                     });
-             } else {
-                 seasonsContainer.innerHTML = '<p style="text-align: center; color: #888;">لم يتم إضافة مواسم لهذا المسلسل.</p>';
-             }
+            // تشغيل الموسم الأول تلقائياً عند فتح الصفحة
+            const firstSeasonNumber = seasons[0].seasonNumber;
+            seasonSelector.value = firstSeasonNumber;
+            
+            // تشغيل أول حلقة من الموسم الأول تلقائياً
+            db.collection(`series/${seriesId}/seasons/${firstSeasonNumber}/episodes`).orderBy('episodeNumber', 'asc').limit(1).get()
+                 .then(snapshot => {
+                     if (!snapshot.empty) {
+                         const firstEpisode = snapshot.docs[0].data();
+                         const baseTitle = seriesTitleElement.dataset.baseTitle || seriesTitleElement.textContent;
+                         seriesTitleElement.textContent = `${baseTitle} - الموسم ${firstSeasonNumber} - حلقة ${firstEpisode.episodeNumber}`;
+                         playEpisode(firstEpisode.servers, firstEpisode.subtitle_url);
+                     }
+                     
+                     // عرض قائمة حلقات الموسم الأول
+                     renderEpisodes(seriesId, firstSeasonNumber);
+                 });
         }
 
-        // جلب البيانات من قاعدة البيانات
         function fetchSeriesData() {
             const urlParams = new URLSearchParams(window.location.search);
             const seriesId = urlParams.get('seriesId');
@@ -356,8 +367,6 @@
                 .then(doc => {
                     if (doc.exists) {
                         const data = doc.data();
-                        
-                        // حفظ الاسم الأصلي للمسلسل لتغيير العنوان لاحقاً
                         seriesTitleElement.textContent = data.title;
                         seriesTitleElement.dataset.baseTitle = data.title;
                         
@@ -373,7 +382,7 @@
                 })
                 .then(snapshot => {
                     const seasons = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderSeasons(seriesId, seasons);
+                    setupSeasonsDropdown(seriesId, seasons); // تم تغيير هذه الدالة
                 })
                 .catch(error => {
                     seriesTitleElement.textContent = `خطأ في التحميل: ${error.message}`;
@@ -381,7 +390,6 @@
                 });
         }
 
-        // التحقق من تسجيل الدخول
         auth.onAuthStateChanged(user => {
             if (user) {
                 fetchSeriesData();
