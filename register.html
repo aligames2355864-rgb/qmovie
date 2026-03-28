@@ -3,140 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>q movie - إنشاء حساب جديد</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Q Movie - إنشاء حساب جديد</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* نفس التصميم لضمان التناسق مع واجهة الدخول */
         :root {
-            --primary-red: #e50914;
-            --dark-bg: #0f0f0f;
-            --glass-bg: rgba(28, 28, 28, 0.85);
-            --text-light: #ffffff;
+            --bg-color: #000000;
+            --card-bg: rgba(0, 0, 0, 0.75);
+            --text-color: #ffffff;
             --text-muted: #b3b3b3;
+            --accent-color: #e50914; 
+            --input-bg: #333333;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://assets.nflxext.com/ffe/siteui/vlv3/f8ca3614-1734-4f03-97d3-5b4b12f6a623/903673c0-08c3-4d4b-a2ed-44ec069c9b56/IQ-ar-20220523-popsignuptwoweeks-perspective_alpha_website_large.jpg');
-            background-size: cover;
+            font-family: 'Tajawal', sans-serif;
+            /* خلفية سينمائية متدرجة */
+            background: radial-gradient(circle at center, #2b2b2b 0%, #000000 100%);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        .register-container {
-            background-color: var(--glass-bg);
-            padding: 40px;
-            border-radius: 12px;
+        #register-form {
+            background-color: var(--card-bg);
+            padding: 50px;
+            border-radius: 8px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            box-sizing: border-box;
         }
 
         h1 {
-            text-align: center;
-            font-size: 2rem;
+            text-align: right;
+            color: var(--text-color);
             margin-bottom: 30px;
-            font-weight: bold;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 15px;
-        }
-
-        .input-group i {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
+            font-size: 32px;
+            font-weight: 700;
         }
 
         input {
             width: 100%;
-            padding: 14px 45px 14px 15px;
-            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border-radius: 4px;
             border: none;
-            background-color: #333;
-            color: white;
+            background-color: var(--input-bg);
+            color: var(--text-color);
             font-size: 16px;
-            box-sizing: border-box;
-            transition: all 0.3s;
+            font-family: 'Tajawal', sans-serif;
+            box-sizing: border-box; 
+            transition: background-color 0.3s ease;
         }
 
         input:focus {
+            outline: none;
             background-color: #454545;
-            outline: 2px solid var(--primary-red);
         }
 
         button {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             font-size: 18px;
-            font-weight: bold;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
             border: none;
-            border-radius: 6px;
-            background-color: var(--primary-red);
+            border-radius: 4px;
+            background-color: var(--accent-color);
             color: white;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
+            transition: background-color 0.2s;
+            margin-top: 10px;
         }
 
-        button:hover {
-            background-color: #ff0f1b;
-            box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+        button:hover { 
+            background-color: #f6121d; 
         }
 
         #error-message {
-            background: rgba(229, 9, 20, 0.2);
-            border-right: 4px solid var(--primary-red);
-            padding: 10px;
-            font-size: 14px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .footer-links {
+            color: var(--accent-color);
             text-align: center;
-            margin-top: 25px;
-            color: var(--text-muted);
+            margin-top: 15px;
+            font-size: 14px;
+            display: none; 
         }
 
-        .footer-links a {
-            color: var(--text-light);
+        .link {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .link a {
+            color: var(--text-color);
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .link a:hover { 
+            text-decoration: underline; 
         }
     </style>
 </head>
 <body>
 
-    <div class="register-container">
-        <h1>إنشاء حساب جديد</h1>
+    <div id="register-form">
+        <h1>إنشاء حساب</h1>
         <form id="form">
-            <div class="input-group">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="البريد الإلكتروني" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="كلمة المرور" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-shield-alt"></i>
-                <input type="password" id="confirm-password" placeholder="تأكيد كلمة المرور" required>
-            </div>
-            <button type="submit">بدء التجربة</button>
+            <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+            <input type="password" id="password" placeholder="كلمة المرور" required>
+            <input type="password" id="confirm-password" placeholder="تأكيد كلمة المرور" required>
+            <button type="submit">متابعة</button>
         </form>
         <p id="error-message"></p>
-        <div class="footer-links">
-            <p>تمتلك حساباً مسبقاً؟ <a href="./login.html">سجل دخولك هنا</a></p>
+        <div class="link">
+            <p>لديك حساب بالفعل؟ <a href="./login.html">تسجيل الدخول</a></p>
         </div>
     </div>
 
@@ -144,6 +132,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
+        // ================ (1) إعدادات Firebase ================
         const firebaseConfig = {
           apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0",
           authDomain: "qmove1.firebaseapp.com",
@@ -157,6 +146,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
+        // ================ (2) برمجة النموذج ================
         const registerForm = document.getElementById('form');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
@@ -165,25 +155,30 @@
 
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault(); 
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
             errorMessage.style.display = 'none';
 
-            if (passwordInput.value !== confirmPasswordInput.value) {
-                errorMessage.textContent = 'كلمات المرور غير متطابقة، يرجى إعادة المحاولة.';
+            // التحقق من تطابق كلمات المرور (لغة فصحى)
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'كلمات المرور غير متطابقة.';
                 errorMessage.style.display = 'block';
                 return; 
             }
 
-            auth.createUserWithEmailAndPassword(emailInput.value, passwordInput.value)
-                .then(() => {
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
                     window.location.href = './index.html';
                 })
                 .catch((error) => {
+                    // رسائل خطأ احترافية
                     if (error.code === 'auth/email-already-in-use') {
-                        errorMessage.textContent = 'هذا البريد الإلكتروني مسجل بالفعل لدينا.';
+                        errorMessage.textContent = 'البريد الإلكتروني مستخدم بالفعل.';
                     } else if (error.code === 'auth/weak-password') {
-                        errorMessage.textContent = 'كلمة المرور ضعيفة جداً، يرجى اختيار 6 أحرف على الأقل.';
+                        errorMessage.textContent = 'كلمة المرور ضعيفة (يجب أن تتكون من 6 أحرف على الأقل).';
                     } else {
-                        errorMessage.textContent = 'تعذر إتمام التسجيل حالياً، يرجى المحاولة لاحقاً.';
+                        errorMessage.textContent = 'حدث خطأ. يرجى المحاولة مرة أخرى.';
                     }
                     errorMessage.style.display = 'block';
                 });
