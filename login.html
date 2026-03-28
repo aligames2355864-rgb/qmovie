@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>q movie - تسجيل الدخول</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Q Movie - تسجيل الدخول</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-red: #e50914;
-            --dark-bg: #0f0f0f;
-            --glass-bg: rgba(28, 28, 28, 0.85);
-            --text-light: #ffffff;
+            --bg-color: #000000;
+            --card-bg: rgba(0, 0, 0, 0.75);
+            --text-color: #ffffff;
             --text-muted: #b3b3b3;
+            --accent-color: #e50914; /* أحمر نتفليكس */
+            --input-bg: #333333;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://assets.nflxext.com/ffe/siteui/vlv3/f8ca3614-1734-4f03-97d3-5b4b12f6a623/903673c0-08c3-4d4b-a2ed-44ec069c9b56/IQ-ar-20220523-popsignuptwoweeks-perspective_alpha_website_large.jpg');
-            background-size: cover;
-            background-position: center;
-            color: var(--text-light);
+            font-family: 'Tajawal', sans-serif;
+            /* خلفية سينمائية متدرجة */
+            background: radial-gradient(circle at center, #2b2b2b 0%, #000000 100%);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -27,118 +27,102 @@
             margin: 0;
         }
 
-        .login-container {
-            background-color: var(--glass-bg);
-            padding: 40px;
-            border-radius: 12px;
+        /* تصميم الصندوق الرئيسي المماثل للمنصات العالمية */
+        #login-form {
+            background-color: var(--card-bg);
+            padding: 60px 50px;
+            border-radius: 8px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            box-sizing: border-box;
         }
 
         h1 {
-            text-align: center;
-            font-size: 2rem;
+            text-align: right;
+            color: var(--text-color);
             margin-bottom: 30px;
-            font-weight: bold;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .input-group i {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
+            font-size: 32px;
+            font-weight: 700;
         }
 
         input {
             width: 100%;
-            padding: 14px 45px 14px 15px;
-            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border-radius: 4px;
             border: none;
-            background-color: #333;
-            color: white;
+            background-color: var(--input-bg);
+            color: var(--text-color);
             font-size: 16px;
-            box-sizing: border-box;
-            transition: background 0.3s, ring 0.3s;
+            font-family: 'Tajawal', sans-serif;
+            box-sizing: border-box; 
+            transition: background-color 0.3s ease;
         }
 
         input:focus {
+            outline: none;
             background-color: #454545;
-            outline: 2px solid var(--primary-red);
         }
 
         button {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             font-size: 18px;
-            font-weight: bold;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
             border: none;
-            border-radius: 6px;
-            background-color: var(--primary-red);
+            border-radius: 4px;
+            background-color: var(--accent-color);
             color: white;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background-color 0.2s;
             margin-top: 10px;
         }
 
-        button:hover {
-            background-color: #ff0f1b;
-            transform: translateY(-2px);
+        button:hover { 
+            background-color: #f6121d; 
         }
 
         #error-message {
-            background: rgba(229, 9, 20, 0.2);
-            border-right: 4px solid var(--primary-red);
-            padding: 10px;
-            font-size: 14px;
-            margin-top: 15px;
-            display: none;
-            text-align: right;
-        }
-
-        .footer-links {
+            color: var(--accent-color);
             text-align: center;
-            margin-top: 25px;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .link {
+            text-align: center;
+            margin-top: 30px;
             color: var(--text-muted);
+            font-size: 16px;
         }
 
-        .footer-links a {
-            color: var(--text-light);
+        .link a {
+            color: var(--text-color);
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 500;
+            transition: color 0.2s;
         }
 
-        .footer-links a:hover {
-            text-decoration: underline;
+        .link a:hover { 
+            text-decoration: underline; 
         }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
+    <div id="login-form">
         <h1>تسجيل الدخول</h1>
         <form id="form">
-            <div class="input-group">
-                <i class="fas fa-envelope"></i>
-                <input type="email" id="email" placeholder="البريد الإلكتروني" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="كلمة المرور" required>
-            </div>
-            <button type="submit">دخول</button>
+            <input type="email" id="email" placeholder="البريد الإلكتروني" required>
+            <input type="password" id="password" placeholder="كلمة المرور" required>
+            <button type="submit">تسجيل الدخول</button>
         </form>
         <p id="error-message"></p>
-        <div class="footer-links">
-            <p>لا تمتلك حساباً بعد؟ <a href="./register.html">انضم إلينا الآن</a></p>
+        <div class="link">
+            <p>ليس لديك حساب؟ <a href="./register.html">سجل الآن</a></p>
         </div>
     </div>
 
@@ -146,6 +130,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
+        // ================ (1) إعدادات Firebase ================
         const firebaseConfig = {
           apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0",
           authDomain: "qmove1.firebaseapp.com",
@@ -159,6 +144,7 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
+        // ================ (2) برمجة النموذج ================
         const loginForm = document.getElementById('form');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
@@ -166,14 +152,18 @@
 
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault(); 
+            const email = emailInput.value;
+            const password = passwordInput.value;
             errorMessage.style.display = 'none'; 
 
-            auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
-                .then(() => {
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // التوجيه للرئيسية عند نجاح تسجيل الدخول
                     window.location.href = './index.html';
                 })
-                .catch(() => {
-                    errorMessage.textContent = 'خطأ في البريد الإلكتروني أو كلمة المرور. يرجى التثبت من البيانات.';
+                .catch((error) => {
+                    // رسالة خطأ باللغة الفصحى
+                    errorMessage.textContent = 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
                     errorMessage.style.display = 'block';
                 });
         });
