@@ -4,93 +4,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Q Movie - إنشاء حساب جديد</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #000000;
-            --card-bg: rgba(0, 0, 0, 0.75);
+            --accent-color: #e50914;
+            --accent-glow: rgba(229, 9, 20, 0.5);
             --text-color: #ffffff;
             --text-muted: #b3b3b3;
-            --accent-color: #e50914; 
-            --input-bg: #333333;
         }
 
         body {
             font-family: 'Tajawal', sans-serif;
-            /* خلفية سينمائية متدرجة */
-            background: radial-gradient(circle at center, #2b2b2b 0%, #000000 100%);
-            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
             box-sizing: border-box;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), 
+                        url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1920&auto=format&fit=crop') center/cover fixed;
+            color: var(--text-color);
         }
 
-        #register-form {
-            background-color: var(--card-bg);
-            padding: 50px;
-            border-radius: 8px;
+        .glass-panel {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 50px 50px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            max-width: 420px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.05);
             box-sizing: border-box;
+            transform: translateY(0);
+            animation: floatUp 0.8s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         h1 {
             text-align: right;
-            color: var(--text-color);
-            margin-bottom: 30px;
             font-size: 32px;
-            font-weight: 700;
+            font-weight: 800;
+            margin-bottom: 35px;
+            letter-spacing: -0.5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
-        input {
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-group input {
             width: 100%;
-            padding: 16px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-            border: none;
-            background-color: var(--input-bg);
-            color: var(--text-color);
+            padding: 22px 16px 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
             font-size: 16px;
             font-family: 'Tajawal', sans-serif;
-            box-sizing: border-box; 
-            transition: background-color 0.3s ease;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
-        input:focus {
+        .input-group label {
+            position: absolute;
+            right: 16px;
+            top: 18px;
+            color: var(--text-muted);
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus,
+        .input-group input:valid {
+            border-color: var(--accent-color);
             outline: none;
-            background-color: #454545;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 15px rgba(229, 9, 20, 0.2);
+        }
+
+        .input-group input:focus ~ label,
+        .input-group input:valid ~ label {
+            top: 6px;
+            font-size: 12px;
+            color: var(--accent-color);
+            font-weight: 700;
         }
 
         button {
             width: 100%;
-            padding: 16px;
-            font-size: 18px;
+            padding: 18px;
+            font-size: 20px;
             font-family: 'Tajawal', sans-serif;
-            font-weight: 700;
+            font-weight: 800;
             border: none;
-            border-radius: 4px;
-            background-color: var(--accent-color);
+            border-radius: 8px;
+            background: linear-gradient(135deg, #e50914, #b20710);
             color: white;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.3s ease;
             margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
 
         button:hover { 
-            background-color: #f6121d; 
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
         }
 
         #error-message {
-            color: var(--accent-color);
-            text-align: center;
-            margin-top: 15px;
+            background: rgba(229, 9, 20, 0.1);
+            border-right: 4px solid var(--accent-color);
+            color: #ff6b6b;
+            padding: 12px;
+            border-radius: 4px;
+            text-align: right;
+            margin-top: 20px;
             font-size: 14px;
-            display: none; 
+            display: none;
         }
 
         .link {
@@ -101,30 +141,43 @@
         }
 
         .link a {
-            color: var(--text-color);
+            color: white;
             text-decoration: none;
-            font-weight: 500;
-            transition: color 0.2s;
+            font-weight: 700;
+            margin-right: 5px;
+            transition: color 0.3s ease;
         }
 
         .link a:hover { 
-            text-decoration: underline; 
+            color: var(--accent-color);
         }
     </style>
 </head>
 <body>
 
-    <div id="register-form">
+    <div class="glass-panel">
         <h1>إنشاء حساب</h1>
         <form id="form">
-            <input type="email" id="email" placeholder="البريد الإلكتروني" required>
-            <input type="password" id="password" placeholder="كلمة المرور" required>
-            <input type="password" id="confirm-password" placeholder="تأكيد كلمة المرور" required>
-            <button type="submit">متابعة</button>
+            <div class="input-group">
+                <input type="email" id="email" required autocomplete="off">
+                <label>البريد الإلكتروني</label>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password" required>
+                <label>كلمة المرور</label>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="confirm-password" required>
+                <label>تأكيد كلمة المرور</label>
+            </div>
+
+            <button type="submit">متابعة وتسجيل</button>
         </form>
-        <p id="error-message"></p>
+        <div id="error-message"></div>
         <div class="link">
-            <p>لديك حساب بالفعل؟ <a href="./login.html">تسجيل الدخول</a></p>
+            <span>هل لديك حساب بالفعل؟</span><a href="./login.html">تسجيل الدخول</a>
         </div>
     </div>
 
@@ -132,7 +185,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
     <script>
-        // ================ (1) إعدادات Firebase ================
         const firebaseConfig = {
           apiKey: "AIzaSyBApoSZ-HXy9kd07tSJfuRdWkJcrbQVYf0",
           authDomain: "qmove1.firebaseapp.com",
@@ -142,11 +194,9 @@
           appId: "1:166464805371:web:d65b0cb8b141e4b894935e",
           measurementId: "G-3EXSHD3GN8"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
-        // ================ (2) برمجة النموذج ================
         const registerForm = document.getElementById('form');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
@@ -160,27 +210,33 @@
             const confirmPassword = confirmPasswordInput.value;
             errorMessage.style.display = 'none';
 
-            // التحقق من تطابق كلمات المرور (لغة فصحى)
             if (password !== confirmPassword) {
-                errorMessage.textContent = 'كلمات المرور غير متطابقة.';
+                errorMessage.textContent = 'عذراً، كلمات المرور غير متطابقة.';
                 errorMessage.style.display = 'block';
                 return; 
             }
+
+            // تأثير تحميل
+            const btn = registerForm.querySelector('button');
+            const originalBtnText = btn.textContent;
+            btn.textContent = 'جاري إنشاء الحساب...';
+            btn.style.opacity = '0.8';
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     window.location.href = './index.html';
                 })
                 .catch((error) => {
-                    // رسائل خطأ احترافية
                     if (error.code === 'auth/email-already-in-use') {
-                        errorMessage.textContent = 'البريد الإلكتروني مستخدم بالفعل.';
+                        errorMessage.textContent = 'البريد الإلكتروني مسجل مسبقاً في النظام.';
                     } else if (error.code === 'auth/weak-password') {
-                        errorMessage.textContent = 'كلمة المرور ضعيفة (يجب أن تتكون من 6 أحرف على الأقل).';
+                        errorMessage.textContent = 'يرجى استخدام كلمة مرور أقوى (6 أحرف على الأقل).';
                     } else {
-                        errorMessage.textContent = 'حدث خطأ. يرجى المحاولة مرة أخرى.';
+                        errorMessage.textContent = 'حدث خطأ غير متوقع. يرجى المحاولة لاحقاً.';
                     }
                     errorMessage.style.display = 'block';
+                    btn.textContent = originalBtnText;
+                    btn.style.opacity = '1';
                 });
         });
     </script>
